@@ -598,13 +598,19 @@ function verFichaCliente(id) {
       clasesHtml += `
         <div class="agenda-item" style="border-left: 6px solid ${clase.entrenadorColor || entrenador.color}">
           <div class="agenda-hora">${clase.hora}</div>
+
           <div class="agenda-cliente">
             <strong>${formatearFechaES(clase.fecha)}</strong>
             <span>${clase.duracion || clienteActual.bonoDuracion} min · ${clase.modalidad || clienteActual.bonoModalidad}</span>
             <span>Entrenador: ${clase.entrenadorNombre || entrenador.nombre}</span>
             <span>Estado: ${clase.estado}</span>
           </div>
-          <button class="eliminar-btn" onclick="eliminarClase(${clienteActual.id}, ${clase.id})">Borrar</button>
+
+          <div class="acciones">
+            <button class="ver-btn" onclick="cancelarClase(${clienteActual.id}, ${clase.id})">Cancelar</button>
+            <button class="ficha-btn" onclick="cancelarClaseExcepcional(${clienteActual.id}, ${clase.id})">Excepcional</button>
+            <button class="eliminar-btn" onclick="eliminarClase(${clienteActual.id}, ${clase.id})">Borrar</button>
+          </div>
         </div>
       `;
     });
