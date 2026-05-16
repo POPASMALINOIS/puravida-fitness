@@ -345,80 +345,69 @@ function renderCalendarioSemanal() {
   }
 
   const contenedor = document.createElement("div");
-  contenedor.className = "week-calendar-grid";
+  contenedor.className = "week-calendar";
+
+  const cabecera = document.createElement("div");
+  cabecera.className = "week-header";
+  cabecera.innerHTML = `<div class="week-hour-label"></div>`;
 
   const nombresDias = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-
-  contenedor.innerHTML += `<div class="week-corner"></div>`;
 
   for (let i = 0; i < 7; i++) {
     const fecha = new Date(lunes);
     fecha.setDate(lunes.getDate() + i);
     const fechaISO = obtenerFechaISO(fecha);
 
-    contenedor.innerHTML += `
-      <div class="week-day-header-grid" style="grid-column:${i + 2}; grid-row:1;" onclick="abrirAgendaDia('${fechaISO}')">
+    cabecera.innerHTML += `
+      <div class="week-day-header" onclick="abrirAgendaDia('${fechaISO}')">
         <span>${nombresDias[i]}</span>
         <strong>${fecha.getDate()}</strong>
       </div>
     `;
   }
 
-  tramos.forEach((tramo, index) => {
-    const row = index + 2;
+  contenedor.appendChild(cabecera);
 
-    contenedor.innerHTML += `
-      <div class="week-hour-grid" style="grid-column:1; grid-row:${row};">${tramo}</div>
-    `;
+  tramos.forEach(tramo => {
+    const fila = document.createElement("div");
+    fila.className = "week-row";
+    fila.innerHTML = `<div class="week-hour">${tramo}</div>`;
 
     for (let i = 0; i < 7; i++) {
       const fecha = new Date(lunes);
       fecha.setDate(lunes.getDate() + i);
       const fechaISO = obtenerFechaISO(fecha);
 
-      contenedor.innerHTML += `
-        <div class="week-cell-grid" style="grid-column:${i + 2}; grid-row:${row};" onclick="abrirAgendaDia('${fechaISO}', '${tramo}')"></div>
-      `;
-    }
-  });
+      const clasesTramo = obtenerClasesPorFecha(fechaISO).filter(clase => clase.hora === tramo);
 
-  for (let i = 0; i < 7; i++) {
-    const fecha = new Date(lunes);
-    fecha.setDate(lunes.getDate() + i);
-    const fechaISO = obtenerFechaISO(fecha);
-    const clasesDia = obtenerClasesPorFecha(fechaISO);
+      let eventosHtml = "";
 
-    clasesDia.forEach(clase => {
-      if (!clase.hora) return;
+      clasesTramo.forEach(clase => {
+        const duracion = parseInt(clase.duracion || clase.bonoDuracion || "60");
+        const claseDuracion = duracion === 60 ? "evento-60" : "evento-30";
 
-      const [hora, minutos] = clase.hora.split(":").map(Number);
-      const inicioIndex = ((hora - 6) * 2) + (minutos >= 30 ? 1 : 0);
+        eventosHtml += `
+          <div 
+            class="week-event ${claseDuracion}" 
+            style="background:${clase.entrenadorColor}"
+            onclick="event.stopPropagation(); verFichaCliente(${clase.clienteId})"
+          >
+            <strong>${clase.hora}</strong>
+            <span>${clase.clienteNombre}</span>
+            <small>${duracion} min · ${clase.entrenadorNombre}</small>
+          </div>
+        `;
+      });
 
-      if (inicioIndex < 0 || inicioIndex >= tramos.length) return;
-
-      const duracion = parseInt(clase.duracion || clase.bonoDuracion || "60");
-      const filasQueOcupa = duracion === 60 ? 2 : 1;
-
-      const rowInicio = inicioIndex + 2;
-      const rowFin = rowInicio + filasQueOcupa;
-
-      contenedor.innerHTML += `
-        <div 
-          class="week-event-grid"
-          style="
-            grid-column:${i + 2};
-            grid-row:${rowInicio} / ${rowFin};
-            background:${clase.entrenadorColor};
-          "
-          onclick="event.stopPropagation(); verFichaCliente(${clase.clienteId})"
-        >
-          <strong>${clase.hora}</strong>
-          <span>${clase.clienteNombre}</span>
-          <small>${duracion} min · ${clase.entrenadorNombre}</small>
+      fila.innerHTML += `
+        <div class="week-cell" onclick="abrirAgendaDia('${fechaISO}', '${tramo}')">
+          ${eventosHtml}
         </div>
       `;
-    });
-  }
+    }
+
+    contenedor.appendChild(fila);
+  });
 
   calendario.appendChild(contenedor);
 }
