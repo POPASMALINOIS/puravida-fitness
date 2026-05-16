@@ -646,3 +646,16 @@ button {
 .week-event-fixed small {
   opacity: 0.9;
 }
+.logo-img {
+  width: 160px;
+  max-width: 100%;
+  display: block;
+  margin: 0 auto 20px;
+}
+
+.login-logo {
+  width: 180px;
+  max-width: 100%;
+  display: block;
+  margin: 0 auto 20px;
+}
