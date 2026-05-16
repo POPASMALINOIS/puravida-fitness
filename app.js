@@ -4,6 +4,8 @@ let clienteActual = null;
 document.addEventListener("DOMContentLoaded", function () {
   cargarClientes();
   actualizarResumen();
+  actualizarSelectorClientes();
+  renderCalendarioGeneral();
   renderClientes();
 });
 
@@ -22,6 +24,8 @@ function login() {
   if (usuario && password) {
     cambiarPantalla("dashboard-screen");
     actualizarResumen();
+    actualizarSelectorClientes();
+    renderCalendarioGeneral();
     renderClientes();
   } else {
     alert("Introduce usuario y contraseña.");
@@ -43,6 +47,8 @@ function cambiarPantalla(id) {
 function volverDashboard() {
   cambiarPantalla("dashboard-screen");
   actualizarResumen();
+  actualizarSelectorClientes();
+  renderCalendarioGeneral();
   renderClientes();
 }
 
@@ -106,20 +112,123 @@ function eliminarCliente(id) {
   clientes = clientes.filter(cliente => cliente.id !== id);
 
   guardarClientes();
-  actualizarResumen();
-  renderClientes();
+  volverDashboard();
 }
 
 function actualizarResumen() {
   document.getElementById("totalClientes").textContent = clientes.length;
+  document.getElementById("clientesActivos").textContent = clientes.filter(c => c.estado === "Activo").length;
+  document.getElementById("bonosBajos").textContent = clientes.filter(c => c.bonoDisponible <= 2).length;
 
-  const activos = clientes.filter(c => c.estado === "Activo").length;
-  document.getElementById("clientesActivos").textContent = activos;
+  const hoy = new Date().toISOString().split("T")[0];
+  let clasesHoy = 0;
 
-  const bonosBajos = clientes.filter(c => c.bonoDisponible <= 2).length;
-  document.getElementById("bonosBajos").textContent = bonosBajos;
+  clientes.forEach(cliente => {
+    clasesHoy += cliente.clases.filter(clase => clase.fecha === hoy).length;
+  });
 
-  document.getElementById("clasesHoy").textContent = 0;
+  document.getElementById("clasesHoy").textContent = clasesHoy;
+}
+
+function actualizarSelectorClientes() {
+  const select = document.getElementById("calendarioClienteSelect");
+
+  if (!select) return;
+
+  select.innerHTML = "";
+
+  clientes.forEach(cliente => {
+    const option = document.createElement("option");
+    option.value = cliente.id;
+    option.textContent = cliente.nombre;
+    select.appendChild(option);
+  });
+}
+
+function agendarClaseGeneral() {
+  const clienteId = parseInt(document.getElementById("calendarioClienteSelect").value);
+  const fecha = document.getElementById("generalClaseFecha").value;
+  const hora = document.getElementById("generalClaseHora").value;
+
+  if (!clienteId || !fecha || !hora) {
+    alert("Completa todos los campos.");
+    return;
+  }
+
+  const cliente = clientes.find(c => c.id === clienteId);
+
+  if (!cliente) return;
+
+  cliente.clases.push({
+    id: Date.now(),
+    fecha,
+    hora,
+    estado: "Programada"
+  });
+
+  guardarClientes();
+  volverDashboard();
+}
+
+function agendarClaseCliente() {
+  const fecha = document.getElementById("claseFecha").value;
+  const hora = document.getElementById("claseHora").value;
+
+  if (!fecha || !hora) {
+    alert("Completa fecha y hora.");
+    return;
+  }
+
+  clienteActual.clases.push({
+    id: Date.now(),
+    fecha,
+    hora,
+    estado: "Programada"
+  });
+
+  guardarClientes();
+  verFichaCliente(clienteActual.id);
+}
+
+function renderCalendarioGeneral() {
+  const calendario = document.getElementById("calendarioGeneral");
+
+  if (!calendario) return;
+
+  calendario.innerHTML = "";
+
+  let clases = [];
+
+  clientes.forEach(cliente => {
+    cliente.clases.forEach(clase => {
+      clases.push({
+        cliente: cliente.nombre,
+        fecha: clase.fecha,
+        hora: clase.hora,
+        estado: clase.estado
+      });
+    });
+  });
+
+  clases.sort((a, b) => `${a.fecha} ${a.hora}`.localeCompare(`${b.fecha} ${b.hora}`));
+
+  if (clases.length === 0) {
+    calendario.innerHTML = "<p>No hay clases programadas.</p>";
+    return;
+  }
+
+  clases.forEach(clase => {
+    const div = document.createElement("div");
+    div.className = "calendario-item";
+
+    div.innerHTML = `
+      <strong>${clase.fecha} - ${clase.hora}</strong><br>
+      Cliente: ${clase.cliente}<br>
+      Estado: ${clase.estado}
+    `;
+
+    calendario.appendChild(div);
+  });
 }
 
 function verFichaCliente(id) {
@@ -129,26 +238,44 @@ function verFichaCliente(id) {
 
   const ficha = document.getElementById("clienteFicha");
 
+  let clasesHtml = "";
+
+  if (clienteActual.clases.length === 0) {
+    clasesHtml = "<p>No hay clases programadas.</p>";
+  } else {
+    clienteActual.clases.forEach(clase => {
+      clasesHtml += `
+        <div class="calendario-item">
+          <strong>${clase.fecha} - ${clase.hora}</strong><br>
+          Estado: ${clase.estado}
+        </div>
+      `;
+    });
+  }
+
   ficha.innerHTML = `
     <div class="ficha-card">
       <h2>${clienteActual.nombre}</h2>
       <p>📞 ${clienteActual.telefono}</p>
       <p>📧 ${clienteActual.email || "Sin email"}</p>
-      <p>📅 Alta: ${clienteActual.fechaAlta || "No indicada"}</p>
-      <p>💳 Cuota: ${clienteActual.cuota || "0"} €</p>
       <p>🎟️ Bono: ${clienteActual.bonoDisponible}/${clienteActual.bonoTotal}</p>
       <p>📌 Estado: ${clienteActual.estado}</p>
-      <p>📝 ${clienteActual.observaciones || "Sin observaciones"}</p>
+    </div>
+
+    <div class="ficha-card">
+      <h2>Calendario de clases</h2>
+
+      <input type="date" id="claseFecha">
+      <input type="time" id="claseHora">
+
+      <button class="ficha-btn" onclick="agendarClaseCliente()">Guardar clase</button>
+
+      <div>${clasesHtml}</div>
     </div>
 
     <div class="ficha-card">
       <h2>Rutinas</h2>
       <p>${clienteActual.rutinas.length} registradas</p>
-    </div>
-
-    <div class="ficha-card">
-      <h2>Clases</h2>
-      <p>${clienteActual.clases.length} programadas</p>
     </div>
 
     <div class="ficha-card">
