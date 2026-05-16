@@ -3,15 +3,36 @@ let clienteActual = null;
 let fechaCalendario = new Date();
 let fechaDiaSeleccionado = null;
 
+const entrenadores = [
+  { id: 1, nombre: "Entrenador 1", color: "#2563eb" },
+  { id: 2, nombre: "Entrenador 2", color: "#9333ea" },
+  { id: 3, nombre: "Entrenador 3", color: "#16a34a" },
+  { id: 4, nombre: "Entrenador 4", color: "#ea580c" },
+  { id: 5, nombre: "Entrenador 5", color: "#ca8a04" }
+];
+
 document.addEventListener("DOMContentLoaded", function () {
   cargarClientes();
   actualizarResumen();
-  renderCalendarioMensual();
+  renderCalendarioSemanal();
   renderClientes();
 });
 
 function cargarClientes() {
   clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+
+  clientes.forEach(cliente => {
+    cliente.bonoTotal = cliente.bonoTotal || cliente.bonoDisponible || 0;
+    cliente.bonoDisponible = cliente.bonoDisponible ?? cliente.bonoTotal;
+    cliente.bonoDuracion = cliente.bonoDuracion || "60";
+    cliente.bonoModalidad = cliente.bonoModalidad || "Individual";
+    cliente.clases = cliente.clases || [];
+    cliente.rutinas = cliente.rutinas || [];
+    cliente.controles = cliente.controles || [];
+    cliente.pagos = cliente.pagos || [];
+  });
+
+  guardarClientes();
 }
 
 function guardarClientes() {
@@ -25,7 +46,7 @@ function login() {
   if (usuario && password) {
     cambiarPantalla("dashboard-screen");
     actualizarResumen();
-    renderCalendarioMensual();
+    renderCalendarioSemanal();
     renderClientes();
   } else {
     alert("Introduce usuario y contraseña.");
@@ -47,7 +68,7 @@ function cambiarPantalla(id) {
 function volverDashboard() {
   cambiarPantalla("dashboard-screen");
   actualizarResumen();
-  renderCalendarioMensual();
+  renderCalendarioSemanal();
   renderClientes();
 }
 
@@ -146,14 +167,27 @@ function formatearFechaES(fechaISO) {
   return `${day}/${month}/${year}`;
 }
 
+function obtenerLunesSemana(fecha) {
+  const nuevaFecha = new Date(fecha);
+  const dia = nuevaFecha.getDay();
+  const diferencia = dia === 0 ? -6 : 1 - dia;
+  nuevaFecha.setDate(nuevaFecha.getDate() + diferencia);
+  nuevaFecha.setHours(0, 0, 0, 0);
+  return nuevaFecha;
+}
+
 function cambiarMes(direccion) {
-  fechaCalendario.setMonth(fechaCalendario.getMonth() + direccion);
-  renderCalendarioMensual();
+  fechaCalendario.setDate(fechaCalendario.getDate() + direccion * 7);
+  renderCalendarioSemanal();
 }
 
 function irMesActual() {
   fechaCalendario = new Date();
-  renderCalendarioMensual();
+  renderCalendarioSemanal();
+}
+
+function obtenerEntrenador(id) {
+  return entrenadores.find(e => e.id === parseInt(id)) || entrenadores[0];
 }
 
 function obtenerClasesPorFecha(fechaISO) {
@@ -162,6 +196,8 @@ function obtenerClasesPorFecha(fechaISO) {
   clientes.forEach(cliente => {
     cliente.clases.forEach(clase => {
       if (clase.fecha === fechaISO) {
+        const entrenador = obtenerEntrenador(clase.entrenadorId);
+
         clases.push({
           clienteId: cliente.id,
           clienteNombre: cliente.nombre,
@@ -170,6 +206,8 @@ function obtenerClasesPorFecha(fechaISO) {
           bonoTotal: cliente.bonoTotal,
           bonoDuracion: cliente.bonoDuracion,
           bonoModalidad: cliente.bonoModalidad,
+          entrenadorNombre: clase.entrenadorNombre || entrenador.nombre,
+          entrenadorColor: clase.entrenadorColor || entrenador.color,
           ...clase
         });
       }
@@ -181,61 +219,87 @@ function obtenerClasesPorFecha(fechaISO) {
   return clases;
 }
 
-function renderCalendarioMensual() {
+function renderCalendarioSemanal() {
   const calendario = document.getElementById("calendarioMensual");
   const tituloMes = document.getElementById("tituloMes");
 
   if (!calendario || !tituloMes) return;
 
   calendario.innerHTML = "";
+  calendario.className = "calendar-grid semana-grid";
 
-  const year = fechaCalendario.getFullYear();
-  const month = fechaCalendario.getMonth();
+  const lunes = obtenerLunesSemana(fechaCalendario);
+  const domingo = new Date(lunes);
+  domingo.setDate(lunes.getDate() + 6);
 
-  const nombresMeses = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-  ];
+  tituloMes.textContent = `${formatearFechaES(obtenerFechaISO(lunes))} - ${formatearFechaES(obtenerFechaISO(domingo))}`;
 
-  tituloMes.textContent = `${nombresMeses[month]} ${year}`;
-
-  const primerDiaMes = new Date(year, month, 1);
-  const ultimoDiaMes = new Date(year, month + 1, 0);
-
-  let diaSemanaInicio = primerDiaMes.getDay();
-  diaSemanaInicio = diaSemanaInicio === 0 ? 7 : diaSemanaInicio;
-
-  for (let i = 1; i < diaSemanaInicio; i++) {
-    const empty = document.createElement("div");
-    empty.className = "calendar-day empty";
-    calendario.appendChild(empty);
+  const horas = [];
+  for (let h = 6; h <= 23; h++) {
+    horas.push(String(h).padStart(2, "0") + ":00");
   }
 
-  const hoyISO = obtenerFechaISO(new Date());
+  const contenedor = document.createElement("div");
+  contenedor.className = "week-calendar";
 
-  for (let dia = 1; dia <= ultimoDiaMes.getDate(); dia++) {
-    const fecha = new Date(year, month, dia);
+  const cabecera = document.createElement("div");
+  cabecera.className = "week-header";
+
+  cabecera.innerHTML = `<div class="week-hour-label"></div>`;
+
+  for (let i = 0; i < 7; i++) {
+    const fecha = new Date(lunes);
+    fecha.setDate(lunes.getDate() + i);
     const fechaISO = obtenerFechaISO(fecha);
-    const clasesDia = obtenerClasesPorFecha(fechaISO);
 
-    const div = document.createElement("div");
-    div.className = "calendar-day";
+    const nombresDias = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
-    if (fechaISO === hoyISO) {
-      div.classList.add("today");
+    cabecera.innerHTML += `
+      <div class="week-day-header" onclick="abrirAgendaDia('${fechaISO}')">
+        <span>${nombresDias[i]}</span>
+        <strong>${fecha.getDate()}</strong>
+      </div>
+    `;
+  }
+
+  contenedor.appendChild(cabecera);
+
+  horas.forEach(hora => {
+    const fila = document.createElement("div");
+    fila.className = "week-row";
+
+    fila.innerHTML = `<div class="week-hour">${hora}</div>`;
+
+    for (let i = 0; i < 7; i++) {
+      const fecha = new Date(lunes);
+      fecha.setDate(lunes.getDate() + i);
+      const fechaISO = obtenerFechaISO(fecha);
+
+      const clasesHora = obtenerClasesPorFecha(fechaISO).filter(clase => clase.hora.startsWith(hora.substring(0, 2)));
+
+      let eventosHtml = "";
+
+      clasesHora.forEach(clase => {
+        eventosHtml += `
+          <div class="week-event" style="background:${clase.entrenadorColor}" onclick="verFichaCliente(${clase.clienteId})">
+            <strong>${clase.hora}</strong>
+            <span>${clase.clienteNombre}</span>
+            <small>${clase.entrenadorNombre}</small>
+          </div>
+        `;
+      });
+
+      fila.innerHTML += `
+        <div class="week-cell" onclick="abrirAgendaDia('${fechaISO}')">
+          ${eventosHtml}
+        </div>
+      `;
     }
 
-    div.onclick = function () {
-      abrirAgendaDia(fechaISO);
-    };
+    contenedor.appendChild(fila);
+  });
 
-    div.innerHTML = `
-      <div class="calendar-number">${dia}</div>
-      ${clasesDia.length > 0 ? `<div class="calendar-count">${clasesDia.length} clases</div>` : ""}
-    `;
-
-    calendario.appendChild(div);
-  }
+  calendario.appendChild(contenedor);
 }
 
 function abrirAgendaDia(fechaISO) {
@@ -244,10 +308,15 @@ function abrirAgendaDia(fechaISO) {
   document.getElementById("tituloDia").textContent = `Agenda ${formatearFechaES(fechaISO)}`;
   document.getElementById("subtituloDia").textContent = "Planificación diaria de clases";
 
-  actualizarSelectorDiaClientes();
+  prepararFormularioAgendaDia();
   renderAgendaDia();
 
   cambiarPantalla("dia-screen");
+}
+
+function prepararFormularioAgendaDia() {
+  actualizarSelectorDiaClientes();
+  crearSelectorEntrenadoresAgenda();
 }
 
 function actualizarSelectorDiaClientes() {
@@ -273,12 +342,36 @@ function actualizarSelectorDiaClientes() {
   });
 }
 
+function crearSelectorEntrenadoresAgenda() {
+  let select = document.getElementById("diaEntrenadorSelect");
+  const horaInput = document.getElementById("diaClaseHora");
+
+  if (!horaInput) return;
+
+  if (!select) {
+    select = document.createElement("select");
+    select.id = "diaEntrenadorSelect";
+    horaInput.insertAdjacentElement("afterend", select);
+  }
+
+  select.innerHTML = "";
+
+  entrenadores.forEach(entrenador => {
+    const option = document.createElement("option");
+    option.value = entrenador.id;
+    option.textContent = entrenador.nombre;
+    select.appendChild(option);
+  });
+}
+
 function agendarClaseDia() {
   const clienteId = parseInt(document.getElementById("diaClienteSelect").value);
   const hora = document.getElementById("diaClaseHora").value;
+  const entrenadorId = parseInt(document.getElementById("diaEntrenadorSelect").value);
+  const entrenador = obtenerEntrenador(entrenadorId);
 
-  if (!fechaDiaSeleccionado || !clienteId || !hora) {
-    alert("Selecciona cliente y hora.");
+  if (!fechaDiaSeleccionado || !clienteId || !hora || !entrenadorId) {
+    alert("Selecciona cliente, hora y entrenador.");
     return;
   }
 
@@ -296,6 +389,9 @@ function agendarClaseDia() {
     estado: "Programada",
     duracion: cliente.bonoDuracion,
     modalidad: cliente.bonoModalidad,
+    entrenadorId: entrenador.id,
+    entrenadorNombre: entrenador.nombre,
+    entrenadorColor: entrenador.color,
     consumida: false
   });
 
@@ -342,6 +438,7 @@ function renderAgendaDia() {
   clases.forEach(clase => {
     const div = document.createElement("div");
     div.className = "agenda-item";
+    div.style.borderLeft = `6px solid ${clase.entrenadorColor}`;
 
     div.innerHTML = `
       <div class="agenda-hora">${clase.hora}</div>
@@ -349,6 +446,7 @@ function renderAgendaDia() {
       <div class="agenda-cliente">
         <strong>${clase.clienteNombre}</strong>
         <span>${clase.duracion || clase.bonoDuracion} min · ${clase.modalidad || clase.bonoModalidad}</span>
+        <span>Entrenador: ${clase.entrenadorNombre}</span>
         <span>Bono: ${clase.bonoDisponible}/${clase.bonoTotal}</span>
       </div>
 
@@ -376,12 +474,15 @@ function verFichaCliente(id) {
     clasesHtml = "<p>No hay clases programadas.</p>";
   } else {
     clasesOrdenadas.forEach(clase => {
+      const entrenador = obtenerEntrenador(clase.entrenadorId);
+
       clasesHtml += `
-        <div class="agenda-item">
+        <div class="agenda-item" style="border-left: 6px solid ${clase.entrenadorColor || entrenador.color}">
           <div class="agenda-hora">${clase.hora}</div>
           <div class="agenda-cliente">
             <strong>${formatearFechaES(clase.fecha)}</strong>
             <span>${clase.duracion || clienteActual.bonoDuracion} min · ${clase.modalidad || clienteActual.bonoModalidad}</span>
+            <span>Entrenador: ${clase.entrenadorNombre || entrenador.nombre}</span>
             <span>Estado: ${clase.estado}</span>
           </div>
           <button class="eliminar-btn" onclick="eliminarClase(${clienteActual.id}, ${clase.id})">Borrar</button>
