@@ -337,10 +337,11 @@ function renderCalendarioSemanal() {
 
   tituloMes.textContent = `${formatearFechaES(obtenerFechaISO(lunes))} - ${formatearFechaES(obtenerFechaISO(domingo))}`;
 
-  const horas = [];
+  const tramos = [];
 
   for (let h = 6; h <= 23; h++) {
-    horas.push(String(h).padStart(2, "0") + ":00");
+    tramos.push(String(h).padStart(2, "0") + ":00");
+    tramos.push(String(h).padStart(2, "0") + ":30");
   }
 
   const contenedor = document.createElement("div");
@@ -367,34 +368,37 @@ function renderCalendarioSemanal() {
 
   contenedor.appendChild(cabecera);
 
-  horas.forEach(hora => {
+  tramos.forEach(tramo => {
     const fila = document.createElement("div");
     fila.className = "week-row";
-    fila.innerHTML = `<div class="week-hour">${hora}</div>`;
+    fila.innerHTML = `<div class="week-hour">${tramo}</div>`;
 
     for (let i = 0; i < 7; i++) {
       const fecha = new Date(lunes);
       fecha.setDate(lunes.getDate() + i);
       const fechaISO = obtenerFechaISO(fecha);
 
-      const clasesHora = obtenerClasesPorFecha(fechaISO).filter(clase =>
-        clase.hora && clase.hora.startsWith(hora.substring(0, 2))
+      const clasesTramo = obtenerClasesPorFecha(fechaISO).filter(clase =>
+        clase.hora === tramo
       );
 
       let eventosHtml = "";
 
-      clasesHora.forEach(clase => {
+      clasesTramo.forEach(clase => {
+        const duracion = clase.duracion || clase.bonoDuracion || "60";
+        const claseDuracion = duracion === "60" ? "evento-60" : "evento-30";
+
         eventosHtml += `
-          <div class="week-event" style="background:${clase.entrenadorColor}" onclick="event.stopPropagation(); verFichaCliente(${clase.clienteId})">
+          <div class="week-event ${claseDuracion}" style="background:${clase.entrenadorColor}" onclick="event.stopPropagation(); verFichaCliente(${clase.clienteId})">
             <strong>${clase.hora}</strong>
             <span>${clase.clienteNombre}</span>
-            <small>${clase.entrenadorNombre}</small>
+            <small>${duracion} min · ${clase.entrenadorNombre}</small>
           </div>
         `;
       });
 
       fila.innerHTML += `
-        <div class="week-cell" onclick="abrirAgendaDia('${fechaISO}', '${hora}')">
+        <div class="week-cell" onclick="abrirAgendaDia('${fechaISO}', '${tramo}')">
           ${eventosHtml}
         </div>
       `;
