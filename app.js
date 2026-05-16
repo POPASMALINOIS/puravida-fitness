@@ -1,8 +1,27 @@
-let clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+let clientes = [];
+
+document.addEventListener("DOMContentLoaded", function () {
+  cargarClientes();
+  renderClientes();
+});
+
+function cargarClientes() {
+  const datosGuardados = localStorage.getItem("clientes");
+
+  if (datosGuardados) {
+    clientes = JSON.parse(datosGuardados);
+  } else {
+    clientes = [];
+  }
+}
+
+function guardarClientes() {
+  localStorage.setItem("clientes", JSON.stringify(clientes));
+}
 
 function login() {
-  const usuario = document.getElementById("usuario").value;
-  const password = document.getElementById("password").value;
+  const usuario = document.getElementById("usuario").value.trim();
+  const password = document.getElementById("password").value.trim();
 
   if (usuario && password) {
     cambiarPantalla("dashboard-screen");
@@ -25,6 +44,8 @@ function cambiarPantalla(id) {
 
 function mostrarModulo(modulo) {
   if (modulo === "clientes") {
+    cargarClientes();
+    renderClientes();
     cambiarPantalla("clientes-screen");
   } else {
     alert("Módulo " + modulo + " en desarrollo.");
@@ -36,28 +57,41 @@ function volverDashboard() {
 }
 
 function agregarCliente() {
-  const nombre = document.getElementById("clienteNombre").value;
-  const telefono = document.getElementById("clienteTelefono").value;
+  const nombre = document.getElementById("clienteNombre").value.trim();
+  const telefono = document.getElementById("clienteTelefono").value.trim();
 
   if (!nombre || !telefono) {
     alert("Completa todos los campos.");
     return;
   }
 
-  clientes.push({ nombre, telefono });
+  clientes.push({
+    id: Date.now(),
+    nombre: nombre,
+    telefono: telefono
+  });
 
-  localStorage.setItem("clientes", JSON.stringify(clientes));
+  guardarClientes();
 
   document.getElementById("clienteNombre").value = "";
   document.getElementById("clienteTelefono").value = "";
 
   renderClientes();
+
+  alert("Cliente guardado correctamente.");
 }
 
 function renderClientes() {
   const lista = document.getElementById("clientesLista");
 
+  if (!lista) return;
+
   lista.innerHTML = "";
+
+  if (clientes.length === 0) {
+    lista.innerHTML = "<p>No hay clientes guardados.</p>";
+    return;
+  }
 
   clientes.forEach(cliente => {
     const div = document.createElement("div");
@@ -71,7 +105,3 @@ function renderClientes() {
     lista.appendChild(div);
   });
 }
-
-window.onload = function() {
-  renderClientes();
-};
