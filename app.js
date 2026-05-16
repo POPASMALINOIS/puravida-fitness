@@ -535,6 +535,46 @@ function agendarClaseDia() {
     return;
   }
 
+  const duracionNueva = parseInt(cliente.bonoDuracion || "60");
+  const inicioNueva = convertirHoraAMinutos(hora);
+  const finNueva = inicioNueva + duracionNueva;
+
+  let haySolape = false;
+  let claseSolapada = null;
+
+  clientes.forEach(c => {
+    c.clases.forEach(clase => {
+      if (clase.fecha !== fechaDiaSeleccionado) return;
+      if (parseInt(clase.entrenadorId) !== entrenadorId) return;
+      if (clase.estado === "Cancelada" || clase.estado === "Cancelada excepcional") return;
+
+      const duracionExistente = parseInt(clase.duracion || c.bonoDuracion || "60");
+      const inicioExistente = convertirHoraAMinutos(clase.hora);
+      const finExistente = inicioExistente + duracionExistente;
+
+      const solapa = inicioNueva < finExistente && finNueva > inicioExistente;
+
+      if (solapa) {
+        haySolape = true;
+        claseSolapada = {
+          cliente: c.nombre,
+          hora: clase.hora,
+          duracion: duracionExistente
+        };
+      }
+    });
+  });
+
+  if (haySolape) {
+    alert(
+      "No se puede reservar. El entrenador ya tiene una clase en esa franja:\n\n" +
+      claseSolapada.cliente + " · " +
+      claseSolapada.hora + " · " +
+      claseSolapada.duracion + " min"
+    );
+    return;
+  }
+
   cliente.clases.push({
     id: Date.now(),
     fecha: fechaDiaSeleccionado,
