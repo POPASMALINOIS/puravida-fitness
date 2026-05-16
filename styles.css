@@ -161,3 +161,30 @@ textarea {
   min-height: 90px;
   resize: vertical;
 }
+.cliente-ficha {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ficha-card {
+  background: rgba(255,255,255,0.08);
+  padding: 20px;
+  border-radius: 18px;
+}
+
+.ficha-card h2 {
+  margin-top: 0;
+}
+
+.ficha-btn {
+  margin-top: 10px;
+  background: #2563eb;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 12px;
+  width: 100%;
+  cursor: pointer;
+}
