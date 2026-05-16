@@ -20,7 +20,7 @@ function login() {
   const password = document.getElementById("password").value.trim();
 
   if (usuario && password) {
-    cambiarPantalla("clientes-screen");
+    cambiarPantalla("dashboard-screen");
     actualizarResumen();
     renderClientes();
   } else {
@@ -40,10 +40,16 @@ function cambiarPantalla(id) {
   document.getElementById(id).classList.add("active");
 }
 
-function volverClientes() {
-  cambiarPantalla("clientes-screen");
+function volverDashboard() {
+  cambiarPantalla("dashboard-screen");
   actualizarResumen();
   renderClientes();
+}
+
+function mostrarSeccion(seccion) {
+  if (seccion !== "clientes") {
+    alert("Módulo " + seccion + " en desarrollo.");
+  }
 }
 
 function agregarCliente() {
@@ -80,7 +86,7 @@ function agregarCliente() {
 
   guardarClientes();
   limpiarFormulario();
-  volverClientes();
+  volverDashboard();
 }
 
 function limpiarFormulario() {
@@ -112,6 +118,8 @@ function actualizarResumen() {
 
   const bonosBajos = clientes.filter(c => c.bonoDisponible <= 2).length;
   document.getElementById("bonosBajos").textContent = bonosBajos;
+
+  document.getElementById("clasesHoy").textContent = 0;
 }
 
 function verFichaCliente(id) {
@@ -183,7 +191,8 @@ function enviarRecordatorioPago() {
 
 function renderClientes() {
   const lista = document.getElementById("clientesLista");
-  const buscador = document.getElementById("buscadorClientes").value.toLowerCase();
+  const buscadorInput = document.getElementById("buscadorClientes");
+  const buscador = buscadorInput ? buscadorInput.value.toLowerCase() : "";
 
   if (!lista) return;
 
@@ -195,21 +204,32 @@ function renderClientes() {
   );
 
   if (clientesFiltrados.length === 0) {
-    lista.innerHTML = "<p>No hay clientes encontrados.</p>";
+    lista.innerHTML = `<div class="cliente-row">No hay clientes encontrados.</div>`;
     return;
   }
 
   clientesFiltrados.forEach(cliente => {
+    const estadoClass = cliente.estado === "Activo" ? "estado-activo" : "estado-inactivo";
+
     const div = document.createElement("div");
-    div.className = "cliente-item";
+    div.className = "cliente-row";
 
     div.innerHTML = `
-      <strong>${cliente.nombre}</strong>
-      <span>📞 ${cliente.telefono}</span><br>
-      <span>🎟️ Bono: ${cliente.bonoDisponible}/${cliente.bonoTotal}</span><br>
-      <span>📌 ${cliente.estado}</span>
-      <button class="ficha-btn" onclick="verFichaCliente(${cliente.id})">Ver ficha</button>
-      <button class="eliminar-btn" onclick="eliminarCliente(${cliente.id})">Eliminar</button>
+      <div>
+        <span class="cliente-nombre">${cliente.nombre}</span>
+        <span class="cliente-sub">${cliente.estado}</span>
+      </div>
+
+      <div>${cliente.telefono}</div>
+
+      <div>${cliente.bonoDisponible}/${cliente.bonoTotal}</div>
+
+      <div><span class="${estadoClass}">${cliente.estado}</span></div>
+
+      <div class="acciones">
+        <button class="ver-btn" onclick="verFichaCliente(${cliente.id})">Ver</button>
+        <button class="eliminar-btn" onclick="eliminarCliente(${cliente.id})">Borrar</button>
+      </div>
     `;
 
     lista.appendChild(div);
