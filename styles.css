@@ -621,3 +621,103 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+
+/* CORRECCIÓN DEFINITIVA LAYOUT DESKTOP */
+
+#dashboard-screen.active {
+  display: block !important;
+}
+
+.sidebar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 240px !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  padding: 24px 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: rgba(15, 23, 42, 0.98) !important;
+  border-right: 1px solid rgba(148, 163, 184, 0.15) !important;
+  z-index: 1000 !important;
+}
+
+.logo {
+  margin: 0 0 24px 0 !important;
+  padding: 0 0 20px 0 !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15) !important;
+  text-align: center !important;
+}
+
+.logo-img {
+  width: 135px !important;
+  max-width: 100% !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
+
+.logo h2,
+.logo span {
+  display: none !important;
+}
+
+.sidebar nav {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.sidebar nav button {
+  width: 100% !important;
+  display: block !important;
+  text-align: left !important;
+  padding: 14px 16px !important;
+  border-radius: 14px !important;
+  background: transparent !important;
+  color: #cbd5e1 !important;
+  border: none !important;
+  font-size: 15px !important;
+}
+
+.sidebar nav button:hover,
+.sidebar nav button.nav-active {
+  background: rgba(241, 90, 36, 0.16) !important;
+  color: #F15A24 !important;
+}
+
+.main-panel {
+  margin-left: 240px !important;
+  width: calc(100% - 240px) !important;
+  min-height: 100vh !important;
+  padding: 28px !important;
+  display: block !important;
+}
+
+/* Evita que Safari/MacBook lo trate como móvil demasiado pronto */
+@media (max-width: 700px) {
+  .sidebar {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+
+  .main-panel {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: 18px !important;
+  }
+
+  .sidebar nav {
+    flex-direction: row !important;
+    overflow-x: auto !important;
+  }
+
+  .sidebar nav button {
+    width: auto !important;
+    white-space: nowrap !important;
+  }
+}
