@@ -16,6 +16,11 @@ textarea {
   font-family: inherit;
 }
 
+button {
+  border: none;
+  cursor: pointer;
+}
+
 .screen {
   display: none;
 }
@@ -23,6 +28,8 @@ textarea {
 .screen.active {
   display: flex;
 }
+
+/* LOGIN */
 
 #login-screen {
   min-height: 100vh;
@@ -43,6 +50,13 @@ textarea {
 
 .login-card {
   max-width: 420px;
+}
+
+.login-logo {
+  width: 180px;
+  max-width: 100%;
+  display: block;
+  margin: 0 auto 24px;
 }
 
 input,
@@ -68,66 +82,84 @@ textarea {
   resize: vertical;
 }
 
-button {
-  border: none;
-  cursor: pointer;
-}
+/* DASHBOARD GENERAL */
 
 #dashboard-screen {
   width: 100%;
   min-height: 100vh;
+  background: linear-gradient(135deg, #020617, #0f172a);
 }
+
+/* SIDEBAR */
 
 .sidebar {
-  width: 230px;
-  min-height: 100vh;
+  width: 240px;
+  min-width: 240px;
+  background: rgba(15, 23, 42, 0.96);
+  border-right: 1px solid rgba(148, 163, 184, 0.12);
+  display: flex;
+  flex-direction: column;
   padding: 24px 18px;
-  background: #020617;
-  border-right: 1px solid rgba(148, 163, 184, 0.15);
-  flex-shrink: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 100;
 }
 
-.logo h2 {
-  margin: 0;
-  font-size: 28px;
+.logo {
+  text-align: center;
+  margin-bottom: 28px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
 }
 
-.logo h2::first-letter {
-  color: #F15A24;
+.logo-img {
+  width: 150px;
+  max-width: 100%;
+  display: block;
+  margin: 0 auto;
 }
 
+.logo h2,
 .logo span {
-  font-size: 12px;
-  letter-spacing: 4px;
-  color: #cbd5e1;
+  display: none;
 }
 
 .sidebar nav {
-  margin-top: 36px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  width: 100%;
+  margin-top: 0;
 }
 
 .sidebar nav button {
+  width: 100%;
   text-align: left;
   padding: 14px 16px;
+  border: none;
   border-radius: 14px;
   background: transparent;
   color: #cbd5e1;
   font-size: 15px;
+  cursor: pointer;
+  transition: all 0.25s ease;
 }
 
 .sidebar nav button:hover,
 .sidebar nav button.nav-active {
-  background: rgba(241, 90, 36, 0.14);
-  color: #22c55e;
+  background: rgba(241, 90, 36, 0.16);
+  color: #F15A24;
 }
 
+/* MAIN PANEL */
+
 .main-panel {
-  flex: 1;
+  margin-left: 240px;
+  width: calc(100% - 240px);
   padding: 28px;
-  background: linear-gradient(135deg, #020617, #0f172a);
   min-height: 100vh;
 }
 
@@ -159,6 +191,8 @@ button {
   border: 1px solid rgba(148, 163, 184, 0.22);
 }
 
+/* RESUMEN */
+
 .resumen-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -182,6 +216,8 @@ button {
 .resumen-card span {
   color: #cbd5e1;
 }
+
+/* CALENDARIO */
 
 .calendario-panel {
   padding: 24px;
@@ -219,346 +255,12 @@ button {
   border: 1px solid rgba(148, 163, 184, 0.2);
 }
 
+/* CALENDARIO SEMANAL FIJO */
+
 .semana-grid {
   display: block;
 }
 
-.week-calendar {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.week-header,
-.week-row {
-  display: grid;
-  grid-template-columns: 70px repeat(7, minmax(130px, 1fr));
-}
-
-.week-day-header {
-  padding: 12px;
-  text-align: center;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
-  cursor: pointer;
-}
-
-.week-day-header span {
-  display: block;
-  color: #94a3b8;
-  font-size: 12px;
-}
-
-.week-day-header strong {
-  font-size: 26px;
-}
-
-.week-hour {
-  padding: 10px;
-  color: #94a3b8;
-  font-size: 13px;
-  border-top: 1px solid rgba(148, 163, 184, 0.12);
-}
-
-.week-cell {
-  min-height: 68px;
-  padding: 4px;
-  border-top: 1px solid rgba(148, 163, 184, 0.10);
-  border-left: 1px solid rgba(148, 163, 184, 0.08);
-  cursor: pointer;
-}
-
-.week-event {
-  padding: 6px 8px;
-  border-radius: 8px;
-  margin-bottom: 4px;
-  color: white;
-  font-size: 12px;
-  overflow: hidden;
-}
-
-.week-event strong,
-.week-event span,
-.week-event small {
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.week-event small {
-  opacity: 0.85;
-}
-
-.toolbar {
-  display: flex;
-  gap: 14px;
-  margin-bottom: 20px;
-}
-
-.toolbar input,
-.toolbar select {
-  margin-bottom: 0;
-}
-
-.add-btn {
-  padding: 14px 20px;
-  border-radius: 14px;
-  background: #22c55e;
-  color: white;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.tabla-clientes {
-  border-radius: 20px;
-  overflow: hidden;
-  background: rgba(15, 23, 42, 0.94);
-  border: 1px solid rgba(148, 163, 184, 0.16);
-}
-
-.tabla-header,
-.cliente-row {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 0.8fr 1fr;
-  gap: 12px;
-  align-items: center;
-}
-
-.entrenadores-header,
-.entrenador-row {
-  grid-template-columns: 1.5fr 1fr 0.8fr 0.8fr 1fr;
-}
-
-.tabla-header {
-  padding: 16px 20px;
-  color: #94a3b8;
-  font-size: 13px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
-}
-
-.cliente-row,
-.entrenador-row {
-  display: grid;
-  padding: 16px 20px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.10);
-  gap: 12px;
-  align-items: center;
-}
-
-.cliente-row:last-child,
-.entrenador-row:last-child {
-  border-bottom: 0;
-}
-
-.cliente-nombre {
-  font-weight: 800;
-}
-
-.cliente-sub {
-  display: block;
-  color: #22c55e;
-  font-size: 13px;
-  margin-top: 4px;
-}
-
-.estado-activo,
-.estado-inactivo {
-  display: inline-block;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.estado-activo {
-  background: rgba(34,197,94,0.16);
-  color: #22c55e;
-}
-
-.estado-inactivo {
-  background: rgba(239,68,68,0.16);
-  color: #f87171;
-}
-
-.color-dot {
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  display: inline-block;
-  border: 2px solid rgba(255,255,255,0.5);
-}
-
-.acciones {
-  display: flex;
-  gap: 8px;
-}
-
-.ver-btn,
-.eliminar-btn,
-.ficha-btn {
-  color: white;
-  padding: 10px 12px;
-  border-radius: 10px;
-  font-weight: 700;
-}
-
-.ver-btn,
-.ficha-btn {
-  background: #2563eb;
-}
-
-.eliminar-btn {
-  background: #dc2626;
-}
-
-#dia-screen,
-#alta-screen,
-#ficha-screen {
-  min-height: 100vh;
-  padding: 24px;
-  flex-direction: column;
-  background: linear-gradient(135deg, #020617, #0f172a);
-}
-
-.agenda-layout {
-  display: grid;
-  grid-template-columns: 380px 1fr;
-  gap: 24px;
-}
-
-.agenda-panel {
-  padding: 24px;
-  border-radius: 24px;
-  background: rgba(15, 23, 42, 0.94);
-  border: 1px solid rgba(148, 163, 184, 0.16);
-}
-
-.agenda-item {
-  display: grid;
-  grid-template-columns: 90px 1fr auto;
-  gap: 14px;
-  align-items: center;
-  padding: 16px;
-  border-radius: 16px;
-  background: rgba(2, 6, 23, 0.65);
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  margin-bottom: 12px;
-}
-
-.agenda-hora {
-  font-weight: 900;
-  color: #F15A24;
-}
-
-.agenda-cliente strong {
-  display: block;
-}
-
-.agenda-cliente span {
-  color: #94a3b8;
-  font-size: 13px;
-  display: block;
-}
-
-.cliente-ficha {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.ficha-card {
-  padding: 22px;
-  border-radius: 20px;
-  background: rgba(15, 23, 42, 0.94);
-  border: 1px solid rgba(148, 163, 184, 0.16);
-}
-
-.ficha-card h2 {
-  margin-top: 0;
-}
-
-@media (max-width: 950px) {
-  #dashboard-screen {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100%;
-    min-height: auto;
-    border-right: 0;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-  }
-
-  .sidebar nav {
-    flex-direction: row;
-    overflow-x: auto;
-  }
-
-  .main-panel {
-    padding: 18px;
-  }
-
-  .resumen-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .toolbar {
-    flex-direction: column;
-  }
-
-  .add-btn {
-    width: 100%;
-  }
-
-  .tabla-header {
-    display: none;
-  }
-
-  .cliente-row,
-  .entrenador-row {
-    grid-template-columns: 1fr;
-  }
-
-  .acciones {
-    margin-top: 10px;
-  }
-
-  .agenda-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .agenda-item {
-    grid-template-columns: 1fr;
-  }
-}
-.evento-30 {
-  min-height: 34px;
-}
-
-.evento-60 {
-  min-height: 64px;
-}
-.week-row {
-  min-height: 42px;
-}
-
-.week-cell {
-  min-height: 42px;
-  overflow: visible;
-  position: relative;
-}
-
-.week-event {
-  position: relative;
-  z-index: 10;
-}
-
-.evento-30 {
-  min-height: 32px;
-}
-
-.evento-60 {
-  min-height: 72px;
-}
 .week-calendar-fixed {
   width: 100%;
   overflow-x: auto;
@@ -617,7 +319,7 @@ button {
 }
 
 .week-slot-fixed:hover {
-  background: rgba(34, 197, 94, 0.08);
+  background: rgba(241, 90, 36, 0.08);
 }
 
 .week-event-fixed {
@@ -646,69 +348,276 @@ button {
 .week-event-fixed small {
   opacity: 0.9;
 }
-.logo-img {
-  width: 160px;
-  max-width: 100%;
-  display: block;
-  margin: 0 auto 20px;
-}
 
-.login-logo {
-  width: 180px;
-  max-width: 100%;
-  display: block;
-  margin: 0 auto 20px;
-}
-.sidebar {
+/* TOOLBAR */
+
+.toolbar {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
+  gap: 14px;
+  margin-bottom: 20px;
 }
 
-.logo {
-  width: 100%;
-  padding-bottom: 18px;
-  margin-bottom: 18px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-  text-align: center;
+.toolbar input,
+.toolbar select {
+  margin-bottom: 0;
 }
 
-.logo-img {
-  width: 130px;
-  max-width: 100%;
-  display: block;
-  margin: 0 auto;
-}
-
-.logo h2,
-.logo span {
-  display: none;
-}
-
-.sidebar nav {
-  margin-top: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.sidebar nav button {
-  width: 100%;
-  text-align: left;
-  padding: 14px 16px;
+.add-btn {
+  padding: 14px 20px;
   border-radius: 14px;
-  background: transparent;
-  color: #cbd5e1;
-  font-size: 15px;
-  border: none;
+  background: #F15A24;
+  color: white;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
-.sidebar nav button:hover,
-.sidebar nav button.nav-active {
+/* TABLAS */
+
+.tabla-clientes {
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.94);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.tabla-header,
+.cliente-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 0.8fr 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.entrenadores-header,
+.entrenador-row {
+  grid-template-columns: 1.5fr 1fr 0.8fr 0.8fr 1fr;
+}
+
+.tabla-header {
+  padding: 16px 20px;
+  color: #94a3b8;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.cliente-row,
+.entrenador-row {
+  display: grid;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.10);
+  gap: 12px;
+  align-items: center;
+}
+
+.cliente-row:last-child,
+.entrenador-row:last-child {
+  border-bottom: 0;
+}
+
+.cliente-nombre {
+  font-weight: 800;
+}
+
+.cliente-sub {
+  display: block;
+  color: #F15A24;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.estado-activo,
+.estado-inactivo {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.estado-activo {
   background: rgba(241, 90, 36, 0.16);
   color: #F15A24;
 }
 
-.main-panel {
-  padding-top: 28px;
+.estado-inactivo {
+  background: rgba(239,68,68,0.16);
+  color: #f87171;
+}
+
+.color-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: inline-block;
+  border: 2px solid rgba(255,255,255,0.5);
+}
+
+/* BOTONES */
+
+.acciones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ver-btn,
+.eliminar-btn,
+.ficha-btn {
+  color: white;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.ver-btn,
+.ficha-btn {
+  background: #2563eb;
+}
+
+.eliminar-btn {
+  background: #dc2626;
+}
+
+/* PANTALLAS SECUNDARIAS */
+
+#dia-screen,
+#alta-screen,
+#ficha-screen {
+  min-height: 100vh;
+  padding: 24px;
+  flex-direction: column;
+  background: linear-gradient(135deg, #020617, #0f172a);
+}
+
+/* AGENDA DÍA */
+
+.agenda-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 24px;
+}
+
+.agenda-panel {
+  padding: 24px;
+  border-radius: 24px;
+  background: rgba(15, 23, 42, 0.94);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.agenda-item {
+  display: grid;
+  grid-template-columns: 90px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(2, 6, 23, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  margin-bottom: 12px;
+}
+
+.agenda-hora {
+  font-weight: 900;
+  color: #F15A24;
+}
+
+.agenda-cliente strong {
+  display: block;
+}
+
+.agenda-cliente span {
+  color: #94a3b8;
+  font-size: 13px;
+  display: block;
+}
+
+/* FICHA CLIENTE */
+
+.cliente-ficha {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ficha-card {
+  padding: 22px;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.94);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.ficha-card h2 {
+  margin-top: 0;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 950px) {
+  #dashboard-screen {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    position: relative;
+    width: 100%;
+    min-width: 100%;
+    height: auto;
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  }
+
+  .logo-img {
+    width: 120px;
+  }
+
+  .sidebar nav {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 8px;
+  }
+
+  .sidebar nav button {
+    white-space: nowrap;
+    width: auto;
+  }
+
+  .main-panel {
+    margin-left: 0;
+    width: 100%;
+    padding: 18px;
+  }
+
+  .resumen-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .toolbar {
+    flex-direction: column;
+  }
+
+  .add-btn {
+    width: 100%;
+  }
+
+  .tabla-header {
+    display: none;
+  }
+
+  .cliente-row,
+  .entrenador-row {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones {
+    margin-top: 10px;
+  }
+
+  .agenda-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .agenda-item {
+    grid-template-columns: 1fr;
+  }
 }
