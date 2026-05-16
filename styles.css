@@ -147,3 +147,17 @@ button {
   font-weight: 700;
   cursor: pointer;
 }
+select,
+textarea {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 14px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
