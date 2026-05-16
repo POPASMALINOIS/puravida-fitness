@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-title" content="PuraVida Fitness">
 
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
 
@@ -69,6 +69,16 @@
     <div class="card">
       <input type="text" id="clienteNombre" placeholder="Nombre del cliente">
       <input type="text" id="clienteTelefono" placeholder="Teléfono">
+      <input type="date" id="clienteFechaAlta">
+      <input type="number" id="clienteCuota" placeholder="Cuota mensual (€)">
+      
+      <select id="clienteEstado">
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+      </select>
+
+      <textarea id="clienteObservaciones" placeholder="Observaciones"></textarea>
+
       <button onclick="agregarCliente()">Agregar cliente</button>
     </div>
 
@@ -77,7 +87,7 @@
 
 </div>
 
-<script src="app.js?v=3"></script>
+<script src="app.js?v=5"></script>
 
 <script>
 if ("serviceWorker" in navigator) {
