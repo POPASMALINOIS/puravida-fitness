@@ -5,16 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PuraVida Fitness</title>
 
-  <meta name="theme-color" content="#111827">
+  <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="PuraVida Fitness">
 
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
 
-<div class="app-container">
+<div class="app-layout">
 
   <!-- LOGIN -->
   <section id="login-screen" class="screen active">
@@ -29,42 +28,86 @@
     </div>
   </section>
 
-  <!-- CLIENTES -->
-  <section id="clientes-screen" class="screen">
-    <header class="dashboard-header">
-      <h1>Clientes</h1>
-      <button onclick="logout()">Salir</button>
-    </header>
+  <!-- DASHBOARD -->
+  <section id="dashboard-screen" class="screen">
 
-    <div class="resumen-grid">
-      <div class="resumen-card">
-        <strong id="totalClientes">0</strong>
-        <span>Total clientes</span>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <h2>PuraVida</h2>
+        <span>FITNESS</span>
       </div>
 
-      <div class="resumen-card">
-        <strong id="clientesActivos">0</strong>
-        <span>Activos</span>
-      </div>
+      <nav>
+        <button onclick="mostrarSeccion('clientes')">Clientes</button>
+        <button onclick="mostrarSeccion('clases')">Clases</button>
+        <button onclick="mostrarSeccion('calendario')">Calendario</button>
+        <button onclick="mostrarSeccion('pagos')">Pagos</button>
+        <button onclick="mostrarSeccion('rutinas')">Rutinas</button>
+        <button onclick="mostrarSeccion('controles')">Controles</button>
+        <button onclick="mostrarSeccion('recordatorios')">Recordatorios</button>
+        <button onclick="mostrarSeccion('ajustes')">Ajustes</button>
+      </nav>
+    </aside>
 
-      <div class="resumen-card">
-        <strong id="bonosBajos">0</strong>
-        <span>Bonos bajos</span>
-      </div>
-    </div>
+    <!-- MAIN -->
+    <main class="main-panel">
 
-    <input type="text" id="buscadorClientes" placeholder="Buscar cliente..." oninput="renderClientes()">
+      <header class="top-header">
+        <h1>Clientes</h1>
+        <button onclick="logout()">Salir</button>
+      </header>
 
-    <div class="clientes-lista" id="clientesLista"></div>
+      <!-- RESUMEN -->
+      <section class="resumen-grid">
+        <div class="resumen-card">
+          <strong id="totalClientes">0</strong>
+          <span>Total clientes</span>
+        </div>
 
-    <button class="floating-btn" onclick="cambiarPantalla('alta-screen')">＋</button>
+        <div class="resumen-card">
+          <strong id="clientesActivos">0</strong>
+          <span>Activos</span>
+        </div>
+
+        <div class="resumen-card">
+          <strong id="bonosBajos">0</strong>
+          <span>Bonos bajos</span>
+        </div>
+
+        <div class="resumen-card">
+          <strong id="clasesHoy">0</strong>
+          <span>Clases hoy</span>
+        </div>
+      </section>
+
+      <!-- BUSCADOR -->
+      <section class="toolbar">
+        <input type="text" id="buscadorClientes" placeholder="Buscar cliente..." oninput="renderClientes()">
+        <button class="add-btn" onclick="cambiarPantalla('alta-screen')">+ Añadir cliente</button>
+      </section>
+
+      <!-- TABLA CLIENTES -->
+      <section class="tabla-clientes">
+        <div class="tabla-header">
+          <span>Cliente</span>
+          <span>Teléfono</span>
+          <span>Bono</span>
+          <span>Estado</span>
+          <span>Acciones</span>
+        </div>
+
+        <div id="clientesLista"></div>
+      </section>
+
+    </main>
   </section>
 
   <!-- ALTA CLIENTE -->
   <section id="alta-screen" class="screen">
     <header class="dashboard-header">
       <h1>Nuevo Cliente</h1>
-      <button onclick="volverClientes()">Volver</button>
+      <button onclick="volverDashboard()">Volver</button>
     </header>
 
     <div class="card">
@@ -86,11 +129,11 @@
     </div>
   </section>
 
-  <!-- FICHA CLIENTE -->
+  <!-- FICHA -->
   <section id="ficha-screen" class="screen">
     <header class="dashboard-header">
       <h1>Ficha Cliente</h1>
-      <button onclick="volverClientes()">Volver</button>
+      <button onclick="volverDashboard()">Volver</button>
     </header>
 
     <div class="cliente-ficha" id="clienteFicha"></div>
@@ -98,7 +141,7 @@
 
 </div>
 
-<script src="app.js?v=7"></script>
+<script src="app.js?v=8"></script>
 
 <script>
 if ("serviceWorker" in navigator) {
