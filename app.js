@@ -1,4 +1,4 @@
-let clientes = [];
+let clientes = JSON.parse(localStorage.getItem("clientes")) || [];
 
 function login() {
   const usuario = document.getElementById("usuario").value;
@@ -46,6 +46,8 @@ function agregarCliente() {
 
   clientes.push({ nombre, telefono });
 
+  localStorage.setItem("clientes", JSON.stringify(clientes));
+
   document.getElementById("clienteNombre").value = "";
   document.getElementById("clienteTelefono").value = "";
 
@@ -69,3 +71,7 @@ function renderClientes() {
     lista.appendChild(div);
   });
 }
+
+window.onload = function() {
+  renderClientes();
+};
