@@ -931,3 +931,7 @@ function cancelarClaseExcepcional(clienteId, claseId) {
     verFichaCliente(clienteId);
   }
 }
+function convertirHoraAMinutos(hora) {
+  const [h, m] = hora.split(":").map(Number);
+  return h * 60 + m;
+}
