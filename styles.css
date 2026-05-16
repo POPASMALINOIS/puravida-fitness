@@ -188,3 +188,41 @@ textarea {
   width: 100%;
   cursor: pointer;
 }
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.resumen-card {
+  background: rgba(255,255,255,0.08);
+  padding: 16px;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.resumen-card strong {
+  display: block;
+  font-size: 22px;
+}
+
+.floating-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: none;
+  background: #22c55e;
+  color: white;
+  font-size: 34px;
+  font-weight: bold;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  cursor: pointer;
+}
+
+#buscadorClientes {
+  margin-bottom: 20px;
+}
