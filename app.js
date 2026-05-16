@@ -14,6 +14,7 @@ const entrenadoresIniciales = [
 
 document.addEventListener("DOMContentLoaded", function () {
   cargarDatos();
+  procesarBonosAutomaticamente();
   actualizarResumen();
   renderCalendarioSemanal();
   renderClientes();
@@ -711,4 +712,106 @@ function renderClientes() {
 
     lista.appendChild(div);
   });
+}
+function procesarBonosAutomaticamente() {
+  const ahora = new Date();
+
+  clientes.forEach(cliente => {
+    cliente.clases.forEach(clase => {
+      if (clase.estado !== "Programada" || clase.consumida) return;
+
+      const fechaClase = new Date(`${clase.fecha}T${clase.hora}:00`);
+      const diferenciaHoras = (fechaClase - ahora) / (1000 * 60 * 60);
+
+      if (diferenciaHoras <= 12) {
+        if (cliente.bonoDisponible > 0) {
+          cliente.bonoDisponible -= 1;
+        }
+
+        clase.estado = "Consumida";
+        clase.consumida = true;
+      }
+    });
+  });
+
+  guardarDatos();
+}
+
+function cancelarClase(clienteId, claseId) {
+  const cliente = clientes.find(c => c.id === clienteId);
+
+  if (!cliente) return;
+
+  const clase = cliente.clases.find(c => c.id === claseId);
+
+  if (!clase) return;
+
+  const ahora = new Date();
+  const fechaClase = new Date(`${clase.fecha}T${clase.hora}:00`);
+  const diferenciaHoras = (fechaClase - ahora) / (1000 * 60 * 60);
+
+  if (diferenciaHoras <= 12) {
+    alert("No se puede cancelar con menos de 12 horas.");
+    return;
+  }
+
+  clase.estado = "Cancelada";
+
+  guardarDatos();
+  renderAgendaDia();
+
+  if (clienteActual && clienteActual.id === clienteId) {
+    verFichaCliente(clienteId);
+  }
+}
+function procesarBonosAutomaticamente() {
+  const ahora = new Date();
+
+  clientes.forEach(cliente => {
+    cliente.clases.forEach(clase => {
+      if (clase.estado !== "Programada" || clase.consumida) return;
+
+      const fechaClase = new Date(`${clase.fecha}T${clase.hora}:00`);
+      const diferenciaHoras = (fechaClase - ahora) / (1000 * 60 * 60);
+
+      if (diferenciaHoras <= 12) {
+        if (cliente.bonoDisponible > 0) {
+          cliente.bonoDisponible -= 1;
+        }
+
+        clase.estado = "Consumida";
+        clase.consumida = true;
+      }
+    });
+  });
+
+  guardarDatos();
+}
+
+function cancelarClase(clienteId, claseId) {
+  const cliente = clientes.find(c => c.id === clienteId);
+
+  if (!cliente) return;
+
+  const clase = cliente.clases.find(c => c.id === claseId);
+
+  if (!clase) return;
+
+  const ahora = new Date();
+  const fechaClase = new Date(`${clase.fecha}T${clase.hora}:00`);
+  const diferenciaHoras = (fechaClase - ahora) / (1000 * 60 * 60);
+
+  if (diferenciaHoras <= 12) {
+    alert("No se puede cancelar con menos de 12 horas.");
+    return;
+  }
+
+  clase.estado = "Cancelada";
+
+  guardarDatos();
+  renderAgendaDia();
+
+  if (clienteActual && clienteActual.id === clienteId) {
+    verFichaCliente(clienteId);
+  }
 }
