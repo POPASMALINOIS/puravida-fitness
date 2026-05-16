@@ -561,10 +561,15 @@ function renderAgendaDia() {
         <strong>${clase.clienteNombre}</strong>
         <span>${clase.duracion || clase.bonoDuracion} min · ${clase.modalidad || clase.bonoModalidad}</span>
         <span>Entrenador: ${clase.entrenadorNombre}</span>
+        <span>Estado: ${clase.estado}</span>
         <span>Bono: ${clase.bonoDisponible}/${clase.bonoTotal}</span>
       </div>
 
-      <button class="eliminar-btn" onclick="eliminarClase(${clase.clienteId}, ${clase.id})">Borrar</button>
+      <div class="acciones">
+        <button class="ver-btn" onclick="cancelarClase(${clase.clienteId}, ${clase.id})">Cancelar</button>
+        <button class="ficha-btn" onclick="cancelarClaseExcepcional(${clase.clienteId}, ${clase.id})">Excepcional</button>
+        <button class="eliminar-btn" onclick="eliminarClase(${clase.clienteId}, ${clase.id})">Borrar</button>
+      </div>
     `;
 
     lista.appendChild(div);
