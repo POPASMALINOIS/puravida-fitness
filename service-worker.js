@@ -1,4 +1,4 @@
-const CACHE_NAME = "puravida-fitness-v2";
+const CACHE_NAME = "puravida-fitness-v3";
 
 const urlsToCache = [
   "./",
