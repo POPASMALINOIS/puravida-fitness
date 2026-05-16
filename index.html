@@ -16,21 +16,61 @@
 </head>
 
 <body>
-  <main class="app">
-    <section class="hero">
+
+<div class="app-container">
+
+  <!-- LOGIN -->
+  <section id="login-screen" class="screen active">
+    <div class="card">
       <h1>PuraVida Fitness</h1>
-      <p>Gestión de gimnasio</p>
+      <p>Gestión profesional de gimnasio</p>
 
-      <button onclick="entrarApp()">Entrar</button>
-    </section>
-  </main>
+      <input type="text" id="usuario" placeholder="Usuario">
+      <input type="password" id="password" placeholder="Contraseña">
 
-  <script src="app.js"></script>
+      <button onclick="login()">Acceder</button>
+    </div>
+  </section>
 
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js");
-    }
-  </script>
+  <!-- DASHBOARD -->
+  <section id="dashboard-screen" class="screen">
+    <header class="dashboard-header">
+      <h1>PuraVida Fitness</h1>
+      <button onclick="logout()">Cerrar sesión</button>
+    </header>
+
+    <main class="dashboard-grid">
+      <div class="dashboard-card" onclick="mostrarModulo('clientes')">
+        <h2>Clientes</h2>
+        <p>Gestión de socios</p>
+      </div>
+
+      <div class="dashboard-card" onclick="mostrarModulo('rutinas')">
+        <h2>Rutinas</h2>
+        <p>Entrenamientos</p>
+      </div>
+
+      <div class="dashboard-card" onclick="mostrarModulo('clases')">
+        <h2>Clases</h2>
+        <p>Calendario y reservas</p>
+      </div>
+
+      <div class="dashboard-card" onclick="mostrarModulo('pagos')">
+        <h2>Pagos</h2>
+        <p>Cuotas y facturación</p>
+      </div>
+    </main>
+  </section>
+
+</div>
+
+<script src="app.js"></script>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+  }
+</script>
+
 </body>
 </html>
