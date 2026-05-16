@@ -530,3 +530,10 @@ button {
     grid-template-columns: 1fr;
   }
 }
+.evento-30 {
+  min-height: 34px;
+}
+
+.evento-60 {
+  min-height: 64px;
+}
