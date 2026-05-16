@@ -337,78 +337,111 @@ function renderCalendarioSemanal() {
 
   tituloMes.textContent = `${formatearFechaES(obtenerFechaISO(lunes))} - ${formatearFechaES(obtenerFechaISO(domingo))}`;
 
-  const tramos = [];
-
-  for (let h = 6; h <= 23; h++) {
-    tramos.push(String(h).padStart(2, "0") + ":00");
-    tramos.push(String(h).padStart(2, "0") + ":30");
-  }
-
-  const contenedor = document.createElement("div");
-  contenedor.className = "week-calendar";
-
-  const cabecera = document.createElement("div");
-  cabecera.className = "week-header";
-  cabecera.innerHTML = `<div class="week-hour-label"></div>`;
+  const slotHeight = 42;
+  const horaInicio = 6;
+  const horaFin = 24;
+  const totalSlots = (horaFin - horaInicio) * 2;
 
   const nombresDias = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+  const contenedor = document.createElement("div");
+  contenedor.className = "week-calendar-fixed";
+
+  let headerHtml = `<div class="week-header-fixed"><div></div>`;
 
   for (let i = 0; i < 7; i++) {
     const fecha = new Date(lunes);
     fecha.setDate(lunes.getDate() + i);
     const fechaISO = obtenerFechaISO(fecha);
 
-    cabecera.innerHTML += `
-      <div class="week-day-header" onclick="abrirAgendaDia('${fechaISO}')">
+    headerHtml += `
+      <div class="week-day-header-fixed" onclick="abrirAgendaDia('${fechaISO}')">
         <span>${nombresDias[i]}</span>
         <strong>${fecha.getDate()}</strong>
       </div>
     `;
   }
 
-  contenedor.appendChild(cabecera);
+  headerHtml += `</div>`;
 
-  tramos.forEach(tramo => {
-    const fila = document.createElement("div");
-    fila.className = "week-row";
-    fila.innerHTML = `<div class="week-hour">${tramo}</div>`;
+  let bodyHtml = `<div class="week-body-fixed">`;
 
-    for (let i = 0; i < 7; i++) {
-      const fecha = new Date(lunes);
-      fecha.setDate(lunes.getDate() + i);
-      const fechaISO = obtenerFechaISO(fecha);
+  bodyHtml += `<div class="week-hours-fixed">`;
 
-      const clasesTramo = obtenerClasesPorFecha(fechaISO).filter(clase => clase.hora === tramo);
+  for (let slot = 0; slot < totalSlots; slot++) {
+    const hora = horaInicio + Math.floor(slot / 2);
+    const minutos = slot % 2 === 0 ? "00" : "30";
+    const tramo = `${String(hora).padStart(2, "0")}:${minutos}`;
 
-      let eventosHtml = "";
+    bodyHtml += `
+      <div class="week-hour-fixed" style="height:${slotHeight}px;">
+        ${tramo}
+      </div>
+    `;
+  }
 
-      clasesTramo.forEach(clase => {
-        const duracion = parseInt(clase.duracion || clase.bonoDuracion || "60");
-        const claseDuracion = duracion === 60 ? "evento-60" : "evento-30";
+  bodyHtml += `</div>`;
 
-        eventosHtml += `
-          <div 
-            class="week-event ${claseDuracion}" 
-            style="background:${clase.entrenadorColor}"
-            onclick="event.stopPropagation(); verFichaCliente(${clase.clienteId})"
-          >
-            <strong>${clase.hora}</strong>
-            <span>${clase.clienteNombre}</span>
-            <small>${duracion} min · ${clase.entrenadorNombre}</small>
-          </div>
-        `;
-      });
+  for (let i = 0; i < 7; i++) {
+    const fecha = new Date(lunes);
+    fecha.setDate(lunes.getDate() + i);
+    const fechaISO = obtenerFechaISO(fecha);
+    const clasesDia = obtenerClasesPorFecha(fechaISO);
 
-      fila.innerHTML += `
-        <div class="week-cell" onclick="abrirAgendaDia('${fechaISO}', '${tramo}')">
-          ${eventosHtml}
-        </div>
+    bodyHtml += `<div class="week-day-column-fixed" style="height:${totalSlots * slotHeight}px;">`;
+
+    for (let slot = 0; slot < totalSlots; slot++) {
+      const hora = horaInicio + Math.floor(slot / 2);
+      const minutos = slot % 2 === 0 ? "00" : "30";
+      const tramo = `${String(hora).padStart(2, "0")}:${minutos}`;
+      const top = slot * slotHeight;
+
+      bodyHtml += `
+        <div 
+          class="week-slot-fixed"
+          style="top:${top}px; height:${slotHeight}px;"
+          onclick="abrirAgendaDia('${fechaISO}', '${tramo}')"
+        ></div>
       `;
     }
 
-    contenedor.appendChild(fila);
-  });
+    clasesDia.forEach(clase => {
+      if (!clase.hora) return;
 
+      const [hora, minutos] = clase.hora.split(":").map(Number);
+      const slotInicio = ((hora - horaInicio) * 2) + (minutos >= 30 ? 1 : 0);
+
+      if (slotInicio < 0 || slotInicio >= totalSlots) return;
+
+      const duracion = parseInt(clase.duracion || clase.bonoDuracion || "60");
+      const slotsOcupados = duracion === 60 ? 2 : 1;
+
+      const top = slotInicio * slotHeight;
+      const height = (slotsOcupados * slotHeight) - 6;
+
+      bodyHtml += `
+        <div 
+          class="week-event-fixed"
+          style="
+            top:${top + 3}px;
+            height:${height}px;
+            background:${clase.entrenadorColor};
+          "
+          onclick="event.stopPropagation(); verFichaCliente(${clase.clienteId})"
+        >
+          <strong>${clase.hora}</strong>
+          <span>${clase.clienteNombre}</span>
+          <small>${duracion} min · ${clase.entrenadorNombre}</small>
+        </div>
+      `;
+    });
+
+    bodyHtml += `</div>`;
+  }
+
+  bodyHtml += `</div>`;
+
+  contenedor.innerHTML = headerHtml + bodyHtml;
   calendario.appendChild(contenedor);
 }
 
