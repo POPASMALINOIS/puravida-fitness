@@ -393,7 +393,7 @@ function renderCalendarioSemanal() {
       });
 
       fila.innerHTML += `
-        <div class="week-cell" onclick="abrirAgendaDia('${fechaISO}')">
+        <div class="week-cell" onclick="abrirAgendaDia('${fechaISO}', '${hora}')">
           ${eventosHtml}
         </div>
       `;
@@ -405,13 +405,21 @@ function renderCalendarioSemanal() {
   calendario.appendChild(contenedor);
 }
 
-function abrirAgendaDia(fechaISO) {
+function abrirAgendaDia(fechaISO, horaPreseleccionada = "") {
   fechaDiaSeleccionado = fechaISO;
 
   document.getElementById("tituloDia").textContent = `Agenda ${formatearFechaES(fechaISO)}`;
-  document.getElementById("subtituloDia").textContent = "Planificación diaria de clases";
+  document.getElementById("subtituloDia").textContent = horaPreseleccionada
+    ? `Nueva clase a las ${horaPreseleccionada}`
+    : "Planificación diaria de clases";
 
   prepararFormularioAgendaDia();
+
+  const horaInput = document.getElementById("diaClaseHora");
+  if (horaInput && horaPreseleccionada) {
+    horaInput.value = horaPreseleccionada;
+  }
+
   renderAgendaDia();
 
   cambiarPantalla("dia-screen");
