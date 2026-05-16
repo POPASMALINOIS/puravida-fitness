@@ -3,23 +3,26 @@ let clienteActual = null;
 let fechaCalendario = new Date();
 let fechaDiaSeleccionado = null;
 
-const entrenadores = [
-  { id: 1, nombre: "Entrenador 1", color: "#2563eb" },
-  { id: 2, nombre: "Entrenador 2", color: "#9333ea" },
-  { id: 3, nombre: "Entrenador 3", color: "#16a34a" },
-  { id: 4, nombre: "Entrenador 4", color: "#ea580c" },
-  { id: 5, nombre: "Entrenador 5", color: "#ca8a04" }
+let entrenadores = [];
+
+const entrenadoresIniciales = [
+  { id: 1, nombre: "Entrenador 1", color: "#2563eb", estado: "Activo" },
+  { id: 2, nombre: "Entrenador 2", color: "#9333ea", estado: "Activo" },
+  { id: 3, nombre: "Entrenador 3", color: "#16a34a", estado: "Activo" },
+  { id: 4, nombre: "Entrenador 4", color: "#ea580c", estado: "Activo" }
 ];
 
 document.addEventListener("DOMContentLoaded", function () {
-  cargarClientes();
+  cargarDatos();
   actualizarResumen();
   renderCalendarioSemanal();
   renderClientes();
+  renderEntrenadores();
 });
 
-function cargarClientes() {
+function cargarDatos() {
   clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+  entrenadores = JSON.parse(localStorage.getItem("entrenadores")) || entrenadoresIniciales;
 
   clientes.forEach(cliente => {
     cliente.bonoTotal = cliente.bonoTotal || cliente.bonoDisponible || 0;
@@ -32,11 +35,12 @@ function cargarClientes() {
     cliente.pagos = cliente.pagos || [];
   });
 
-  guardarClientes();
+  guardarDatos();
 }
 
-function guardarClientes() {
+function guardarDatos() {
   localStorage.setItem("clientes", JSON.stringify(clientes));
+  localStorage.setItem("entrenadores", JSON.stringify(entrenadores));
 }
 
 function login() {
@@ -45,9 +49,7 @@ function login() {
 
   if (usuario && password) {
     cambiarPantalla("dashboard-screen");
-    actualizarResumen();
-    renderCalendarioSemanal();
-    renderClientes();
+    mostrarSeccion("clientes");
   } else {
     alert("Introduce usuario y contraseña.");
   }
@@ -65,17 +67,32 @@ function cambiarPantalla(id) {
   document.getElementById(id).classList.add("active");
 }
 
-function volverDashboard() {
-  cambiarPantalla("dashboard-screen");
-  actualizarResumen();
-  renderCalendarioSemanal();
-  renderClientes();
+function mostrarSeccion(seccion) {
+  document.getElementById("clientes-section").style.display = seccion === "clientes" ? "block" : "none";
+  document.getElementById("entrenadores-section").style.display = seccion === "entrenadores" ? "block" : "none";
+
+  document.querySelectorAll(".sidebar nav button").forEach(btn => btn.classList.remove("nav-active"));
+
+  if (seccion === "clientes") {
+    document.getElementById("nav-clientes").classList.add("nav-active");
+    document.getElementById("tituloPanel").textContent = "Clientes";
+    document.getElementById("subtituloPanel").textContent = "Planificación, bonos y seguimiento";
+    actualizarResumen();
+    renderCalendarioSemanal();
+    renderClientes();
+  }
+
+  if (seccion === "entrenadores") {
+    document.getElementById("nav-entrenadores").classList.add("nav-active");
+    document.getElementById("tituloPanel").textContent = "Entrenadores";
+    document.getElementById("subtituloPanel").textContent = "Colores, agenda y asignación de clases";
+    renderEntrenadores();
+  }
 }
 
-function mostrarSeccion(seccion) {
-  if (seccion !== "clientes") {
-    alert("Módulo " + seccion + " en desarrollo.");
-  }
+function volverDashboard() {
+  cambiarPantalla("dashboard-screen");
+  mostrarSeccion("clientes");
 }
 
 function agregarCliente() {
@@ -114,12 +131,12 @@ function agregarCliente() {
     pagos: []
   });
 
-  guardarClientes();
-  limpiarFormulario();
+  guardarDatos();
+  limpiarFormularioCliente();
   volverDashboard();
 }
 
-function limpiarFormulario() {
+function limpiarFormularioCliente() {
   document.getElementById("clienteNombre").value = "";
   document.getElementById("clienteTelefono").value = "";
   document.getElementById("clienteEmail").value = "";
@@ -136,8 +153,89 @@ function eliminarCliente(id) {
   if (!confirm("¿Eliminar este cliente?")) return;
 
   clientes = clientes.filter(cliente => cliente.id !== id);
-  guardarClientes();
+  guardarDatos();
   volverDashboard();
+}
+
+function agregarEntrenador() {
+  const nombre = document.getElementById("entrenadorNombre").value.trim();
+  const color = document.getElementById("entrenadorColor").value;
+
+  if (!nombre) {
+    alert("Introduce el nombre del entrenador.");
+    return;
+  }
+
+  entrenadores.push({
+    id: Date.now(),
+    nombre,
+    color,
+    estado: "Activo"
+  });
+
+  document.getElementById("entrenadorNombre").value = "";
+  document.getElementById("entrenadorColor").value = "#2563eb";
+
+  guardarDatos();
+  renderEntrenadores();
+  renderCalendarioSemanal();
+}
+
+function eliminarEntrenador(id) {
+  if (!confirm("¿Eliminar este entrenador? Las clases ya creadas conservarán su color y nombre.")) return;
+
+  entrenadores = entrenadores.filter(entrenador => entrenador.id !== id);
+  guardarDatos();
+  renderEntrenadores();
+}
+
+function contarClasesEntrenador(id) {
+  let total = 0;
+
+  clientes.forEach(cliente => {
+    total += cliente.clases.filter(clase => parseInt(clase.entrenadorId) === parseInt(id)).length;
+  });
+
+  return total;
+}
+
+function renderEntrenadores() {
+  const lista = document.getElementById("entrenadoresLista");
+
+  if (!lista) return;
+
+  lista.innerHTML = "";
+
+  if (entrenadores.length === 0) {
+    lista.innerHTML = `<div class="entrenador-row">No hay entrenadores registrados.</div>`;
+    return;
+  }
+
+  entrenadores.forEach(entrenador => {
+    const div = document.createElement("div");
+    div.className = "entrenador-row";
+
+    div.innerHTML = `
+      <div>
+        <span class="cliente-nombre">${entrenador.nombre}</span>
+        <span class="cliente-sub">Color fijo</span>
+      </div>
+
+      <div>
+        <span class="color-dot" style="background:${entrenador.color}"></span>
+      </div>
+
+      <div><span class="estado-activo">${entrenador.estado}</span></div>
+
+      <div>${contarClasesEntrenador(entrenador.id)}</div>
+
+      <div class="acciones">
+        <button class="eliminar-btn" onclick="eliminarEntrenador(${entrenador.id})">Borrar</button>
+      </div>
+    `;
+
+    lista.appendChild(div);
+  });
 }
 
 function actualizarResumen() {
@@ -187,7 +285,11 @@ function irMesActual() {
 }
 
 function obtenerEntrenador(id) {
-  return entrenadores.find(e => e.id === parseInt(id)) || entrenadores[0];
+  return entrenadores.find(e => parseInt(e.id) === parseInt(id)) || entrenadores[0] || {
+    id: 0,
+    nombre: "Sin entrenador",
+    color: "#64748b"
+  };
 }
 
 function obtenerClasesPorFecha(fechaISO) {
@@ -235,6 +337,7 @@ function renderCalendarioSemanal() {
   tituloMes.textContent = `${formatearFechaES(obtenerFechaISO(lunes))} - ${formatearFechaES(obtenerFechaISO(domingo))}`;
 
   const horas = [];
+
   for (let h = 6; h <= 23; h++) {
     horas.push(String(h).padStart(2, "0") + ":00");
   }
@@ -244,15 +347,14 @@ function renderCalendarioSemanal() {
 
   const cabecera = document.createElement("div");
   cabecera.className = "week-header";
-
   cabecera.innerHTML = `<div class="week-hour-label"></div>`;
+
+  const nombresDias = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
   for (let i = 0; i < 7; i++) {
     const fecha = new Date(lunes);
     fecha.setDate(lunes.getDate() + i);
     const fechaISO = obtenerFechaISO(fecha);
-
-    const nombresDias = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
     cabecera.innerHTML += `
       <div class="week-day-header" onclick="abrirAgendaDia('${fechaISO}')">
@@ -267,7 +369,6 @@ function renderCalendarioSemanal() {
   horas.forEach(hora => {
     const fila = document.createElement("div");
     fila.className = "week-row";
-
     fila.innerHTML = `<div class="week-hour">${hora}</div>`;
 
     for (let i = 0; i < 7; i++) {
@@ -275,13 +376,15 @@ function renderCalendarioSemanal() {
       fecha.setDate(lunes.getDate() + i);
       const fechaISO = obtenerFechaISO(fecha);
 
-      const clasesHora = obtenerClasesPorFecha(fechaISO).filter(clase => clase.hora.startsWith(hora.substring(0, 2)));
+      const clasesHora = obtenerClasesPorFecha(fechaISO).filter(clase =>
+        clase.hora && clase.hora.startsWith(hora.substring(0, 2))
+      );
 
       let eventosHtml = "";
 
       clasesHora.forEach(clase => {
         eventosHtml += `
-          <div class="week-event" style="background:${clase.entrenadorColor}" onclick="verFichaCliente(${clase.clienteId})">
+          <div class="week-event" style="background:${clase.entrenadorColor}" onclick="event.stopPropagation(); verFichaCliente(${clase.clienteId})">
             <strong>${clase.hora}</strong>
             <span>${clase.clienteNombre}</span>
             <small>${clase.entrenadorNombre}</small>
@@ -356,12 +459,14 @@ function crearSelectorEntrenadoresAgenda() {
 
   select.innerHTML = "";
 
-  entrenadores.forEach(entrenador => {
-    const option = document.createElement("option");
-    option.value = entrenador.id;
-    option.textContent = entrenador.nombre;
-    select.appendChild(option);
-  });
+  entrenadores
+    .filter(entrenador => entrenador.estado === "Activo")
+    .forEach(entrenador => {
+      const option = document.createElement("option");
+      option.value = entrenador.id;
+      option.textContent = entrenador.nombre;
+      select.appendChild(option);
+    });
 }
 
 function agendarClaseDia() {
@@ -395,7 +500,7 @@ function agendarClaseDia() {
     consumida: false
   });
 
-  guardarClientes();
+  guardarDatos();
 
   document.getElementById("diaClaseHora").value = "";
 
@@ -412,7 +517,7 @@ function eliminarClase(clienteId, claseId) {
 
   cliente.clases = cliente.clases.filter(clase => clase.id !== claseId);
 
-  guardarClientes();
+  guardarDatos();
   actualizarResumen();
   renderAgendaDia();
 
