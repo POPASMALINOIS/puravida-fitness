@@ -815,3 +815,29 @@ function cancelarClase(clienteId, claseId) {
     verFichaCliente(clienteId);
   }
 }
+function cancelarClaseExcepcional(clienteId, claseId) {
+  const cliente = clientes.find(c => c.id === clienteId);
+
+  if (!cliente) return;
+
+  const clase = cliente.clases.find(c => c.id === claseId);
+
+  if (!clase) return;
+
+  if (!confirm("¿Cancelar excepcionalmente esta clase y devolver la sesión al bono?")) return;
+
+  if (clase.consumida && cliente.bonoDisponible < cliente.bonoTotal) {
+    cliente.bonoDisponible += 1;
+  }
+
+  clase.estado = "Cancelada excepcional";
+  clase.consumida = false;
+
+  guardarDatos();
+  actualizarResumen();
+  renderAgendaDia();
+
+  if (clienteActual && clienteActual.id === clienteId) {
+    verFichaCliente(clienteId);
+  }
+}
