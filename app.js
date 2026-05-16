@@ -3,6 +3,7 @@ let clienteActual = null;
 
 document.addEventListener("DOMContentLoaded", function () {
   cargarClientes();
+  actualizarResumen();
   renderClientes();
 });
 
@@ -20,6 +21,8 @@ function login() {
 
   if (usuario && password) {
     cambiarPantalla("clientes-screen");
+    actualizarResumen();
+    renderClientes();
   } else {
     alert("Introduce usuario y contraseña.");
   }
@@ -39,6 +42,7 @@ function cambiarPantalla(id) {
 
 function volverClientes() {
   cambiarPantalla("clientes-screen");
+  actualizarResumen();
   renderClientes();
 }
 
@@ -76,7 +80,7 @@ function agregarCliente() {
 
   guardarClientes();
   limpiarFormulario();
-  renderClientes();
+  volverClientes();
 }
 
 function limpiarFormulario() {
@@ -96,7 +100,18 @@ function eliminarCliente(id) {
   clientes = clientes.filter(cliente => cliente.id !== id);
 
   guardarClientes();
+  actualizarResumen();
   renderClientes();
+}
+
+function actualizarResumen() {
+  document.getElementById("totalClientes").textContent = clientes.length;
+
+  const activos = clientes.filter(c => c.estado === "Activo").length;
+  document.getElementById("clientesActivos").textContent = activos;
+
+  const bonosBajos = clientes.filter(c => c.bonoDisponible <= 2).length;
+  document.getElementById("bonosBajos").textContent = bonosBajos;
 }
 
 function verFichaCliente(id) {
@@ -140,8 +155,8 @@ function verFichaCliente(id) {
 
     <div class="ficha-card">
       <h2>Recordatorios</h2>
-      <button class="ficha-btn" onclick="enviarRecordatorioClase()">Enviar recordatorio clase</button>
-      <button class="ficha-btn" onclick="enviarRecordatorioPago()">Enviar recordatorio pago</button>
+      <button class="ficha-btn" onclick="enviarRecordatorioClase()">Recordatorio clase</button>
+      <button class="ficha-btn" onclick="enviarRecordatorioPago()">Recordatorio pago</button>
     </div>
   `;
 
@@ -168,17 +183,23 @@ function enviarRecordatorioPago() {
 
 function renderClientes() {
   const lista = document.getElementById("clientesLista");
+  const buscador = document.getElementById("buscadorClientes").value.toLowerCase();
 
   if (!lista) return;
 
   lista.innerHTML = "";
 
-  if (clientes.length === 0) {
-    lista.innerHTML = "<p>No hay clientes guardados.</p>";
+  const clientesFiltrados = clientes.filter(cliente =>
+    cliente.nombre.toLowerCase().includes(buscador) ||
+    cliente.telefono.includes(buscador)
+  );
+
+  if (clientesFiltrados.length === 0) {
+    lista.innerHTML = "<p>No hay clientes encontrados.</p>";
     return;
   }
 
-  clientes.forEach(cliente => {
+  clientesFiltrados.forEach(cliente => {
     const div = document.createElement("div");
     div.className = "cliente-item";
 
