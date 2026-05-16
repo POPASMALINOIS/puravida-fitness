@@ -659,3 +659,56 @@ button {
   display: block;
   margin: 0 auto 20px;
 }
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.logo {
+  width: 100%;
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  text-align: center;
+}
+
+.logo-img {
+  width: 130px;
+  max-width: 100%;
+  display: block;
+  margin: 0 auto;
+}
+
+.logo h2,
+.logo span {
+  display: none;
+}
+
+.sidebar nav {
+  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar nav button {
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: transparent;
+  color: #cbd5e1;
+  font-size: 15px;
+  border: none;
+}
+
+.sidebar nav button:hover,
+.sidebar nav button.nav-active {
+  background: rgba(241, 90, 36, 0.16);
+  color: #F15A24;
+}
+
+.main-panel {
+  padding-top: 28px;
+}
