@@ -59,22 +59,34 @@ function volverDashboard() {
 function agregarCliente() {
   const nombre = document.getElementById("clienteNombre").value.trim();
   const telefono = document.getElementById("clienteTelefono").value.trim();
+  const fechaAlta = document.getElementById("clienteFechaAlta").value;
+  const cuota = document.getElementById("clienteCuota").value;
+  const estado = document.getElementById("clienteEstado").value;
+  const observaciones = document.getElementById("clienteObservaciones").value.trim();
 
   if (!nombre || !telefono) {
-    alert("Completa todos los campos.");
+    alert("Completa al menos nombre y teléfono.");
     return;
   }
 
   clientes.push({
     id: Date.now(),
-    nombre: nombre,
-    telefono: telefono
+    nombre,
+    telefono,
+    fechaAlta,
+    cuota,
+    estado,
+    observaciones
   });
 
   guardarClientes();
 
   document.getElementById("clienteNombre").value = "";
   document.getElementById("clienteTelefono").value = "";
+  document.getElementById("clienteFechaAlta").value = "";
+  document.getElementById("clienteCuota").value = "";
+  document.getElementById("clienteEstado").value = "Activo";
+  document.getElementById("clienteObservaciones").value = "";
 
   renderClientes();
 
@@ -108,7 +120,11 @@ function renderClientes() {
 
     div.innerHTML = `
       <strong>${cliente.nombre}</strong>
-      <span>${cliente.telefono}</span>
+      <span>📞 ${cliente.telefono}</span><br>
+      <span>📅 Alta: ${cliente.fechaAlta || "No indicada"}</span><br>
+      <span>💳 Cuota: ${cliente.cuota || "0"} €</span><br>
+      <span>📌 Estado: ${cliente.estado}</span><br>
+      <span>📝 ${cliente.observaciones || "Sin observaciones"}</span>
       <button class="eliminar-btn" onclick="eliminarCliente(${cliente.id})">Eliminar</button>
     `;
 
