@@ -533,3 +533,71 @@ button {
     grid-template-columns: 1fr;
   }
 }
+.semana-grid {
+  display: block;
+}
+
+.week-calendar {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.week-header,
+.week-row {
+  display: grid;
+  grid-template-columns: 70px repeat(7, minmax(130px, 1fr));
+}
+
+.week-day-header {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  cursor: pointer;
+}
+
+.week-day-header span {
+  display: block;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.week-day-header strong {
+  font-size: 26px;
+}
+
+.week-hour {
+  padding: 10px;
+  color: #94a3b8;
+  font-size: 13px;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.week-cell {
+  min-height: 68px;
+  padding: 4px;
+  border-top: 1px solid rgba(148, 163, 184, 0.10);
+  border-left: 1px solid rgba(148, 163, 184, 0.08);
+  cursor: pointer;
+}
+
+.week-event {
+  padding: 6px 8px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  color: white;
+  font-size: 12px;
+  overflow: hidden;
+}
+
+.week-event strong,
+.week-event span,
+.week-event small {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.week-event small {
+  opacity: 0.85;
+}
