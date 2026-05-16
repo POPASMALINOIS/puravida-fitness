@@ -745,7 +745,7 @@ function enviarRecordatorioClase() {
     return;
   }
 
-  window.location.href = `mailto:${clienteActual.email}?subject=Recordatorio de clase&body=Hola ${clienteActual.nombre}, te recordamos tu próxima clase en PuraVida Fitness.`;
+  window.location.href = `mailto:${clienteActual.email}?subject=Recordatorio de sesión&body=Hola ${clienteActual.nombre}, te recordamos tu próxima sesión en Rage Training.`;
 }
 
 function enviarRecordatorioPago() {
@@ -754,7 +754,7 @@ function enviarRecordatorioPago() {
     return;
   }
 
-  window.location.href = `mailto:${clienteActual.email}?subject=Recordatorio de pago&body=Hola ${clienteActual.nombre}, te recordamos tu próximo pago o renovación de bono en PuraVida Fitness.`;
+  window.location.href = `mailto:${clienteActual.email}?subject=Recordatorio de pago&body=Hola ${clienteActual.nombre}, te recordamos tu próximo pago o renovación de bono en Rage Training.`;
 }
 
 function renderClientes() {
