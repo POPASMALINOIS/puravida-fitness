@@ -345,79 +345,80 @@ function renderCalendarioSemanal() {
   }
 
   const contenedor = document.createElement("div");
-  contenedor.className = "week-calendar";
-
-  const cabecera = document.createElement("div");
-  cabecera.className = "week-header";
-  cabecera.innerHTML = `<div class="week-hour-label"></div>`;
+  contenedor.className = "week-calendar-grid";
 
   const nombresDias = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+  contenedor.innerHTML += `<div class="week-corner"></div>`;
 
   for (let i = 0; i < 7; i++) {
     const fecha = new Date(lunes);
     fecha.setDate(lunes.getDate() + i);
     const fechaISO = obtenerFechaISO(fecha);
 
-    cabecera.innerHTML += `
-      <div class="week-day-header" onclick="abrirAgendaDia('${fechaISO}')">
+    contenedor.innerHTML += `
+      <div class="week-day-header-grid" style="grid-column:${i + 2}; grid-row:1;" onclick="abrirAgendaDia('${fechaISO}')">
         <span>${nombresDias[i]}</span>
         <strong>${fecha.getDate()}</strong>
       </div>
     `;
   }
 
-  contenedor.appendChild(cabecera);
+  tramos.forEach((tramo, index) => {
+    const row = index + 2;
 
-  tramos.forEach(tramo => {
-    const fila = document.createElement("div");
-    fila.className = "week-row";
-    fila.innerHTML = `<div class="week-hour">${tramo}</div>`;
+    contenedor.innerHTML += `
+      <div class="week-hour-grid" style="grid-column:1; grid-row:${row};">${tramo}</div>
+    `;
 
     for (let i = 0; i < 7; i++) {
       const fecha = new Date(lunes);
       fecha.setDate(lunes.getDate() + i);
       const fechaISO = obtenerFechaISO(fecha);
 
-      const clasesTramo = obtenerClasesPorFecha(fechaISO).filter(clase =>
-        clase.hora === tramo
-      );
-
-      let eventosHtml = "";
-
-      clasesTramo.forEach(clase => {
-  const duracion = parseInt(clase.duracion || clase.bonoDuracion || "60");
-
-  let altura = 34;
-
-  if (duracion === 60) {
-    altura = 72;
-  }
-
-  eventosHtml += `
-    <div 
-      class="week-event" 
-      style="
-        background:${clase.entrenadorColor};
-        min-height:${altura}px;
-      "
-      onclick="event.stopPropagation(); verFichaCliente(${clase.clienteId})"
-    >
-      <strong>${clase.hora}</strong>
-      <span>${clase.clienteNombre}</span>
-      <small>${duracion} min · ${clase.entrenadorNombre}</small>
-    </div>
-  `;
-});
-
-      fila.innerHTML += `
-        <div class="week-cell" onclick="abrirAgendaDia('${fechaISO}', '${tramo}')">
-          ${eventosHtml}
-        </div>
+      contenedor.innerHTML += `
+        <div class="week-cell-grid" style="grid-column:${i + 2}; grid-row:${row};" onclick="abrirAgendaDia('${fechaISO}', '${tramo}')"></div>
       `;
     }
-
-    contenedor.appendChild(fila);
   });
+
+  for (let i = 0; i < 7; i++) {
+    const fecha = new Date(lunes);
+    fecha.setDate(lunes.getDate() + i);
+    const fechaISO = obtenerFechaISO(fecha);
+    const clasesDia = obtenerClasesPorFecha(fechaISO);
+
+    clasesDia.forEach(clase => {
+      if (!clase.hora) return;
+
+      const [hora, minutos] = clase.hora.split(":").map(Number);
+      const inicioIndex = ((hora - 6) * 2) + (minutos >= 30 ? 1 : 0);
+
+      if (inicioIndex < 0 || inicioIndex >= tramos.length) return;
+
+      const duracion = parseInt(clase.duracion || clase.bonoDuracion || "60");
+      const filasQueOcupa = duracion === 60 ? 2 : 1;
+
+      const rowInicio = inicioIndex + 2;
+      const rowFin = rowInicio + filasQueOcupa;
+
+      contenedor.innerHTML += `
+        <div 
+          class="week-event-grid"
+          style="
+            grid-column:${i + 2};
+            grid-row:${rowInicio} / ${rowFin};
+            background:${clase.entrenadorColor};
+          "
+          onclick="event.stopPropagation(); verFichaCliente(${clase.clienteId})"
+        >
+          <strong>${clase.hora}</strong>
+          <span>${clase.clienteNombre}</span>
+          <small>${duracion} min · ${clase.entrenadorNombre}</small>
+        </div>
+      `;
+    });
+  }
 
   calendario.appendChild(contenedor);
 }
