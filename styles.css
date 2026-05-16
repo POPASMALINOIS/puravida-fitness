@@ -537,3 +537,25 @@ button {
 .evento-60 {
   min-height: 64px;
 }
+.week-row {
+  min-height: 42px;
+}
+
+.week-cell {
+  min-height: 42px;
+  overflow: visible;
+  position: relative;
+}
+
+.week-event {
+  position: relative;
+  z-index: 10;
+}
+
+.evento-30 {
+  min-height: 32px;
+}
+
+.evento-60 {
+  min-height: 72px;
+}
