@@ -3,18 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>PuraVida Fitness</title>
 
   <meta name="theme-color" content="#111827">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="PuraVida Fitness">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
 
 <div class="app-container">
@@ -62,14 +59,30 @@
     </main>
   </section>
 
+  <!-- CLIENTES -->
+  <section id="clientes-screen" class="screen">
+    <header class="dashboard-header">
+      <h1>Clientes</h1>
+      <button onclick="volverDashboard()">Volver</button>
+    </header>
+
+    <div class="card">
+      <input type="text" id="clienteNombre" placeholder="Nombre del cliente">
+      <input type="text" id="clienteTelefono" placeholder="Teléfono">
+      <button onclick="agregarCliente()">Agregar cliente</button>
+    </div>
+
+    <div class="clientes-lista" id="clientesLista"></div>
+  </section>
+
 </div>
 
 <script src="app.js"></script>
 
 <script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js");
-  }
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
 </script>
 
 </body>
