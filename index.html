@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-title" content="PuraVida Fitness">
 
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
 
@@ -20,7 +20,7 @@
   <section id="login-screen" class="screen active">
     <div class="card">
       <h1>PuraVida Fitness</h1>
-      <p>Gestión profesional de clientes fitness</p>
+      <p>Gestión premium de clientes fitness</p>
 
       <input type="text" id="usuario" placeholder="Usuario">
       <input type="password" id="password" placeholder="Contraseña">
@@ -29,11 +29,42 @@
     </div>
   </section>
 
-  <!-- CLIENTES PANEL -->
+  <!-- CLIENTES -->
   <section id="clientes-screen" class="screen">
     <header class="dashboard-header">
       <h1>Clientes</h1>
-      <button onclick="logout()">Cerrar sesión</button>
+      <button onclick="logout()">Salir</button>
+    </header>
+
+    <div class="resumen-grid">
+      <div class="resumen-card">
+        <strong id="totalClientes">0</strong>
+        <span>Total clientes</span>
+      </div>
+
+      <div class="resumen-card">
+        <strong id="clientesActivos">0</strong>
+        <span>Activos</span>
+      </div>
+
+      <div class="resumen-card">
+        <strong id="bonosBajos">0</strong>
+        <span>Bonos bajos</span>
+      </div>
+    </div>
+
+    <input type="text" id="buscadorClientes" placeholder="Buscar cliente..." oninput="renderClientes()">
+
+    <div class="clientes-lista" id="clientesLista"></div>
+
+    <button class="floating-btn" onclick="cambiarPantalla('alta-screen')">＋</button>
+  </section>
+
+  <!-- ALTA CLIENTE -->
+  <section id="alta-screen" class="screen">
+    <header class="dashboard-header">
+      <h1>Nuevo Cliente</h1>
+      <button onclick="volverClientes()">Volver</button>
     </header>
 
     <div class="card">
@@ -51,10 +82,8 @@
 
       <textarea id="clienteObservaciones" placeholder="Observaciones"></textarea>
 
-      <button onclick="agregarCliente()">Agregar cliente</button>
+      <button onclick="agregarCliente()">Guardar cliente</button>
     </div>
-
-    <div class="clientes-lista" id="clientesLista"></div>
   </section>
 
   <!-- FICHA CLIENTE -->
@@ -69,7 +98,7 @@
 
 </div>
 
-<script src="app.js?v=6"></script>
+<script src="app.js?v=7"></script>
 
 <script>
 if ("serviceWorker" in navigator) {
