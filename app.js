@@ -385,17 +385,29 @@ function renderCalendarioSemanal() {
       let eventosHtml = "";
 
       clasesTramo.forEach(clase => {
-        const duracion = clase.duracion || clase.bonoDuracion || "60";
-        const claseDuracion = duracion === "60" ? "evento-60" : "evento-30";
+  const duracion = parseInt(clase.duracion || clase.bonoDuracion || "60");
 
-        eventosHtml += `
-          <div class="week-event ${claseDuracion}" style="background:${clase.entrenadorColor}" onclick="event.stopPropagation(); verFichaCliente(${clase.clienteId})">
-            <strong>${clase.hora}</strong>
-            <span>${clase.clienteNombre}</span>
-            <small>${duracion} min · ${clase.entrenadorNombre}</small>
-          </div>
-        `;
-      });
+  let altura = 34;
+
+  if (duracion === 60) {
+    altura = 72;
+  }
+
+  eventosHtml += `
+    <div 
+      class="week-event" 
+      style="
+        background:${clase.entrenadorColor};
+        min-height:${altura}px;
+      "
+      onclick="event.stopPropagation(); verFichaCliente(${clase.clienteId})"
+    >
+      <strong>${clase.hora}</strong>
+      <span>${clase.clienteNombre}</span>
+      <small>${duracion} min · ${clase.entrenadorNombre}</small>
+    </div>
+  `;
+});
 
       fila.innerHTML += `
         <div class="week-cell" onclick="abrirAgendaDia('${fechaISO}', '${tramo}')">
