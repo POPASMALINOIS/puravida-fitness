@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body>
 
@@ -81,10 +81,27 @@
         </div>
       </section>
 
-      <!-- BUSCADOR -->
+      <!-- TOOLBAR -->
       <section class="toolbar">
         <input type="text" id="buscadorClientes" placeholder="Buscar cliente..." oninput="renderClientes()">
         <button class="add-btn" onclick="cambiarPantalla('alta-screen')">+ Añadir cliente</button>
+      </section>
+
+      <!-- CALENDARIO GENERAL -->
+      <section class="calendario-panel">
+        <div class="calendario-header">
+          <h2>Planificación general</h2>
+          <span>Todas las clases programadas</span>
+        </div>
+
+        <div class="calendario-form">
+          <select id="calendarioClienteSelect"></select>
+          <input type="date" id="generalClaseFecha">
+          <input type="time" id="generalClaseHora">
+          <button class="add-btn" onclick="agendarClaseGeneral()">Guardar clase</button>
+        </div>
+
+        <div id="calendarioGeneral" class="calendario-lista"></div>
       </section>
 
       <!-- TABLA CLIENTES -->
@@ -129,7 +146,7 @@
     </div>
   </section>
 
-  <!-- FICHA -->
+  <!-- FICHA CLIENTE -->
   <section id="ficha-screen" class="screen">
     <header class="dashboard-header">
       <h1>Ficha Cliente</h1>
@@ -141,7 +158,7 @@
 
 </div>
 
-<script src="app.js?v=8"></script>
+<script src="app.js?v=9"></script>
 
 <script>
 if ("serviceWorker" in navigator) {
