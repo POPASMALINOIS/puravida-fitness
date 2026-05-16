@@ -93,7 +93,7 @@ button {
 }
 
 .logo h2::first-letter {
-  color: #22c55e;
+  color: #F15A24;
 }
 
 .logo span {
@@ -120,7 +120,7 @@ button {
 
 .sidebar nav button:hover,
 .sidebar nav button.nav-active {
-  background: rgba(34, 197, 94, 0.14);
+  background: rgba(241, 90, 36, 0.14);
   color: #22c55e;
 }
 
@@ -446,7 +446,7 @@ button {
 
 .agenda-hora {
   font-weight: 900;
-  color: #22c55e;
+  color: #F15A24;
 }
 
 .agenda-cliente strong {
