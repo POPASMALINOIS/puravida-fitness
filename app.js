@@ -81,6 +81,15 @@ function agregarCliente() {
   alert("Cliente guardado correctamente.");
 }
 
+function eliminarCliente(id) {
+  if (!confirm("¿Eliminar este cliente?")) return;
+
+  clientes = clientes.filter(cliente => cliente.id !== id);
+
+  guardarClientes();
+  renderClientes();
+}
+
 function renderClientes() {
   const lista = document.getElementById("clientesLista");
 
@@ -100,6 +109,7 @@ function renderClientes() {
     div.innerHTML = `
       <strong>${cliente.nombre}</strong>
       <span>${cliente.telefono}</span>
+      <button class="eliminar-btn" onclick="eliminarCliente(${cliente.id})">Eliminar</button>
     `;
 
     lista.appendChild(div);
