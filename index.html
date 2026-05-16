@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-title" content="PuraVida Fitness">
 
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
 
@@ -20,7 +20,7 @@
   <section id="login-screen" class="screen active">
     <div class="card">
       <h1>PuraVida Fitness</h1>
-      <p>Gestión profesional de gimnasio</p>
+      <p>Gestión profesional de clientes fitness</p>
 
       <input type="text" id="usuario" placeholder="Usuario">
       <input type="password" id="password" placeholder="Contraseña">
@@ -29,49 +29,21 @@
     </div>
   </section>
 
-  <!-- DASHBOARD -->
-  <section id="dashboard-screen" class="screen">
-    <header class="dashboard-header">
-      <h1>PuraVida Fitness</h1>
-      <button onclick="logout()">Cerrar sesión</button>
-    </header>
-
-    <main class="dashboard-grid">
-      <div class="dashboard-card" onclick="mostrarModulo('clientes')">
-        <h2>Clientes</h2>
-        <p>Gestión de socios</p>
-      </div>
-
-      <div class="dashboard-card" onclick="mostrarModulo('rutinas')">
-        <h2>Rutinas</h2>
-        <p>Entrenamientos</p>
-      </div>
-
-      <div class="dashboard-card" onclick="mostrarModulo('clases')">
-        <h2>Clases</h2>
-        <p>Calendario y reservas</p>
-      </div>
-
-      <div class="dashboard-card" onclick="mostrarModulo('pagos')">
-        <h2>Pagos</h2>
-        <p>Cuotas y facturación</p>
-      </div>
-    </main>
-  </section>
-
-  <!-- CLIENTES -->
+  <!-- CLIENTES PANEL -->
   <section id="clientes-screen" class="screen">
     <header class="dashboard-header">
       <h1>Clientes</h1>
-      <button onclick="volverDashboard()">Volver</button>
+      <button onclick="logout()">Cerrar sesión</button>
     </header>
 
     <div class="card">
       <input type="text" id="clienteNombre" placeholder="Nombre del cliente">
       <input type="text" id="clienteTelefono" placeholder="Teléfono">
+      <input type="email" id="clienteEmail" placeholder="Email">
       <input type="date" id="clienteFechaAlta">
       <input type="number" id="clienteCuota" placeholder="Cuota mensual (€)">
-      
+      <input type="number" id="clienteBono" placeholder="Sesiones bono">
+
       <select id="clienteEstado">
         <option value="Activo">Activo</option>
         <option value="Inactivo">Inactivo</option>
@@ -85,9 +57,19 @@
     <div class="clientes-lista" id="clientesLista"></div>
   </section>
 
+  <!-- FICHA CLIENTE -->
+  <section id="ficha-screen" class="screen">
+    <header class="dashboard-header">
+      <h1>Ficha Cliente</h1>
+      <button onclick="volverClientes()">Volver</button>
+    </header>
+
+    <div class="cliente-ficha" id="clienteFicha"></div>
+  </section>
+
 </div>
 
-<script src="app.js?v=5"></script>
+<script src="app.js?v=6"></script>
 
 <script>
 if ("serviceWorker" in navigator) {
