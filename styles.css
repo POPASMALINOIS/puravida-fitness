@@ -1020,3 +1020,34 @@ textarea {
   height: auto;
   margin-bottom: 12px;
 }
+
+/* CALENDARIO TABLET / IPAD */
+
+.week-calendar-fixed {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.week-header-fixed,
+.week-body-fixed {
+  min-width: 1050px;
+}
+
+@media (max-width: 1100px) {
+  .calendario-panel {
+    overflow-x: hidden;
+  }
+
+  .week-header-fixed,
+  .week-body-fixed {
+    min-width: 980px;
+  }
+
+  .week-day-header-fixed strong {
+    font-size: 22px;
+  }
+
+  .week-event-fixed {
+    font-size: 11px;
+  }
+}
