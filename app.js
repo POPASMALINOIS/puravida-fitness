@@ -201,42 +201,39 @@ function contarClasesEntrenador(id) {
 }
 
 function renderEntrenadores() {
-  const lista = document.getElementById("entrenadoresLista");
+    const lista = document.getElementById("entrenadoresLista");
+    if (!lista) return;
 
-  if (!lista) return;
+    lista.innerHTML = "";
 
-  lista.innerHTML = "";
+    entrenadores.forEach((entrenador, index) => {
+        const sesiones = clientes.filter(c => c.entrenadorId === entrenador.id).length;
 
-  if (entrenadores.length === 0) {
-    lista.innerHTML = `<div class="entrenador-row">No hay entrenadores registrados.</div>`;
-    return;
-  }
+        lista.innerHTML += `
+            <div class="entrenador-row">
+                <div class="cliente-nombre">
+                    ${entrenador.nombre}
+                    <span class="cliente-sub">Color fijo</span>
+                </div>
 
-  entrenadores.forEach(entrenador => {
-    const div = document.createElement("div");
-    div.className = "entrenador-row";
+                <div>
+                    <span class="color-dot" style="background:${entrenador.color};"></span>
+                </div>
 
-    div.innerHTML = `
-      <div>
-        <span class="cliente-nombre">${entrenador.nombre}</span>
-        <span class="cliente-sub">Color fijo</span>
-      </div>
+                <div>
+                    <span class="estado-activo">Activo</span>
+                </div>
 
-      <div>
-        <span class="color-dot" style="background:${entrenador.color}"></span>
-      </div>
+                <div>
+                    <strong>${sesiones}</strong>
+                </div>
 
-      <div><span class="estado-activo">${entrenador.estado}</span></div>
-
-      <div>${contarClasesEntrenador(entrenador.id)}</div>
-
-      <div class="acciones">
-        <button class="eliminar-btn" onclick="eliminarEntrenador(${entrenador.id})">Borrar</button>
-      </div>
-    `;
-
-    lista.appendChild(div);
-  });
+                <div class="acciones">
+                    <button class="eliminar-btn" onclick="eliminarEntrenador(${index})">Borrar</button>
+                </div>
+            </div>
+        `;
+    });
 }
 
 function actualizarResumen() {
