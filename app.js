@@ -788,13 +788,13 @@ function renderClientes() {
 
     div.innerHTML = `
       <div>
-        <span class="cliente-nombre">${cliente.nombre}</span>
+        <strong>${cliente.nombre}</strong>
         <span class="cliente-sub">${cliente.bonoDuracion || "-"} min · ${cliente.bonoModalidad || "-"}</span>
       </div>
 
       <div>${cliente.telefono}</div>
 
-      <div>${cliente.bonoDisponible}/${cliente.bonoTotal}</div>
+      <div><strong>${cliente.bonoDisponible}/${cliente.bonoTotal}</strong></div>
 
       <div><span class="${estadoClass}">${cliente.estado}</span></div>
 
@@ -807,6 +807,7 @@ function renderClientes() {
     lista.appendChild(div);
   });
 }
+
 function procesarBonosAutomaticamente() {
   const ahora = new Date();
 
