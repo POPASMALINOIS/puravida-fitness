@@ -761,3 +761,64 @@ textarea {
   padding: 8px 12px;
   font-size: 13px;
 }
+/* ENTRENADORES COMPACTO DEFINITIVO */
+
+#entrenadores-section .toolbar {
+  display: grid !important;
+  grid-template-columns: 1fr 120px 180px !important;
+  gap: 12px !important;
+  align-items: center !important;
+}
+
+#entrenadores-section .toolbar input {
+  margin-bottom: 0 !important;
+}
+
+#entrenadores-section .toolbar input[type="color"] {
+  height: 46px !important;
+  width: 100% !important;
+}
+
+#entrenadores-section .add-btn {
+  height: 46px !important;
+  padding: 0 16px !important;
+}
+
+.entrenadores-header,
+.entrenador-row {
+  display: grid !important;
+  grid-template-columns: 2fr 0.7fr 0.8fr 0.7fr 1fr !important;
+  gap: 12px !important;
+  align-items: center !important;
+}
+
+.entrenador-row {
+  padding: 12px 20px !important;
+  min-height: 58px !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.10) !important;
+}
+
+.entrenador-row strong {
+  font-size: 15px !important;
+}
+
+.entrenador-row .cliente-sub {
+  display: block !important;
+  font-size: 12px !important;
+  margin-top: 2px !important;
+}
+
+.entrenador-row .color-dot {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.entrenador-row .estado-activo {
+  padding: 4px 9px !important;
+  font-size: 12px !important;
+}
+
+.entrenador-row .eliminar-btn {
+  padding: 7px 11px !important;
+  font-size: 12px !important;
+}
