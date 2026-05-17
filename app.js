@@ -15,6 +15,8 @@ const entrenadoresIniciales = [
 document.addEventListener("DOMContentLoaded", function () {
   cargarDatos();
   procesarBonosAutomaticamente();
+  verificarPagosPendientes();
+  verificarEstadoBonos();
   actualizarResumen();
   renderCalendarioSemanal();
   renderClientes();
@@ -65,18 +67,18 @@ function cambiarPantalla(id) {
     screen.classList.remove("active");
   });
 
-  document.getElementById(id).classList.add("active");
+  const pantalla = document.getElementById(id);
+  if (pantalla) pantalla.classList.add("active");
 }
 
 function mostrarSeccion(seccion) {
-  document.getElementById("clientes-section").style.display =
-  seccion === "clientes" ? "block" : "none";
+  const clientesSection = document.getElementById("clientes-section");
+  const bonosSection = document.getElementById("clientes-bonos-section");
+  const entrenadoresSection = document.getElementById("entrenadores-section");
 
-document.getElementById("clientes-bonos-section").style.display =
-  seccion === "clientes-bonos" ? "block" : "none";
-
-document.getElementById("entrenadores-section").style.display =
-  seccion === "entrenadores" ? "block" : "none";
+  if (clientesSection) clientesSection.style.display = seccion === "clientes" ? "block" : "none";
+  if (bonosSection) bonosSection.style.display = seccion === "clientes-bonos" ? "block" : "none";
+  if (entrenadoresSection) entrenadoresSection.style.display = seccion === "entrenadores" ? "block" : "none";
 
   document.querySelectorAll(".sidebar nav button").forEach(btn => btn.classList.remove("nav-active"));
 
@@ -90,18 +92,23 @@ document.getElementById("entrenadores-section").style.display =
   }
 
   if (seccion === "clientes-bonos") {
-  document.getElementById("tituloPanel").textContent = "Bonos críticos";
-  document.getElementById("subtituloPanel").textContent =
-    "Clientes con bonos bajos o agotados";
-
-  filtrarClientesBonos();
+    document.getElementById("nav-bonos").classList.add("nav-active");
+    document.getElementById("tituloPanel").textContent = "Bonos críticos";
+    document.getElementById("subtituloPanel").textContent = "Clientes con bonos bajos o agotados";
+    verificarEstadoBonos();
+    renderClientesBonos();
   }
 
   if (seccion === "entrenadores") {
     document.getElementById("nav-entrenadores").classList.add("nav-active");
     document.getElementById("tituloPanel").textContent = "Entrenadores";
-    document.getElementById("subtituloPanel").textContent = "Colores, agenda y asignación de clases";
+    document.getElementById("subtituloPanel").textContent = "Colores, agenda y asignación de sesiones";
     renderEntrenadores();
+  }
+
+  if (!["clientes", "clientes-bonos", "entrenadores"].includes(seccion)) {
+    alert("Módulo " + seccion + " en desarrollo.");
+    mostrarSeccion("clientes");
   }
 }
 
@@ -143,7 +150,9 @@ function agregarCliente() {
     rutinas: [],
     clases: [],
     controles: [],
-    pagos: []
+    pagos: [],
+    pagoPendiente: false,
+    bonoEstado: "Activo"
   });
 
   guardarDatos();
@@ -189,7 +198,7 @@ function agregarEntrenador() {
   });
 
   document.getElementById("entrenadorNombre").value = "";
-  document.getElementById("entrenadorColor").value = "#2563eb";
+  document.getElementById("entrenadorColor").value = "#F15A24";
 
   guardarDatos();
   renderEntrenadores();
@@ -197,7 +206,7 @@ function agregarEntrenador() {
 }
 
 function eliminarEntrenador(id) {
-  if (!confirm("¿Eliminar este entrenador? Las clases ya creadas conservarán su color y nombre.")) return;
+  if (!confirm("¿Eliminar este entrenador? Las sesiones ya creadas conservarán su color y nombre.")) return;
 
   entrenadores = entrenadores.filter(entrenador => entrenador.id !== id);
   guardarDatos();
@@ -267,9 +276,7 @@ function actualizarResumen() {
     clientes.filter(c => c.estado === "Activo").length;
 
   document.getElementById("bonosBajos").textContent =
-    clientes.filter(c =>
-      c.bonoEstado === "Bajo" || c.bonoEstado === "Agotado"
-    ).length;
+    clientes.filter(c => c.bonoEstado === "Bajo" || c.bonoEstado === "Agotado").length;
 
   document.getElementById("clasesHoy").textContent =
     clientes.reduce((total, cliente) => {
@@ -277,6 +284,41 @@ function actualizarResumen() {
         clase.fecha === obtenerFechaISO(new Date())
       ).length;
     }, 0);
+}
+
+function verificarPagosPendientes() {
+  const hoy = new Date();
+  const diaActual = hoy.getDate();
+
+  clientes.forEach(cliente => {
+    if (!cliente.pagos) cliente.pagos = [];
+
+    const pagoMesActual = cliente.pagos.find(p => {
+      const fechaPago = new Date(p.fecha);
+      return (
+        fechaPago.getMonth() === hoy.getMonth() &&
+        fechaPago.getFullYear() === hoy.getFullYear()
+      );
+    });
+
+    cliente.pagoPendiente = !pagoMesActual && diaActual > 5;
+  });
+
+  guardarDatos();
+}
+
+function verificarEstadoBonos() {
+  clientes.forEach(cliente => {
+    if (cliente.bonoDisponible <= 0) {
+      cliente.bonoEstado = "Agotado";
+    } else if (cliente.bonoDisponible <= 2) {
+      cliente.bonoEstado = "Bajo";
+    } else {
+      cliente.bonoEstado = "Activo";
+    }
+  });
+
+  guardarDatos();
 }
 
 function obtenerFechaISO(fecha) {
@@ -475,8 +517,8 @@ function abrirAgendaDia(fechaISO, horaPreseleccionada = "") {
 
   document.getElementById("tituloDia").textContent = `Agenda ${formatearFechaES(fechaISO)}`;
   document.getElementById("subtituloDia").textContent = horaPreseleccionada
-    ? `Nueva clase a las ${horaPreseleccionada}`
-    : "Planificación diaria de clases";
+    ? `Nueva sesión a las ${horaPreseleccionada}`
+    : "Planificación diaria de sesiones";
 
   prepararFormularioAgendaDia();
 
@@ -629,13 +671,74 @@ function eliminarClase(clienteId, claseId) {
 
   if (!cliente) return;
 
-  if (!confirm("¿Eliminar esta clase?")) return;
+  if (!confirm("¿Eliminar esta sesión?")) return;
 
   cliente.clases = cliente.clases.filter(clase => clase.id !== claseId);
 
   guardarDatos();
   actualizarResumen();
   renderAgendaDia();
+  renderCalendarioSemanal();
+
+  if (clienteActual && clienteActual.id === clienteId) {
+    verFichaCliente(clienteId);
+  }
+}
+
+function cancelarClase(clienteId, claseId) {
+  const cliente = clientes.find(c => c.id === clienteId);
+
+  if (!cliente) return;
+
+  const clase = cliente.clases.find(c => c.id === claseId);
+
+  if (!clase) return;
+
+  const ahora = new Date();
+  const fechaClase = new Date(`${clase.fecha}T${clase.hora}:00`);
+  const diferenciaHoras = (fechaClase - ahora) / (1000 * 60 * 60);
+
+  if (diferenciaHoras <= 12) {
+    alert("No se puede cancelar con menos de 12 horas.");
+    return;
+  }
+
+  clase.estado = "Cancelada";
+
+  guardarDatos();
+  actualizarResumen();
+  renderAgendaDia();
+  renderCalendarioSemanal();
+
+  if (clienteActual && clienteActual.id === clienteId) {
+    verFichaCliente(clienteId);
+  }
+}
+
+function cancelarClaseExcepcional(clienteId, claseId) {
+  const cliente = clientes.find(c => c.id === clienteId);
+
+  if (!cliente) return;
+
+  const clase = cliente.clases.find(c => c.id === claseId);
+
+  if (!clase) return;
+
+  if (!confirm("¿Cancelar excepcionalmente esta sesión y devolver la sesión al bono?")) return;
+
+  if (clase.consumida && cliente.bonoDisponible < cliente.bonoTotal) {
+    cliente.bonoDisponible += 1;
+  }
+
+  clase.estado = "Cancelada excepcional";
+  clase.consumida = false;
+
+  guardarDatos();
+  verificarEstadoBonos();
+  actualizarResumen();
+  renderAgendaDia();
+  renderCalendarioSemanal();
+  renderClientes();
 
   if (clienteActual && clienteActual.id === clienteId) {
     verFichaCliente(clienteId);
@@ -652,7 +755,7 @@ function renderAgendaDia() {
   lista.innerHTML = "";
 
   if (clases.length === 0) {
-    lista.innerHTML = "<p>No hay clases programadas para este día.</p>";
+    lista.innerHTML = "<p>No hay sesiones programadas para este día.</p>";
     return;
   }
 
@@ -681,6 +784,103 @@ function renderAgendaDia() {
 
     lista.appendChild(div);
   });
+}
+
+function renderClientes() {
+  const lista = document.getElementById("clientesLista");
+  const buscadorInput = document.getElementById("buscadorClientes");
+  const buscador = buscadorInput ? buscadorInput.value.toLowerCase() : "";
+
+  if (!lista) return;
+
+  lista.innerHTML = "";
+
+  verificarEstadoBonos();
+
+  const clientesFiltrados = clientes.filter(cliente =>
+    cliente.nombre.toLowerCase().includes(buscador) ||
+    cliente.telefono.includes(buscador)
+  );
+
+  if (clientesFiltrados.length === 0) {
+    lista.innerHTML = `<div class="cliente-row">No hay clientes encontrados.</div>`;
+    return;
+  }
+
+  clientesFiltrados.forEach(cliente => {
+    lista.appendChild(crearFilaCliente(cliente, true));
+  });
+}
+
+function renderClientesBonos() {
+  const lista = document.getElementById("clientesBonosLista");
+
+  if (!lista) return;
+
+  lista.innerHTML = "";
+
+  verificarEstadoBonos();
+
+  const clientesFiltrados = clientes.filter(cliente =>
+    cliente.bonoEstado === "Bajo" || cliente.bonoEstado === "Agotado"
+  );
+
+  if (clientesFiltrados.length === 0) {
+    lista.innerHTML = `<div class="cliente-row">No hay clientes con bonos bajos o agotados.</div>`;
+    return;
+  }
+
+  clientesFiltrados.forEach(cliente => {
+    lista.appendChild(crearFilaCliente(cliente, false));
+  });
+}
+
+function crearFilaCliente(cliente, permitirBorrar) {
+  const estadoClass = cliente.estado === "Activo" ? "estado-activo" : "estado-inactivo";
+
+  let bonoAviso = "";
+
+  if (cliente.bonoEstado === "Agotado") {
+    bonoAviso = " · Bono agotado";
+  } else if (cliente.bonoEstado === "Bajo") {
+    bonoAviso = " · Bono bajo";
+  }
+
+  const div = document.createElement("div");
+  div.className = "cliente-row";
+
+  div.innerHTML = `
+    <div>
+      <strong>${cliente.nombre}</strong>
+      <span class="cliente-sub">${cliente.bonoDuracion || "-"} min · ${cliente.bonoModalidad || "-"}</span>
+    </div>
+
+    <div>${cliente.telefono}</div>
+
+    <div><strong>${cliente.bonoDisponible}/${cliente.bonoTotal}</strong></div>
+
+    <div>
+      <span class="${estadoClass}">
+        ${cliente.estado}${bonoAviso}
+      </span>
+    </div>
+
+    <div class="acciones">
+      <button class="ver-btn" onclick="verFichaCliente(${cliente.id})">Ver</button>
+      ${permitirBorrar ? `<button class="eliminar-btn" onclick="eliminarCliente(${cliente.id})">Borrar</button>` : ""}
+    </div>
+  `;
+
+  return div;
+}
+
+function filtrarClientesBonos() {
+  mostrarSeccion("clientes-bonos");
+}
+
+function mostrarSesionesHoy() {
+  const hoy = obtenerFechaISO(new Date());
+  abrirAgendaDia(hoy);
 }
 
 function verFichaCliente(id) {
@@ -757,6 +957,13 @@ function verFichaCliente(id) {
     <div class="ficha-card">
       <h2>Bono</h2>
       <p>🎟️ ${clienteActual.bonoDisponible}/${clienteActual.bonoTotal} sesiones</p>
+      <p><strong>Estado bono:</strong> ${
+        clienteActual.bonoEstado === "Agotado"
+          ? '<span style="color:#f87171;">Agotado</span>'
+          : clienteActual.bonoEstado === "Bajo"
+          ? '<span style="color:#facc15;">Bono bajo</span>'
+          : '<span style="color:#F15A24;">Activo</span>'
+      }</p>
       <p>⏱️ ${clienteActual.bonoDuracion} min</p>
       <p>👥 ${clienteActual.bonoModalidad}</p>
       <p>💳 Cuota: ${clienteActual.cuota || "0"} €</p>
@@ -781,7 +988,7 @@ function verFichaCliente(id) {
       </button>
 
       <div class="historial-pagos">
-          ${pagosHtml}
+        ${pagosHtml}
       </div>
     </div>
 
@@ -803,242 +1010,6 @@ function verFichaCliente(id) {
   `;
 
   cambiarPantalla("ficha-screen");
-}
-
-function enviarRecordatorioClase() {
-  if (!clienteActual.email) {
-    alert("Cliente sin email registrado.");
-    return;
-  }
-
-  window.location.href = `mailto:${clienteActual.email}?subject=Recordatorio de sesión&body=Hola ${clienteActual.nombre}, te recordamos tu próxima sesión en Rage Training.`;
-}
-
-function enviarRecordatorioPago() {
-  if (!clienteActual.email) {
-    alert("Cliente sin email registrado.");
-    return;
-  }
-
-  window.location.href = `mailto:${clienteActual.email}?subject=Recordatorio de pago&body=Hola ${clienteActual.nombre}, te recordamos tu próximo pago o renovación de bono en Rage Training.`;
-}
-
-function renderClientes() {
-  const lista = document.getElementById("clientesLista");
-  const buscadorInput = document.getElementById("buscadorClientes");
-  const buscador = buscadorInput ? buscadorInput.value.toLowerCase() : "";
-
-  if (!lista) return;
-
-  lista.innerHTML = "";
-
-  verificarEstadoBonos();
-
-  const clientesFiltrados = clientes.filter(cliente =>
-    cliente.nombre.toLowerCase().includes(buscador) ||
-    cliente.telefono.includes(buscador)
-  );
-
-  if (clientesFiltrados.length === 0) {
-    lista.innerHTML = `<div class="cliente-row">No hay clientes encontrados.</div>`;
-    return;
-  }
-
-  clientesFiltrados.forEach(cliente => {
-    const estadoClass = cliente.estado === "Activo" ? "estado-activo" : "estado-inactivo";
-
-    let bonoAviso = "";
-
-    if (cliente.bonoEstado === "Agotado") {
-      bonoAviso = " · Bono agotado";
-    } else if (cliente.bonoEstado === "Bajo") {
-      bonoAviso = " · Bono bajo";
-    }
-
-    const div = document.createElement("div");
-    div.className = "cliente-row";
-
-    div.innerHTML = `
-      <div>
-        <strong>${cliente.nombre}</strong>
-        <span class="cliente-sub">${cliente.bonoDuracion || "-"} min · ${cliente.bonoModalidad || "-"}</span>
-      </div>
-
-      <div>${cliente.telefono}</div>
-
-      <div><strong>${cliente.bonoDisponible}/${cliente.bonoTotal}</strong></div>
-
-      <div>
-        <span class="${estadoClass}">
-          ${cliente.estado}${bonoAviso}
-        </span>
-      </div>
-
-      <div class="acciones">
-        <button class="ver-btn" onclick="verFichaCliente(${cliente.id})">Ver</button>
-        <button class="eliminar-btn" onclick="eliminarCliente(${cliente.id})">Borrar</button>
-      </div>
-    `;
-
-    lista.appendChild(div);
-  });
-}
-
-function procesarBonosAutomaticamente() {
-  const ahora = new Date();
-
-  clientes.forEach(cliente => {
-    cliente.clases.forEach(clase => {
-      if (clase.estado !== "Programada" || clase.consumida) return;
-
-      const fechaClase = new Date(`${clase.fecha}T${clase.hora}:00`);
-      const diferenciaHoras = (fechaClase - ahora) / (1000 * 60 * 60);
-
-      if (diferenciaHoras <= 12) {
-        if (cliente.bonoDisponible > 0) {
-          cliente.bonoDisponible -= 1;
-        }
-
-        clase.estado = "Consumida";
-        clase.consumida = true;
-      }
-    });
-  });
-
-  guardarDatos();
-}
-
-function cancelarClase(clienteId, claseId) {
-  const cliente = clientes.find(c => c.id === clienteId);
-
-  if (!cliente) return;
-
-  const clase = cliente.clases.find(c => c.id === claseId);
-
-  if (!clase) return;
-
-  const ahora = new Date();
-  const fechaClase = new Date(`${clase.fecha}T${clase.hora}:00`);
-  const diferenciaHoras = (fechaClase - ahora) / (1000 * 60 * 60);
-
-  if (diferenciaHoras <= 12) {
-    alert("No se puede cancelar con menos de 12 horas.");
-    return;
-  }
-
-  clase.estado = "Cancelada";
-
-  guardarDatos();
-  renderAgendaDia();
-
-  if (clienteActual && clienteActual.id === clienteId) {
-    verFichaCliente(clienteId);
-  }
-}
-function procesarBonosAutomaticamente() {
-  const ahora = new Date();
-
-  clientes.forEach(cliente => {
-    cliente.clases.forEach(clase => {
-      if (clase.estado !== "Programada" || clase.consumida) return;
-
-      const fechaClase = new Date(`${clase.fecha}T${clase.hora}:00`);
-      const diferenciaHoras = (fechaClase - ahora) / (1000 * 60 * 60);
-
-      if (diferenciaHoras <= 12) {
-        if (cliente.bonoDisponible > 0) {
-          cliente.bonoDisponible -= 1;
-        }
-
-        clase.estado = "Consumida";
-        clase.consumida = true;
-      }
-    });
-  });
-
-  guardarDatos();
-}
-
-function cancelarClase(clienteId, claseId) {
-  const cliente = clientes.find(c => c.id === clienteId);
-
-  if (!cliente) return;
-
-  const clase = cliente.clases.find(c => c.id === claseId);
-
-  if (!clase) return;
-
-  const ahora = new Date();
-  const fechaClase = new Date(`${clase.fecha}T${clase.hora}:00`);
-  const diferenciaHoras = (fechaClase - ahora) / (1000 * 60 * 60);
-
-  if (diferenciaHoras <= 12) {
-    alert("No se puede cancelar con menos de 12 horas.");
-    return;
-  }
-
-  clase.estado = "Cancelada";
-
-  guardarDatos();
-  renderAgendaDia();
-
-  if (clienteActual && clienteActual.id === clienteId) {
-    verFichaCliente(clienteId);
-  }
-}
-function cancelarClaseExcepcional(clienteId, claseId) {
-  const cliente = clientes.find(c => c.id === clienteId);
-
-  if (!cliente) return;
-
-  const clase = cliente.clases.find(c => c.id === claseId);
-
-  if (!clase) return;
-
-  if (!confirm("¿Cancelar excepcionalmente esta clase y devolver la sesión al bono?")) return;
-
-  if (clase.consumida && cliente.bonoDisponible < cliente.bonoTotal) {
-    cliente.bonoDisponible += 1;
-  }
-
-  clase.estado = "Cancelada excepcional";
-  clase.consumida = false;
-
-  guardarDatos();
-  actualizarResumen();
-  renderAgendaDia();
-
-  if (clienteActual && clienteActual.id === clienteId) {
-    verFichaCliente(clienteId);
-  }
-}
-function convertirHoraAMinutos(hora) {
-  const [h, m] = hora.split(":").map(Number);
-  return h * 60 + m;
-}
-function verificarPagosPendientes() {
-  const hoy = new Date();
-  const diaActual = hoy.getDate();
-
-  clientes.forEach(cliente => {
-    if (!cliente.pagos) cliente.pagos = [];
-
-    const pagoMesActual = cliente.pagos.find(p => {
-      const fechaPago = new Date(p.fecha);
-      return (
-        fechaPago.getMonth() === hoy.getMonth() &&
-        fechaPago.getFullYear() === hoy.getFullYear()
-      );
-    });
-
-    if (!pagoMesActual && diaActual > 5) {
-      cliente.pagoPendiente = true;
-    } else {
-      cliente.pagoPendiente = false;
-    }
-  });
-
-  guardarDatos();
 }
 
 function registrarPagoCliente(clienteId) {
@@ -1070,74 +1041,49 @@ function registrarPagoCliente(clienteId) {
   verFichaCliente(clienteId);
 }
 
-function verificarEstadoBonos() {
+function procesarBonosAutomaticamente() {
+  const ahora = new Date();
+
   clientes.forEach(cliente => {
-    if (cliente.bonoDisponible <= 0) {
-      cliente.bonoEstado = "Agotado";
-    } else if (cliente.bonoDisponible <= 2) {
-      cliente.bonoEstado = "Bajo";
-    } else {
-      cliente.bonoEstado = "Activo";
-    }
+    cliente.clases.forEach(clase => {
+      if (clase.estado !== "Programada" || clase.consumida) return;
+
+      const fechaClase = new Date(`${clase.fecha}T${clase.hora}:00`);
+      const diferenciaHoras = (fechaClase - ahora) / (1000 * 60 * 60);
+
+      if (diferenciaHoras <= 12) {
+        if (cliente.bonoDisponible > 0) {
+          cliente.bonoDisponible -= 1;
+        }
+
+        clase.estado = "Consumida";
+        clase.consumida = true;
+      }
+    });
   });
 
   guardarDatos();
 }
 
-function filtrarClientesBonos() {
-  cambiarPantalla('clientes-bonos');
-
-  const lista = document.getElementById("clientesBonosLista");
-
-  if (!lista) return;
-
-  lista.innerHTML = "";
-
-  const clientesFiltrados = clientes.filter(cliente =>
-    cliente.bonoEstado === "Bajo" || cliente.bonoEstado === "Agotado"
-  );
-
-  if (clientesFiltrados.length === 0) {
-    lista.innerHTML = `<div class="cliente-row">No hay clientes con bonos bajos o agotados.</div>`;
+function enviarRecordatorioClase() {
+  if (!clienteActual.email) {
+    alert("Cliente sin email registrado.");
     return;
   }
 
-  clientesFiltrados.forEach(cliente => {
-    const estadoClass = cliente.estado === "Activo" ? "estado-activo" : "estado-inactivo";
-
-    let bonoAviso = cliente.bonoEstado === "Agotado"
-      ? " · Bono agotado"
-      : " · Bono bajo";
-
-    const div = document.createElement("div");
-    div.className = "cliente-row";
-
-    div.innerHTML = `
-      <div>
-        <strong>${cliente.nombre}</strong>
-        <span class="cliente-sub">${cliente.bonoDuracion} min · ${cliente.bonoModalidad}</span>
-      </div>
-
-      <div>${cliente.telefono}</div>
-
-      <div><strong>${cliente.bonoDisponible}/${cliente.bonoTotal}</strong></div>
-
-      <div>
-        <span class="${estadoClass}">
-          ${cliente.estado}${bonoAviso}
-        </span>
-      </div>
-
-      <div class="acciones">
-        <button class="ver-btn" onclick="verFichaCliente(${cliente.id})">Ver</button>
-      </div>
-    `;
-
-    lista.appendChild(div);
-  });
+  window.location.href = `mailto:${clienteActual.email}?subject=Recordatorio de sesión&body=Hola ${clienteActual.nombre}, te recordamos tu próxima sesión en Rage Training.`;
 }
 
-function mostrarSesionesHoy() {
-  const hoy = obtenerFechaISO(new Date());
-  abrirAgendaDia(hoy);
+function enviarRecordatorioPago() {
+  if (!clienteActual.email) {
+    alert("Cliente sin email registrado.");
+    return;
+  }
+
+  window.location.href = `mailto:${clienteActual.email}?subject=Recordatorio de pago&body=Hola ${clienteActual.nombre}, te recordamos tu próximo pago o renovación de bono en Rage Training.`;
+}
+
+function convertirHoraAMinutos(hora) {
+  const [h, m] = hora.split(":").map(Number);
+  return h * 60 + m;
 }
