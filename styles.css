@@ -390,7 +390,7 @@ textarea {
 
 .entrenadores-header,
 .entrenador-row {
-  grid-template-columns: 1.5fr 1fr 0.8fr 0.8fr 1fr;
+  grid-template-columns: 2fr 0.8fr 1fr 0.8fr 1fr;
 }
 
 .tabla-header {
@@ -735,4 +735,29 @@ textarea {
     width: auto !important;
     white-space: nowrap !important;
   }
+}
+
+.entrenador-row {
+  min-height: auto !important;
+  padding: 14px 20px !important;
+}
+
+.entrenador-row .cliente-nombre {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.entrenador-row .cliente-sub {
+  margin-top: 2px;
+  font-size: 12px;
+}
+
+.entrenador-row .acciones {
+  justify-content: flex-start;
+}
+
+.entrenador-row .eliminar-btn {
+  padding: 8px 12px;
+  font-size: 13px;
 }
