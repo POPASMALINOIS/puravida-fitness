@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
   renderCalendarioSemanal();
   renderClientes();
   renderEntrenadores();
+  convertirInputsMayusculas();
 });
 
 function cargarDatos() {
@@ -1108,4 +1109,19 @@ function enviarRecordatorioPago() {
 function convertirHoraAMinutos(hora) {
   const [h, m] = hora.split(":").map(Number);
   return h * 60 + m;
+}
+
+function convertirInputsMayusculas() {
+  document.querySelectorAll(
+    "#alta-screen input[type='text'], #alta-screen input[type='email'], #alta-screen textarea"
+  ).forEach(input => {
+    input.addEventListener("input", function () {
+      const inicio = this.selectionStart;
+      const fin = this.selectionEnd;
+
+      this.value = this.value.toUpperCase();
+
+      this.setSelectionRange(inicio, fin);
+    });
+  });
 }
