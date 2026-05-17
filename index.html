@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css?v=11">
+  <link rel="stylesheet" href="styles.css?v=12">
 </head>
 <body>
 
@@ -19,7 +19,7 @@
     <div class="card login-card">
       <img src="rage-logo.png" alt="Rage Training Logo" class="login-logo">
       <h1>RAGE TRAINING</h1>
-      <p>Gestión premium de clientes fitness</p>
+      <p>Gestión premium de entrenamiento personal</p>
 
       <input type="text" id="usuario" placeholder="Usuario">
       <input type="password" id="password" placeholder="Contraseña">
@@ -32,10 +32,7 @@
 
     <aside class="sidebar">
       <div class="logo">
-  <img src="rage-logo.png" alt="Rage Training Logo" class="logo-img">
-</div>
-        <h2>RAGE</h2>
-        <span>TRAINING</span>
+        <img src="rage-logo.png" alt="Rage Training Logo" class="logo-img">
       </div>
 
       <nav>
@@ -79,7 +76,7 @@
 
           <div class="resumen-card">
             <strong id="clasesHoy">0</strong>
-            <span>Clases hoy</span>
+            <span>Sesiones hoy</span>
           </div>
         </section>
 
@@ -120,10 +117,9 @@
       </section>
 
       <section id="entrenadores-section" style="display:none;">
-
         <section class="toolbar">
           <input type="text" id="entrenadorNombre" placeholder="Nombre del entrenador">
-          <input type="color" id="entrenadorColor" value="#2563eb">
+          <input type="color" id="entrenadorColor" value="#F15A24">
           <button class="add-btn" onclick="agregarEntrenador()">+ Añadir entrenador</button>
         </section>
 
@@ -132,13 +128,12 @@
             <span>Entrenador</span>
             <span>Color</span>
             <span>Estado</span>
-            <span>Clases</span>
+            <span>Sesiones</span>
             <span>Acciones</span>
           </div>
 
           <div id="entrenadoresLista"></div>
         </section>
-
       </section>
 
     </main>
@@ -194,16 +189,16 @@
 
     <div class="agenda-layout">
       <div class="card">
-        <h2>Añadir clase</h2>
+        <h2>Añadir sesión</h2>
 
         <select id="diaClienteSelect"></select>
         <input type="time" id="diaClaseHora">
 
-        <button onclick="agendarClaseDia()">Guardar clase</button>
+        <button onclick="agendarClaseDia()">Guardar sesión</button>
       </div>
 
       <div class="agenda-panel">
-        <h2>Clases del día</h2>
+        <h2>Sesiones del día</h2>
         <div id="agendaDiaLista"></div>
       </div>
     </div>
@@ -220,7 +215,7 @@
 
 </div>
 
-<script src="app.js?v=11"></script>
+<script src="app.js?v=12"></script>
 
 <script>
 if ("serviceWorker" in navigator) {
