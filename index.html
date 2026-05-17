@@ -171,6 +171,27 @@
     </main>
   </section>
 
+  <!-- PAGOS -->
+  <section id="pagos-section" style="display:none;">
+
+  <section class="toolbar">
+    <input type="text" id="buscadorPagos" placeholder="Buscar cliente..." oninput="renderPagos()">
+  </section>
+
+  <section class="tabla-clientes">
+    <div class="tabla-header">
+      <span>Cliente</span>
+      <span>Estado</span>
+      <span>Último pago</span>
+      <span>Importe</span>
+      <span>Acciones</span>
+    </div>
+
+    <div id="pagosLista"></div>
+    </section>
+
+  </section>
+
   <!-- ALTA CLIENTE -->
   <section id="alta-screen" class="screen">
     <header class="dashboard-header">
