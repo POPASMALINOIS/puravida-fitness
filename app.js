@@ -69,8 +69,14 @@ function cambiarPantalla(id) {
 }
 
 function mostrarSeccion(seccion) {
-  document.getElementById("clientes-section").style.display = seccion === "clientes" ? "block" : "none";
-  document.getElementById("entrenadores-section").style.display = seccion === "entrenadores" ? "block" : "none";
+  document.getElementById("clientes-section").style.display =
+  seccion === "clientes" ? "block" : "none";
+
+document.getElementById("clientes-bonos-section").style.display =
+  seccion === "clientes-bonos" ? "block" : "none";
+
+document.getElementById("entrenadores-section").style.display =
+  seccion === "entrenadores" ? "block" : "none";
 
   document.querySelectorAll(".sidebar nav button").forEach(btn => btn.classList.remove("nav-active"));
 
@@ -81,6 +87,14 @@ function mostrarSeccion(seccion) {
     actualizarResumen();
     renderCalendarioSemanal();
     renderClientes();
+  }
+
+  if (seccion === "clientes-bonos") {
+  document.getElementById("tituloPanel").textContent = "Bonos críticos";
+  document.getElementById("subtituloPanel").textContent =
+    "Clientes con bonos bajos o agotados";
+
+  filtrarClientesBonos();
   }
 
   if (seccion === "entrenadores") {
