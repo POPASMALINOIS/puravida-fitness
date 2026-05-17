@@ -77,11 +77,13 @@ function mostrarSeccion(seccion) {
   const clientesSection = document.getElementById("clientes-section");
   const bonosSection = document.getElementById("clientes-bonos-section");
   const entrenadoresSection = document.getElementById("entrenadores-section");
+  const pagosSection = document.getElementById("pagos-section");
 
   if (resumenSection) resumenSection.style.display = seccion === "resumen" ? "block" : "none";
   if (clientesSection) clientesSection.style.display = seccion === "clientes" ? "block" : "none";
   if (bonosSection) bonosSection.style.display = seccion === "clientes-bonos" ? "block" : "none";
   if (entrenadoresSection) entrenadoresSection.style.display = seccion === "entrenadores" ? "block" : "none";
+  if (pagosSection) pagosSection.style.display = seccion === "pagos" ? "block" : "none";
 
   document.querySelectorAll(".sidebar nav button").forEach(btn =>
     btn.classList.remove("nav-active")
@@ -127,6 +129,14 @@ function mostrarSeccion(seccion) {
       "Colores, agenda y asignación";
 
     renderEntrenadores();
+  }
+
+  else if (seccion === "pagos") {
+    document.getElementById("tituloPanel").textContent = "Pagos";
+    document.getElementById("subtituloPanel").textContent =
+      "Control financiero y seguimiento de cobros";
+
+    renderPagos();
   }
 
   else {
