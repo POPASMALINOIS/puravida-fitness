@@ -1069,3 +1069,60 @@ function verificarEstadoBonos() {
 
   guardarDatos();
 }
+
+function filtrarClientesBonos() {
+  const lista = document.getElementById("clientesLista");
+
+  if (!lista) return;
+
+  lista.innerHTML = "";
+
+  const clientesFiltrados = clientes.filter(cliente =>
+    cliente.bonoEstado === "Bajo" || cliente.bonoEstado === "Agotado"
+  );
+
+  if (clientesFiltrados.length === 0) {
+    lista.innerHTML = `<div class="cliente-row">No hay clientes con bonos bajos o agotados.</div>`;
+    return;
+  }
+
+  clientesFiltrados.forEach(cliente => {
+    const estadoClass = cliente.estado === "Activo" ? "estado-activo" : "estado-inactivo";
+
+    let bonoAviso = cliente.bonoEstado === "Agotado"
+      ? " · Bono agotado"
+      : " · Bono bajo";
+
+    const div = document.createElement("div");
+    div.className = "cliente-row";
+
+    div.innerHTML = `
+      <div>
+        <strong>${cliente.nombre}</strong>
+        <span class="cliente-sub">${cliente.bonoDuracion} min · ${cliente.bonoModalidad}</span>
+      </div>
+
+      <div>${cliente.telefono}</div>
+
+      <div><strong>${cliente.bonoDisponible}/${cliente.bonoTotal}</strong></div>
+
+      <div>
+        <span class="${estadoClass}">
+          ${cliente.estado}${bonoAviso}
+        </span>
+      </div>
+
+      <div class="acciones">
+        <button class="ver-btn" onclick="verFichaCliente(${cliente.id})">Ver</button>
+        <button class="eliminar-btn" onclick="eliminarCliente(${cliente.id})">Borrar</button>
+      </div>
+    `;
+
+    lista.appendChild(div);
+  });
+}
+
+function mostrarSesionesHoy() {
+  const hoy = obtenerFechaISO(new Date());
+  abrirAgendaDia(hoy);
+}
