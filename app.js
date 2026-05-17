@@ -73,6 +73,7 @@ function cambiarPantalla(id) {
 }
 
 function mostrarSeccion(seccion) {
+  asegurarSeccionPagos();
   const resumenSection = document.getElementById("resumen-section");
   const clientesSection = document.getElementById("clientes-section");
   const bonosSection = document.getElementById("clientes-bonos-section");
