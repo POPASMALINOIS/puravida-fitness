@@ -963,3 +963,15 @@ textarea {
 .ficha-card .historial-pagos::-webkit-scrollbar-thumb:hover {
   background: rgba(241, 90, 36, 0.9);
 }
+/* DASHBOARD CARDS CLICKABLE */
+
+.clickable-card {
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.clickable-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(241, 90, 36, 0.35);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.25);
+}
