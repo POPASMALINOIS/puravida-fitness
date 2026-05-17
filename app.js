@@ -73,7 +73,6 @@ function cambiarPantalla(id) {
 }
 
 function mostrarSeccion(seccion) {
-  asegurarSeccionPagos();
   const resumenSection = document.getElementById("resumen-section");
   const clientesSection = document.getElementById("clientes-section");
   const bonosSection = document.getElementById("clientes-bonos-section");
@@ -94,6 +93,7 @@ function mostrarSeccion(seccion) {
     document.getElementById("nav-resumen").classList.add("nav-active");
     document.getElementById("tituloPanel").textContent = "Resumen";
     document.getElementById("subtituloPanel").textContent = "KPIs, agenda y seguimiento general";
+
     actualizarResumen();
     renderCalendarioSemanal();
   }
@@ -102,6 +102,7 @@ function mostrarSeccion(seccion) {
     document.getElementById("nav-clientes").classList.add("nav-active");
     document.getElementById("tituloPanel").textContent = "Clientes";
     document.getElementById("subtituloPanel").textContent = "Base de datos completa de clientes";
+
     renderClientes();
   }
 
@@ -109,19 +110,26 @@ function mostrarSeccion(seccion) {
     document.getElementById("nav-bonos").classList.add("nav-active");
     document.getElementById("tituloPanel").textContent = "Bonos críticos";
     document.getElementById("subtituloPanel").textContent = "Clientes con bonos bajos o agotados";
+
     verificarEstadoBonos();
     renderClientesBonos();
   }
 
+  else if (seccion === "entrenadores") {
+    document.getElementById("nav-entrenadores").classList.add("nav-active");
+    document.getElementById("tituloPanel").textContent = "Entrenadores";
+    document.getElementById("subtituloPanel").textContent = "Colores, agenda y asignación";
+
+    renderEntrenadores();
+  }
+
   else if (seccion === "pagos") {
-  document.getElementById("tituloPanel").textContent = "Pagos";
-  document.getElementById("subtituloPanel").textContent =
-    "Control financiero y seguimiento de cobros";
+    document.getElementById("tituloPanel").textContent = "Pagos";
+    document.getElementById("subtituloPanel").textContent = "Control financiero y seguimiento de cobros";
 
-  renderPagos();
-}
+    renderPagos();
+  }
 
-  
   else {
     alert("Módulo " + seccion + " en desarrollo.");
     mostrarSeccion("resumen");
