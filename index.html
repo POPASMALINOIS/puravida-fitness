@@ -9,8 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css?v=29">
-<script src="app.js?v=29"></script>
+  <link rel="stylesheet" href="styles.css?v=30">
 </head>
 <body>
 
@@ -18,7 +17,6 @@
 
   <section id="login-screen" class="screen active">
     <div class="card login-card">
-      <img src="rage-logo.png" alt="Rage Training Logo" class="login-logo">
       <h1>RAGE TRAINING</h1>
       <p>Gestión premium de entrenamiento personal</p>
 
@@ -33,11 +31,13 @@
 
     <aside class="sidebar">
       <div class="logo">
-        <img src="rage-logo.png" alt="Rage Training Logo" class="logo-img">
+        <h2>RAGE</h2>
+        <span>TRAINING</span>
       </div>
 
       <nav>
         <button id="nav-clientes" class="nav-active" onclick="mostrarSeccion('clientes')">Clientes</button>
+        <button id="nav-bonos" onclick="mostrarSeccion('clientes-bonos')">Bonos críticos</button>
         <button id="nav-entrenadores" onclick="mostrarSeccion('entrenadores')">Entrenadores</button>
         <button onclick="mostrarSeccion('pagos')">Pagos</button>
         <button onclick="mostrarSeccion('rutinas')">Rutinas</button>
@@ -64,17 +64,17 @@
             <strong id="totalClientes">0</strong>
             <span>Total clientes</span>
           </div>
-        
+
           <div class="resumen-card">
             <strong id="clientesActivos">0</strong>
             <span>Activos</span>
           </div>
-        
-          <div class="resumen-card clickable-card" onclick="filtrarClientesBonos()">
+
+          <div class="resumen-card clickable-card" onclick="mostrarSeccion('clientes-bonos')">
             <strong id="bonosBajos">0</strong>
             <span>Bonos bajos / agotados</span>
           </div>
-        
+
           <div class="resumen-card clickable-card" onclick="mostrarSesionesHoy()">
             <strong id="clasesHoy">0</strong>
             <span>Sesiones hoy</span>
@@ -115,6 +115,20 @@
           <div id="clientesLista"></div>
         </section>
 
+      </section>
+
+      <section id="clientes-bonos-section" style="display:none;">
+        <section class="tabla-clientes">
+          <div class="tabla-header">
+            <span>Cliente</span>
+            <span>Teléfono</span>
+            <span>Bono</span>
+            <span>Estado</span>
+            <span>Acciones</span>
+          </div>
+
+          <div id="clientesBonosLista"></div>
+        </section>
       </section>
 
       <section id="entrenadores-section" style="display:none;">
@@ -216,7 +230,7 @@
 
 </div>
 
-<script src="app.js?v=12"></script>
+<script src="app.js?v=30"></script>
 
 <script>
 if ("serviceWorker" in navigator) {
