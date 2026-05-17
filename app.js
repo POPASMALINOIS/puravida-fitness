@@ -1135,3 +1135,60 @@ function convertirInputsMayusculas() {
     });
   });
 }
+
+function renderPagos() {
+  const lista = document.getElementById("pagosLista");
+  const buscadorInput = document.getElementById("buscadorPagos");
+  const buscador = buscadorInput ? buscadorInput.value.toLowerCase() : "";
+
+  if (!lista) return;
+
+  lista.innerHTML = "";
+
+  const clientesFiltrados = clientes.filter(cliente =>
+    cliente.nombre.toLowerCase().includes(buscador)
+  );
+
+  if (clientesFiltrados.length === 0) {
+    lista.innerHTML = `<div class="cliente-row">No hay pagos encontrados.</div>`;
+    return;
+  }
+
+  clientesFiltrados.forEach(cliente => {
+    const ultimoPago = cliente.pagos && cliente.pagos.length
+      ? [...cliente.pagos].sort((a, b) => b.fecha.localeCompare(a.fecha))[0]
+      : null;
+
+    const estadoPago = cliente.pagoPendiente
+      ? '<span style="color:#f87171;">Pendiente</span>'
+      : '<span style="color:#F15A24;">Al corriente</span>';
+
+    const div = document.createElement("div");
+    div.className = "cliente-row";
+
+    div.innerHTML = `
+      <div>
+        <strong>${cliente.nombre}</strong>
+      </div>
+
+      <div>
+        ${estadoPago}
+      </div>
+
+      <div>
+        ${ultimoPago ? formatearFechaES(ultimoPago.fecha) : "-"}
+      </div>
+
+      <div>
+        ${ultimoPago ? ultimoPago.importe + " €" : (cliente.cuota || "0") + " €"}
+      </div>
+
+      <div class="acciones">
+        <button class="ver-btn" onclick="verFichaCliente(${cliente.id})">Ver</button>
+        <button class="ficha-btn" onclick="registrarPagoCliente(${cliente.id})">Registrar</button>
+      </div>
+    `;
+
+    lista.appendChild(div);
+  });
+}
