@@ -1128,63 +1128,82 @@ function convertirInputsMayusculas() {
 }
 
 function renderPagos() {
-  let pagosSection = document.getElementById("pagos-section");
-
-  if (!pagosSection) {
-    alert("No existe pagos-section en index.html");
-    return;
-  }
-
-  pagosSection.innerHTML = `
-    <section class="toolbar">
-      <input type="text" id="buscadorPagos" placeholder="Buscar cliente..." oninput="renderPagos()">
-    </section>
-
-    <section class="tabla-clientes">
-      <div class="tabla-header">
-        <span>Cliente</span>
-        <span>Estado</span>
-        <span>Último pago</span>
-        <span>Importe</span>
-        <span>Acciones</span>
-      </div>
-
-      <div id="pagosLista"></div>
-    </section>
-  `;
-
-  const lista = document.getElementById("pagosLista");
-
-  if (!Array.isArray(clientes) || clientes.length === 0) {
-    lista.innerHTML = `<div class="cliente-row">No hay clientes registrados.</div>`;
-    return;
-  }
+  const pagosSection = document.getElementById("pagos-section");
+  if (!pagosSection) return;
 
   verificarPagosPendientes();
 
-  clientes.forEach(cliente => {
+  let html = `
+    <div style="padding:20px;">
+      <input 
+        type="text" 
+        id="buscadorPagos" 
+        placeholder="Buscar cliente..." 
+        oninput="renderPagos()"
+        style="
+          width:100%;
+          padding:14px;
+          margin-bottom:20px;
+          border-radius:14px;
+          border:none;
+          background:#1e293b;
+          color:white;
+        "
+      >
+  `;
+
+  if (!clientes || clientes.length === 0) {
+    html += `<p style="color:white;">No hay clientes registrados.</p></div>`;
+    pagosSection.innerHTML = html;
+    return;
+  }
+
+  const buscador = document.getElementById("buscadorPagos")
+    ? document.getElementById("buscadorPagos").value.toLowerCase()
+    : "";
+
+  const clientesFiltrados = clientes.filter(c =>
+    c.nombre.toLowerCase().includes(buscador)
+  );
+
+  clientesFiltrados.forEach(cliente => {
     const ultimoPago = cliente.pagos && cliente.pagos.length
-      ? [...cliente.pagos].sort((a, b) => b.fecha.localeCompare(a.fecha))[0]
+      ? [...cliente.pagos].sort((a,b) => b.fecha.localeCompare(a.fecha))[0]
       : null;
 
-    const estadoPago = cliente.pagoPendiente
-      ? '<span style="color:#f87171;">Pendiente</span>'
-      : '<span style="color:#F15A24;">Al corriente</span>';
+    html += `
+      <div style="
+        display:grid;
+        grid-template-columns:2fr 1fr 1fr 1fr auto;
+        gap:12px;
+        padding:16px;
+        margin-bottom:12px;
+        background:#0f172a;
+        border-radius:16px;
+        color:white;
+        align-items:center;
+      ">
+        <div><strong>${cliente.nombre}</strong></div>
 
-    const div = document.createElement("div");
-    div.className = "cliente-row";
+        <div>
+          ${cliente.pagoPendiente
+            ? '<span style="color:#f87171;">Pendiente</span>'
+            : '<span style="color:#F15A24;">Al corriente</span>'}
+        </div>
 
-    div.innerHTML = `
-      <div><strong>${cliente.nombre}</strong></div>
-      <div>${estadoPago}</div>
-      <div>${ultimoPago ? formatearFechaES(ultimoPago.fecha) : "-"}</div>
-      <div>${ultimoPago ? ultimoPago.importe + " €" : (cliente.cuota || "0") + " €"}</div>
-      <div class="acciones">
-        <button class="ver-btn" onclick="verFichaCliente(${cliente.id})">Ver</button>
-        <button class="ficha-btn" onclick="registrarPagoCliente(${cliente.id})">Registrar</button>
+        <div>${ultimoPago ? formatearFechaES(ultimoPago.fecha) : "-"}</div>
+
+        <div>${cliente.cuota || 0} €</div>
+
+        <div>
+          <button onclick="verFichaCliente(${cliente.id})">Ver</button>
+          <button onclick="registrarPagoCliente(${cliente.id})">Registrar</button>
+        </div>
       </div>
     `;
-
-    lista.appendChild(div);
   });
+
+  html += `</div>`;
+
+  pagosSection.innerHTML = html;
 }
