@@ -670,6 +670,28 @@ function verFichaCliente(id) {
 
   const ficha = document.getElementById("clienteFicha");
 
+  const pagosOrdenados = [...(clienteActual.pagos || [])].sort((a, b) =>
+    `${b.fecha}`.localeCompare(`${a.fecha}`)
+  );
+
+  const ultimoPago = pagosOrdenados.length > 0 ? pagosOrdenados[0] : null;
+
+  let pagosHtml = "";
+
+  if (pagosOrdenados.length === 0) {
+    pagosHtml = "<p>No hay pagos registrados.</p>";
+  } else {
+    pagosHtml = pagosOrdenados.map(pago => `
+      <div class="agenda-item">
+        <div class="agenda-hora">${formatearFechaES(pago.fecha)}</div>
+        <div class="agenda-cliente">
+          <strong>${pago.concepto || "Pago"}</strong>
+          <span>Importe: ${pago.importe || 0} €</span>
+        </div>
+      </div>
+    `).join("");
+  }
+
   const clasesOrdenadas = [...clienteActual.clases].sort((a, b) =>
     `${a.fecha} ${a.hora}`.localeCompare(`${b.fecha} ${b.hora}`)
   );
@@ -728,9 +750,19 @@ function verFichaCliente(id) {
           : '<span style="color:#F15A24;">Al corriente</span>'
       }</p>
 
+      <p><strong>Último pago:</strong> ${
+        ultimoPago
+          ? `${formatearFechaES(ultimoPago.fecha)} · ${ultimoPago.importe} €`
+          : "Sin pagos registrados"
+      }</p>
+
       <button class="ficha-btn" onclick="registrarPagoCliente(${clienteActual.id})">
         Registrar pago
       </button>
+
+      <div style="margin-top:16px;">
+        ${pagosHtml}
+      </div>
     </div>
 
     <div class="ficha-card">
@@ -982,9 +1014,19 @@ function registrarPagoCliente(clienteId) {
 
   if (!cliente.pagos) cliente.pagos = [];
 
+  const importe = prompt("Introduce el importe pagado:", cliente.cuota || "0");
+
+  if (importe === null) return;
+
+  const concepto = prompt("Concepto del pago:", "Cuota / bono mensual");
+
+  if (concepto === null) return;
+
   cliente.pagos.push({
+    id: Date.now(),
     fecha: obtenerFechaISO(new Date()),
-    importe: cliente.cuota || 0
+    importe: importe,
+    concepto: concepto
   });
 
   cliente.pagoPendiente = false;
