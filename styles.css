@@ -822,3 +822,31 @@ textarea {
   padding: 7px 11px !important;
   font-size: 12px !important;
 }
+/* CLIENTES COMPACTO DEFINITIVO */
+
+.cliente-row {
+  padding: 12px 20px !important;
+  min-height: 58px !important;
+}
+
+.cliente-row strong {
+  font-size: 15px !important;
+}
+
+.cliente-row .cliente-sub {
+  display: block !important;
+  font-size: 12px !important;
+  margin-top: 2px !important;
+}
+
+.cliente-row .estado-activo,
+.cliente-row .estado-inactivo {
+  padding: 4px 9px !important;
+  font-size: 12px !important;
+}
+
+.cliente-row .ver-btn,
+.cliente-row .eliminar-btn {
+  padding: 7px 11px !important;
+  font-size: 12px !important;
+}
