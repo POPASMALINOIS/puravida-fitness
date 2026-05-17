@@ -1006,3 +1006,17 @@ textarea {
   color: #94a3b8;
   letter-spacing: 3px;
 }
+
+.login-logo {
+  width: 170px;
+  max-width: 100%;
+  display: block;
+  margin: 0 auto 22px;
+}
+
+.sidebar-logo {
+  width: 120px !important;
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 12px;
+}
