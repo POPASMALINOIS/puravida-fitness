@@ -244,18 +244,22 @@ function renderEntrenadores() {
 }
 
 function actualizarResumen() {
+  verificarPagosPendientes();
+
   document.getElementById("totalClientes").textContent = clientes.length;
-  document.getElementById("clientesActivos").textContent = clientes.filter(c => c.estado === "Activo").length;
-  document.getElementById("bonosBajos").textContent = clientes.filter(c => c.bonoDisponible <= 2).length;
 
-  const hoy = obtenerFechaISO(new Date());
-  let clasesHoy = 0;
+  document.getElementById("clientesActivos").textContent =
+    clientes.filter(c => c.estado === "Activo").length;
 
-  clientes.forEach(cliente => {
-    clasesHoy += cliente.clases.filter(clase => clase.fecha === hoy).length;
-  });
+  document.getElementById("bonosBajos").textContent =
+    clientes.filter(c => c.bonoDisponible <= 2).length;
 
-  document.getElementById("clasesHoy").textContent = clasesHoy;
+  document.getElementById("clasesHoy").textContent =
+    clientes.reduce((total, cliente) => {
+      return total + cliente.clases.filter(clase =>
+        clase.fecha === obtenerFechaISO(new Date())
+      ).length;
+    }, 0);
 }
 
 function obtenerFechaISO(fecha) {
@@ -717,6 +721,19 @@ function verFichaCliente(id) {
     </div>
 
     <div class="ficha-card">
+      <h2>Pagos</h2>
+      <p><strong>Estado:</strong> ${
+        clienteActual.pagoPendiente
+          ? '<span style="color:#f87171;">Pago pendiente</span>'
+          : '<span style="color:#F15A24;">Al corriente</span>'
+      }</p>
+
+      <button class="ficha-btn" onclick="registrarPagoCliente(${clienteActual.id})">
+        Registrar pago
+      </button>
+    </div>
+
+    <div class="ficha-card">
       <h2>Observaciones</h2>
       <p>${clienteActual.observaciones || "Sin observaciones"}</p>
     </div>
@@ -932,4 +949,47 @@ function cancelarClaseExcepcional(clienteId, claseId) {
 function convertirHoraAMinutos(hora) {
   const [h, m] = hora.split(":").map(Number);
   return h * 60 + m;
+}
+function verificarPagosPendientes() {
+  const hoy = new Date();
+  const diaActual = hoy.getDate();
+
+  clientes.forEach(cliente => {
+    if (!cliente.pagos) cliente.pagos = [];
+
+    const pagoMesActual = cliente.pagos.find(p => {
+      const fechaPago = new Date(p.fecha);
+      return (
+        fechaPago.getMonth() === hoy.getMonth() &&
+        fechaPago.getFullYear() === hoy.getFullYear()
+      );
+    });
+
+    if (!pagoMesActual && diaActual > 5) {
+      cliente.pagoPendiente = true;
+    } else {
+      cliente.pagoPendiente = false;
+    }
+  });
+
+  guardarDatos();
+}
+
+function registrarPagoCliente(clienteId) {
+  const cliente = clientes.find(c => c.id === clienteId);
+
+  if (!cliente) return;
+
+  if (!cliente.pagos) cliente.pagos = [];
+
+  cliente.pagos.push({
+    fecha: obtenerFechaISO(new Date()),
+    importe: cliente.cuota || 0
+  });
+
+  cliente.pagoPendiente = false;
+
+  guardarDatos();
+  actualizarResumen();
+  verFichaCliente(clienteId);
 }
