@@ -1121,3 +1121,22 @@ textarea {
   position: relative !important;
   z-index: 21 !important;
 }
+/* IPAD: CABECERA DE DÍAS FIJA AL HACER SCROLL VERTICAL */
+
+.week-header-fixed {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 30 !important;
+  background: #0f172a !important;
+}
+
+.week-day-header-fixed {
+  background: #0f172a !important;
+  z-index: 31 !important;
+}
+
+.week-calendar-fixed {
+  max-height: 680px;
+  overflow: auto !important;
+  position: relative !important;
+}
