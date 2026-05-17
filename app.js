@@ -113,24 +113,15 @@ function mostrarSeccion(seccion) {
     renderClientesBonos();
   }
 
-  else if (seccion === "entrenadores") {
-    document.getElementById("nav-entrenadores").classList.add("nav-active");
-    document.getElementById("tituloPanel").textContent = "Entrenadores";
-    document.getElementById("subtituloPanel").textContent = "Colores, agenda y asignación";
-    renderEntrenadores();
-  }
-
   else if (seccion === "pagos") {
-    const navPagos = Array.from(document.querySelectorAll(".sidebar nav button"))
-      .find(btn => btn.textContent.trim() === "Pagos");
+  document.getElementById("tituloPanel").textContent = "Pagos";
+  document.getElementById("subtituloPanel").textContent =
+    "Control financiero y seguimiento de cobros";
 
-    if (navPagos) navPagos.classList.add("nav-active");
+  renderPagos();
+}
 
-    document.getElementById("tituloPanel").textContent = "Pagos";
-    document.getElementById("subtituloPanel").textContent = "Control financiero y seguimiento de cobros";
-    renderPagos();
-  }
-
+  
   else {
     alert("Módulo " + seccion + " en desarrollo.");
     mostrarSeccion("resumen");
@@ -1129,13 +1120,26 @@ function convertirInputsMayusculas() {
 }
 
 function renderPagos() {
-  const pagosSection = asegurarSeccionPagos();
+  let pagosSection = document.getElementById("pagos-section");
+  const mainPanel = document.querySelector(".main-panel");
 
-  verificarPagosPendientes();
+  if (!pagosSection) {
+    pagosSection = document.createElement("section");
+    pagosSection.id = "pagos-section";
+    mainPanel.appendChild(pagosSection);
+  } else if (pagosSection.parentElement !== mainPanel) {
+    mainPanel.appendChild(pagosSection);
+  }
+
+  pagosSection.style.display = "block";
+
+  const datosClientes = Array.isArray(clientes) && clientes.length
+    ? clientes
+    : JSON.parse(localStorage.getItem("clientes")) || [];
 
   pagosSection.innerHTML = `
     <section class="toolbar">
-      <input type="text" id="buscadorPagos" placeholder="Buscar cliente..." oninput="renderPagos()">
+      <input type="text" id="buscadorPagos" placeholder="Buscar cliente...">
     </section>
 
     <section class="tabla-clientes">
@@ -1152,14 +1156,13 @@ function renderPagos() {
   `;
 
   const lista = document.getElementById("pagosLista");
-  lista.innerHTML = "";
 
-  if (!clientes || clientes.length === 0) {
+  if (!datosClientes.length) {
     lista.innerHTML = `<div class="cliente-row">No hay clientes registrados.</div>`;
     return;
   }
 
-  clientes.forEach(cliente => {
+  datosClientes.forEach(cliente => {
     const ultimoPago = cliente.pagos && cliente.pagos.length
       ? [...cliente.pagos].sort((a, b) => b.fecha.localeCompare(a.fecha))[0]
       : null;
