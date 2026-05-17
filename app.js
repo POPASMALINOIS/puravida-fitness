@@ -132,12 +132,21 @@ function mostrarSeccion(seccion) {
   }
 
   else if (seccion === "pagos") {
-    document.getElementById("tituloPanel").textContent = "Pagos";
-    document.getElementById("subtituloPanel").textContent =
-      "Control financiero y seguimiento de cobros";
+  document.querySelectorAll(".sidebar nav button").forEach(btn =>
+    btn.classList.remove("nav-active")
+  );
 
-    renderPagos();
-  }
+  const navPagos = [...document.querySelectorAll(".sidebar nav button")]
+    .find(btn => btn.textContent.trim() === "Pagos");
+
+  if (navPagos) navPagos.classList.add("nav-active");
+
+  document.getElementById("tituloPanel").textContent = "Pagos";
+  document.getElementById("subtituloPanel").textContent =
+    "Control financiero y seguimiento de cobros";
+
+  renderPagos();
+}
 
   else {
     alert("Módulo " + seccion + " en desarrollo.");
@@ -1145,7 +1154,7 @@ function renderPagos() {
 
   lista.innerHTML = "";
 
-  const clientesFiltrados = clientes.filter(cliente =>
+  const clientesFiltrados = (clientes || []).filter
     cliente.nombre.toLowerCase().includes(buscador)
   );
 
