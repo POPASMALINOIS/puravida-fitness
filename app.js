@@ -563,9 +563,7 @@ function agendarClaseDia() {
       const inicioExistente = convertirHoraAMinutos(clase.hora);
       const finExistente = inicioExistente + duracionExistente;
 
-      const solapa = inicioNueva < finExistente && finNueva > inicioExistente;
-
-      if (solapa) {
+      if (inicioNueva < finExistente && finNueva > inicioExistente) {
         haySolape = true;
         claseSolapada = {
           cliente: c.nombre,
@@ -578,7 +576,7 @@ function agendarClaseDia() {
 
   if (haySolape) {
     alert(
-      "No se puede reservar. El entrenador ya tiene una clase en esa franja:\n\n" +
+      "No se puede reservar. El entrenador ya tiene una sesión en esa franja:\n\n" +
       claseSolapada.cliente + " · " +
       claseSolapada.hora + " · " +
       claseSolapada.duracion + " min"
@@ -601,10 +599,15 @@ function agendarClaseDia() {
 
   guardarDatos();
 
+  procesarBonosAutomaticamente();
+  verificarEstadoBonos();
+
   document.getElementById("diaClaseHora").value = "";
 
   actualizarResumen();
   renderAgendaDia();
+  renderCalendarioSemanal();
+  renderClientes();
 }
 
 function eliminarClase(clienteId, claseId) {
