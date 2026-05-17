@@ -245,6 +245,7 @@ function renderEntrenadores() {
 
 function actualizarResumen() {
   verificarPagosPendientes();
+  verificarEstadoBonos();
 
   document.getElementById("totalClientes").textContent = clientes.length;
 
@@ -252,7 +253,9 @@ function actualizarResumen() {
     clientes.filter(c => c.estado === "Activo").length;
 
   document.getElementById("bonosBajos").textContent =
-    clientes.filter(c => c.bonoDisponible <= 2).length;
+    clientes.filter(c =>
+      c.bonoEstado === "Bajo" || c.bonoEstado === "Agotado"
+    ).length;
 
   document.getElementById("clasesHoy").textContent =
     clientes.reduce((total, cliente) => {
@@ -812,6 +815,8 @@ function renderClientes() {
 
   lista.innerHTML = "";
 
+  verificarEstadoBonos();
+
   const clientesFiltrados = clientes.filter(cliente =>
     cliente.nombre.toLowerCase().includes(buscador) ||
     cliente.telefono.includes(buscador)
@@ -824,6 +829,14 @@ function renderClientes() {
 
   clientesFiltrados.forEach(cliente => {
     const estadoClass = cliente.estado === "Activo" ? "estado-activo" : "estado-inactivo";
+
+    let bonoAviso = "";
+
+    if (cliente.bonoEstado === "Agotado") {
+      bonoAviso = " · Bono agotado";
+    } else if (cliente.bonoEstado === "Bajo") {
+      bonoAviso = " · Bono bajo";
+    }
 
     const div = document.createElement("div");
     div.className = "cliente-row";
@@ -838,7 +851,11 @@ function renderClientes() {
 
       <div><strong>${cliente.bonoDisponible}/${cliente.bonoTotal}</strong></div>
 
-      <div><span class="${estadoClass}">${cliente.estado}</span></div>
+      <div>
+        <span class="${estadoClass}">
+          ${cliente.estado}${bonoAviso}
+        </span>
+      </div>
 
       <div class="acciones">
         <button class="ver-btn" onclick="verFichaCliente(${cliente.id})">Ver</button>
@@ -1034,4 +1051,18 @@ function registrarPagoCliente(clienteId) {
   guardarDatos();
   actualizarResumen();
   verFichaCliente(clienteId);
+}
+
+function verificarEstadoBonos() {
+  clientes.forEach(cliente => {
+    if (cliente.bonoDisponible <= 0) {
+      cliente.bonoEstado = "Agotado";
+    } else if (cliente.bonoDisponible <= 2) {
+      cliente.bonoEstado = "Bajo";
+    } else {
+      cliente.bonoEstado = "Activo";
+    }
+  });
+
+  guardarDatos();
 }
