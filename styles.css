@@ -1084,3 +1084,40 @@ textarea {
   z-index: 6;
   background: #0f172a;
 }
+
+/* IPAD: COLUMNA DE HORAS FIJA REAL */
+
+.week-calendar-fixed {
+  overflow-x: auto !important;
+  position: relative !important;
+}
+
+.week-header-fixed {
+  min-width: 1050px !important;
+}
+
+.week-body-fixed {
+  min-width: 1050px !important;
+  position: relative !important;
+}
+
+.week-header-fixed > div:first-child {
+  position: sticky !important;
+  left: 0 !important;
+  z-index: 20 !important;
+  background: #0f172a !important;
+}
+
+.week-hours-fixed {
+  position: sticky !important;
+  left: 0 !important;
+  z-index: 20 !important;
+  background: #0f172a !important;
+  border-right: 1px solid rgba(148, 163, 184, 0.20) !important;
+}
+
+.week-hour-fixed {
+  background: #0f172a !important;
+  position: relative !important;
+  z-index: 21 !important;
+}
