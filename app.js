@@ -1128,39 +1128,41 @@ function convertirInputsMayusculas() {
 }
 
 function renderPagos() {
+  let pagosSection = document.getElementById("pagos-section");
+
+  if (!pagosSection) {
+    alert("No existe pagos-section en index.html");
+    return;
+  }
+
+  pagosSection.innerHTML = `
+    <section class="toolbar">
+      <input type="text" id="buscadorPagos" placeholder="Buscar cliente..." oninput="renderPagos()">
+    </section>
+
+    <section class="tabla-clientes">
+      <div class="tabla-header">
+        <span>Cliente</span>
+        <span>Estado</span>
+        <span>Último pago</span>
+        <span>Importe</span>
+        <span>Acciones</span>
+      </div>
+
+      <div id="pagosLista"></div>
+    </section>
+  `;
+
   const lista = document.getElementById("pagosLista");
-  if (!lista) return;
-
-  const buscadorInput = document.getElementById("buscadorPagos");
-  const buscador = buscadorInput ? buscadorInput.value.toLowerCase() : "";
-
-  lista.innerHTML = "";
 
   if (!Array.isArray(clientes) || clientes.length === 0) {
-    lista.innerHTML = `
-      <div class="cliente-row">
-        <span>No hay clientes registrados.</span>
-      </div>
-    `;
+    lista.innerHTML = `<div class="cliente-row">No hay clientes registrados.</div>`;
     return;
   }
 
   verificarPagosPendientes();
 
-  const clientesFiltrados = clientes.filter(cliente =>
-    cliente.nombre && cliente.nombre.toLowerCase().includes(buscador)
-  );
-
-  if (clientesFiltrados.length === 0) {
-    lista.innerHTML = `
-      <div class="cliente-row">
-        <span>No hay pagos encontrados.</span>
-      </div>
-    `;
-    return;
-  }
-
-  clientesFiltrados.forEach(cliente => {
+  clientes.forEach(cliente => {
     const ultimoPago = cliente.pagos && cliente.pagos.length
       ? [...cliente.pagos].sort((a, b) => b.fecha.localeCompare(a.fecha))[0]
       : null;
@@ -1169,20 +1171,20 @@ function renderPagos() {
       ? '<span style="color:#f87171;">Pendiente</span>'
       : '<span style="color:#F15A24;">Al corriente</span>';
 
-    const fila = document.createElement("div");
-    fila.className = "cliente-row";
+    const div = document.createElement("div");
+    div.className = "cliente-row";
 
-    fila.innerHTML = `
-      <span><strong>${cliente.nombre}</strong></span>
-      <span>${estadoPago}</span>
-      <span>${ultimoPago ? formatearFechaES(ultimoPago.fecha) : "-"}</span>
-      <span>${cliente.cuota ? cliente.cuota + " €" : "-"}</span>
-      <span class="acciones">
+    div.innerHTML = `
+      <div><strong>${cliente.nombre}</strong></div>
+      <div>${estadoPago}</div>
+      <div>${ultimoPago ? formatearFechaES(ultimoPago.fecha) : "-"}</div>
+      <div>${ultimoPago ? ultimoPago.importe + " €" : (cliente.cuota || "0") + " €"}</div>
+      <div class="acciones">
         <button class="ver-btn" onclick="verFichaCliente(${cliente.id})">Ver</button>
         <button class="ficha-btn" onclick="registrarPagoCliente(${cliente.id})">Registrar</button>
-      </span>
+      </div>
     `;
 
-    lista.appendChild(fila);
+    lista.appendChild(div);
   });
 }
