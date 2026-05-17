@@ -760,8 +760,8 @@ function verFichaCliente(id) {
         Registrar pago
       </button>
 
-      <div style="margin-top:16px;">
-        ${pagosHtml}
+      <div class="historial-pagos">
+          ${pagosHtml}
       </div>
     </div>
 
