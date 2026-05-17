@@ -91,62 +91,44 @@ function mostrarSeccion(seccion) {
 
   if (seccion === "resumen") {
     document.getElementById("nav-resumen").classList.add("nav-active");
-
     document.getElementById("tituloPanel").textContent = "Resumen";
-    document.getElementById("subtituloPanel").textContent =
-      "KPIs, agenda y seguimiento general";
-
+    document.getElementById("subtituloPanel").textContent = "KPIs, agenda y seguimiento general";
     actualizarResumen();
     renderCalendarioSemanal();
   }
 
   else if (seccion === "clientes") {
     document.getElementById("nav-clientes").classList.add("nav-active");
-
     document.getElementById("tituloPanel").textContent = "Clientes";
-    document.getElementById("subtituloPanel").textContent =
-      "Base de datos completa de clientes";
-
+    document.getElementById("subtituloPanel").textContent = "Base de datos completa de clientes";
     renderClientes();
   }
 
   else if (seccion === "clientes-bonos") {
     document.getElementById("nav-bonos").classList.add("nav-active");
-
     document.getElementById("tituloPanel").textContent = "Bonos críticos";
-    document.getElementById("subtituloPanel").textContent =
-      "Clientes con bonos bajos o agotados";
-
+    document.getElementById("subtituloPanel").textContent = "Clientes con bonos bajos o agotados";
     verificarEstadoBonos();
     renderClientesBonos();
   }
 
   else if (seccion === "entrenadores") {
     document.getElementById("nav-entrenadores").classList.add("nav-active");
-
     document.getElementById("tituloPanel").textContent = "Entrenadores";
-    document.getElementById("subtituloPanel").textContent =
-      "Colores, agenda y asignación";
-
+    document.getElementById("subtituloPanel").textContent = "Colores, agenda y asignación";
     renderEntrenadores();
   }
 
   else if (seccion === "pagos") {
-  document.querySelectorAll(".sidebar nav button").forEach(btn =>
-    btn.classList.remove("nav-active")
-  );
+    const navPagos = Array.from(document.querySelectorAll(".sidebar nav button"))
+      .find(btn => btn.textContent.trim() === "Pagos");
 
-  const navPagos = [...document.querySelectorAll(".sidebar nav button")]
-    .find(btn => btn.textContent.trim() === "Pagos");
+    if (navPagos) navPagos.classList.add("nav-active");
 
-  if (navPagos) navPagos.classList.add("nav-active");
-
-  document.getElementById("tituloPanel").textContent = "Pagos";
-  document.getElementById("subtituloPanel").textContent =
-    "Control financiero y seguimiento de cobros";
-
-  renderPagos();
-}
+    document.getElementById("tituloPanel").textContent = "Pagos";
+    document.getElementById("subtituloPanel").textContent = "Control financiero y seguimiento de cobros";
+    renderPagos();
+  }
 
   else {
     alert("Módulo " + seccion + " en desarrollo.");
@@ -1154,7 +1136,9 @@ function renderPagos() {
 
   lista.innerHTML = "";
 
-  const clientesFiltrados = (clientes || []).filter
+  verificarPagosPendientes();
+
+  const clientesFiltrados = (clientes || []).filter(cliente =>
     cliente.nombre.toLowerCase().includes(buscador)
   );
 
@@ -1180,17 +1164,11 @@ function renderPagos() {
         <strong>${cliente.nombre}</strong>
       </div>
 
-      <div>
-        ${estadoPago}
-      </div>
+      <div>${estadoPago}</div>
 
-      <div>
-        ${ultimoPago ? formatearFechaES(ultimoPago.fecha) : "-"}
-      </div>
+      <div>${ultimoPago ? formatearFechaES(ultimoPago.fecha) : "-"}</div>
 
-      <div>
-        ${ultimoPago ? ultimoPago.importe + " €" : (cliente.cuota || "0") + " €"}
-      </div>
+      <div>${ultimoPago ? ultimoPago.importe + " €" : (cliente.cuota || "0") + " €"}</div>
 
       <div class="acciones">
         <button class="ver-btn" onclick="verFichaCliente(${cliente.id})">Ver</button>
