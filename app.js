@@ -1071,7 +1071,9 @@ function verificarEstadoBonos() {
 }
 
 function filtrarClientesBonos() {
-  const lista = document.getElementById("clientesLista");
+  cambiarPantalla('clientes-bonos');
+
+  const lista = document.getElementById("clientesBonosLista");
 
   if (!lista) return;
 
@@ -1114,7 +1116,6 @@ function filtrarClientesBonos() {
 
       <div class="acciones">
         <button class="ver-btn" onclick="verFichaCliente(${cliente.id})">Ver</button>
-        <button class="eliminar-btn" onclick="eliminarCliente(${cliente.id})">Borrar</button>
       </div>
     `;
 
