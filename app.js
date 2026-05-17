@@ -660,87 +660,59 @@ function renderAgendaDia() {
 }
 
 function verFichaCliente(id) {
-  clienteActual = clientes.find(cliente => cliente.id === id);
+  const cliente = clientes.find(c => c.id === id);
+  if (!cliente) return;
 
-  if (!clienteActual) return;
+  clienteSeleccionado = cliente;
+
+  cambiarPantalla("ficha-screen");
 
   const ficha = document.getElementById("clienteFicha");
 
-  let clasesHtml = "";
-
-  const clasesOrdenadas = [...clienteActual.clases].sort((a, b) =>
-    `${a.fecha} ${a.hora}`.localeCompare(`${b.fecha} ${b.hora}`)
-  );
-
-  if (clasesOrdenadas.length === 0) {
-    clasesHtml = "<p>No hay clases programadas.</p>";
-  } else {
-    clasesOrdenadas.forEach(clase => {
-      const entrenador = obtenerEntrenador(clase.entrenadorId);
-
-      clasesHtml += `
-        <div class="agenda-item" style="border-left: 6px solid ${clase.entrenadorColor || entrenador.color}">
-          <div class="agenda-hora">${clase.hora}</div>
-
-          <div class="agenda-cliente">
-            <strong>${formatearFechaES(clase.fecha)}</strong>
-            <span>${clase.duracion || clienteActual.bonoDuracion} min · ${clase.modalidad || clienteActual.bonoModalidad}</span>
-            <span>Entrenador: ${clase.entrenadorNombre || entrenador.nombre}</span>
-            <span>Estado: ${clase.estado}</span>
-          </div>
-
-          <div class="acciones">
-            <button class="ver-btn" onclick="cancelarClase(${clienteActual.id}, ${clase.id})">Cancelar</button>
-            <button class="ficha-btn" onclick="cancelarClaseExcepcional(${clienteActual.id}, ${clase.id})">Excepcional</button>
-            <button class="eliminar-btn" onclick="eliminarClase(${clienteActual.id}, ${clase.id})">Borrar</button>
-          </div>
-        </div>
-      `;
-    });
-  }
+  const clasesCliente = agenda
+    .filter(c => c.clienteId === cliente.id)
+    .sort((a, b) => new Date(a.fecha + " " + a.hora) - new Date(b.fecha + " " + b.hora);
 
   ficha.innerHTML = `
     <div class="ficha-card">
-      <h2>${clienteActual.nombre}</h2>
-      <p>📞 ${clienteActual.telefono}</p>
-      <p>📧 ${clienteActual.email || "Sin email"}</p>
-      <p>📅 Alta: ${clienteActual.fechaAlta || "No indicada"}</p>
-      <p>💳 Cuota: ${clienteActual.cuota || "0"} €</p>
-      <p>🎟️ Bono: ${clienteActual.bonoDisponible}/${clienteActual.bonoTotal}</p>
-      <p>⏱️ Duración: ${clienteActual.bonoDuracion} min</p>
-      <p>👥 Modalidad: ${clienteActual.bonoModalidad}</p>
-      <p>📌 Estado: ${clienteActual.estado}</p>
-      <p>📝 ${clienteActual.observaciones || "Sin observaciones"}</p>
+      <h2>${cliente.nombre}</h2>
+      <p><strong>Teléfono:</strong> ${cliente.telefono}</p>
+      <p><strong>Email:</strong> ${cliente.email || "-"}</p>
+      <p><strong>Fecha alta:</strong> ${cliente.fechaAlta || "-"}</p>
+      <p><strong>Estado:</strong> ${cliente.estado}</p>
+      <p><strong>Entrenador:</strong> ${obtenerNombreEntrenador(cliente.entrenadorId)}</p>
     </div>
 
     <div class="ficha-card">
-      <h2>Clases programadas</h2>
-      ${clasesHtml}
+      <h2>Bono</h2>
+      <p><strong>Tipo:</strong> ${cliente.bonoDuracion} min · ${cliente.bonoModalidad}</p>
+      <p><strong>Sesiones disponibles:</strong> ${cliente.bonoDisponible}/${cliente.bonoTotal}</p>
+      <p><strong>Cuota:</strong> ${cliente.cuota || 0} €</p>
     </div>
 
     <div class="ficha-card">
-      <h2>Rutinas</h2>
-      <p>${clienteActual.rutinas.length} registradas</p>
+      <h2>Observaciones</h2>
+      <p>${cliente.observaciones || "Sin observaciones."}</p>
     </div>
 
     <div class="ficha-card">
-      <h2>Controles físicos</h2>
-      <p>${clienteActual.controles.length} registros</p>
-    </div>
-
-    <div class="ficha-card">
-      <h2>Pagos</h2>
-      <p>${clienteActual.pagos.length} registros</p>
-    </div>
-
-    <div class="ficha-card">
-      <h2>Recordatorios</h2>
-      <button class="ficha-btn" onclick="enviarRecordatorioClase()">Recordatorio clase</button>
-      <button class="ficha-btn" onclick="enviarRecordatorioPago()">Recordatorio pago</button>
+      <h2>Próximas sesiones</h2>
+      ${
+        clasesCliente.length
+          ? clasesCliente.map(clase => `
+            <div class="agenda-item">
+              <div class="agenda-hora">${clase.hora}</div>
+              <div class="agenda-cliente">
+                <strong>${formatearFecha(clase.fecha)}</strong>
+                <span>${clase.estado || "Programada"}</span>
+              </div>
+              <button class="eliminar-btn" onclick="cancelarClase(${clase.id})">Cancelar</button>
+            </div>
+          `).join("")
+          : "<p>No hay sesiones programadas.</p>"
+      }
     </div>
   `;
-
-  cambiarPantalla("ficha-screen");
 }
 
 function enviarRecordatorioClase() {
