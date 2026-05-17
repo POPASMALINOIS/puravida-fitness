@@ -1205,3 +1205,14 @@ textarea {
 #alta-screen h1 {
   text-align: center;
 }
+/* LABELS FORMULARIO */
+
+#alta-screen label {
+  display: block;
+  margin-bottom: 8px;
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #cbd5e1;
+  letter-spacing: 0.5px;
+}
