@@ -49,18 +49,52 @@
       </nav>
     </aside>
 
-    <main class="main-panel">
+    <!-- RESUMEN -->
+<section id="resumen-section">
 
-      <header class="top-header">
-        <div>
-          <h1 id="tituloPanel">Clientes</h1>
-          <p id="subtituloPanel">Planificación, bonos y seguimiento</p>
-        </div>
-        <button onclick="logout()">Salir</button>
-      </header>
+  <section class="resumen-grid">
+    <div class="resumen-card">
+      <strong id="totalClientes">0</strong>
+      <span>Total clientes</span>
+    </div>
 
-      <section id="resumen-section">
-        <section id="clientes-section" style="display:none;">
+    <div class="resumen-card">
+      <strong id="clientesActivos">0</strong>
+      <span>Activos</span>
+    </div>
+
+    <div class="resumen-card clickable-card" onclick="mostrarSeccion('clientes-bonos')">
+      <strong id="bonosBajos">0</strong>
+      <span>Bonos bajos / agotados</span>
+    </div>
+
+    <div class="resumen-card clickable-card" onclick="mostrarSesionesHoy()">
+      <strong id="clasesHoy">0</strong>
+      <span>Sesiones hoy</span>
+    </div>
+  </section>
+
+  <section class="calendario-panel">
+    <div class="calendario-top">
+      <div>
+        <h2 id="tituloMes">Calendario</h2>
+        <span>Vista semanal por horas</span>
+      </div>
+
+      <div class="calendar-actions">
+        <button onclick="cambiarMes(-1)">‹</button>
+        <button onclick="irMesActual()">Hoy</button>
+        <button onclick="cambiarMes(1)">›</button>
+      </div>
+    </div>
+
+    <div id="calendarioMensual" class="calendar-grid"></div>
+  </section>
+
+</section>
+
+<!-- CLIENTES -->
+<section id="clientes-section" style="display:none;">
 
   <section class="toolbar">
     <input type="text" id="buscadorClientes" placeholder="Buscar cliente..." oninput="renderClientes()">
@@ -81,100 +115,45 @@
 
 </section>
 
-        <section class="resumen-grid">
-          <div class="resumen-card">
-            <strong id="totalClientes">0</strong>
-            <span>Total clientes</span>
-          </div>
+<!-- BONOS CRÍTICOS -->
+<section id="clientes-bonos-section" style="display:none;">
 
-          <div class="resumen-card">
-            <strong id="clientesActivos">0</strong>
-            <span>Activos</span>
-          </div>
+  <section class="tabla-clientes">
+    <div class="tabla-header">
+      <span>Cliente</span>
+      <span>Teléfono</span>
+      <span>Bono</span>
+      <span>Estado</span>
+      <span>Acciones</span>
+    </div>
 
-          <div class="resumen-card clickable-card" onclick="mostrarSeccion('clientes-bonos')">
-            <strong id="bonosBajos">0</strong>
-            <span>Bonos bajos / agotados</span>
-          </div>
-
-          <div class="resumen-card clickable-card" onclick="mostrarSesionesHoy()">
-            <strong id="clasesHoy">0</strong>
-            <span>Sesiones hoy</span>
-          </div>
-        </section>
-
-        <section class="calendario-panel">
-          <div class="calendario-top">
-            <div>
-              <h2 id="tituloMes">Calendario</h2>
-              <span>Vista semanal por horas</span>
-            </div>
-
-            <div class="calendar-actions">
-              <button onclick="cambiarMes(-1)">‹</button>
-              <button onclick="irMesActual()">Hoy</button>
-              <button onclick="cambiarMes(1)">›</button>
-            </div>
-          </div>
-
-          <div id="calendarioMensual" class="calendar-grid"></div>
-        </section>
-
-        <section class="toolbar">
-          <input type="text" id="buscadorClientes" placeholder="Buscar cliente..." oninput="renderClientes()">
-          <button class="add-btn" onclick="cambiarPantalla('alta-screen')">+ Añadir cliente</button>
-        </section>
-
-        <section class="tabla-clientes">
-          <div class="tabla-header">
-            <span>Cliente</span>
-            <span>Teléfono</span>
-            <span>Bono</span>
-            <span>Estado</span>
-            <span>Acciones</span>
-          </div>
-
-          <div id="clientesLista"></div>
-        </section>
-
-      </section>
-
-      <section id="clientes-bonos-section" style="display:none;">
-        <section class="tabla-clientes">
-          <div class="tabla-header">
-            <span>Cliente</span>
-            <span>Teléfono</span>
-            <span>Bono</span>
-            <span>Estado</span>
-            <span>Acciones</span>
-          </div>
-
-          <div id="clientesBonosLista"></div>
-        </section>
-      </section>
-
-      <section id="entrenadores-section" style="display:none;">
-        <section class="toolbar">
-          <input type="text" id="entrenadorNombre" placeholder="Nombre del entrenador">
-          <input type="color" id="entrenadorColor" value="#F15A24">
-          <button class="add-btn" onclick="agregarEntrenador()">+ Añadir entrenador</button>
-        </section>
-
-        <section class="tabla-clientes">
-          <div class="tabla-header entrenadores-header">
-            <span>Entrenador</span>
-            <span>Color</span>
-            <span>Estado</span>
-            <span>Sesiones</span>
-            <span>Acciones</span>
-          </div>
-
-          <div id="entrenadoresLista"></div>
-        </section>
-      </section>
-
-    </main>
+    <div id="clientesBonosLista"></div>
   </section>
+
+</section>
+
+<!-- ENTRENADORES -->
+<section id="entrenadores-section" style="display:none;">
+
+  <section class="toolbar">
+    <input type="text" id="entrenadorNombre" placeholder="Nombre del entrenador">
+    <input type="color" id="entrenadorColor" value="#F15A24">
+    <button class="add-btn" onclick="agregarEntrenador()">+ Añadir entrenador</button>
+  </section>
+
+  <section class="tabla-clientes">
+    <div class="tabla-header entrenadores-header">
+      <span>Entrenador</span>
+      <span>Color</span>
+      <span>Estado</span>
+      <span>Sesiones</span>
+      <span>Acciones</span>
+    </div>
+
+    <div id="entrenadoresLista"></div>
+  </section>
+
+</section>
 
   <section id="alta-screen" class="screen">
     <header class="dashboard-header">
