@@ -1129,21 +1129,34 @@ function convertirInputsMayusculas() {
 
 function renderPagos() {
   const lista = document.getElementById("pagosLista");
+  if (!lista) return;
+
   const buscadorInput = document.getElementById("buscadorPagos");
   const buscador = buscadorInput ? buscadorInput.value.toLowerCase() : "";
 
-  if (!lista) return;
-
   lista.innerHTML = "";
+
+  if (!Array.isArray(clientes) || clientes.length === 0) {
+    lista.innerHTML = `
+      <div class="cliente-row">
+        <span>No hay clientes registrados.</span>
+      </div>
+    `;
+    return;
+  }
 
   verificarPagosPendientes();
 
-  const clientesFiltrados = (clientes || []).filter(cliente =>
-    cliente.nombre.toLowerCase().includes(buscador)
+  const clientesFiltrados = clientes.filter(cliente =>
+    cliente.nombre && cliente.nombre.toLowerCase().includes(buscador)
   );
 
   if (clientesFiltrados.length === 0) {
-    lista.innerHTML = `<div class="cliente-row">No hay pagos encontrados.</div>`;
+    lista.innerHTML = `
+      <div class="cliente-row">
+        <span>No hay pagos encontrados.</span>
+      </div>
+    `;
     return;
   }
 
@@ -1156,26 +1169,20 @@ function renderPagos() {
       ? '<span style="color:#f87171;">Pendiente</span>'
       : '<span style="color:#F15A24;">Al corriente</span>';
 
-    const div = document.createElement("div");
-    div.className = "cliente-row";
+    const fila = document.createElement("div");
+    fila.className = "cliente-row";
 
-    div.innerHTML = `
-      <div>
-        <strong>${cliente.nombre}</strong>
-      </div>
-
-      <div>${estadoPago}</div>
-
-      <div>${ultimoPago ? formatearFechaES(ultimoPago.fecha) : "-"}</div>
-
-      <div>${ultimoPago ? ultimoPago.importe + " €" : (cliente.cuota || "0") + " €"}</div>
-
-      <div class="acciones">
+    fila.innerHTML = `
+      <span><strong>${cliente.nombre}</strong></span>
+      <span>${estadoPago}</span>
+      <span>${ultimoPago ? formatearFechaES(ultimoPago.fecha) : "-"}</span>
+      <span>${cliente.cuota ? cliente.cuota + " €" : "-"}</span>
+      <span class="acciones">
         <button class="ver-btn" onclick="verFichaCliente(${cliente.id})">Ver</button>
         <button class="ficha-btn" onclick="registrarPagoCliente(${cliente.id})">Registrar</button>
-      </div>
+      </span>
     `;
 
-    lista.appendChild(div);
+    lista.appendChild(fila);
   });
 }
