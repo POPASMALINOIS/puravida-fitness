@@ -52,7 +52,7 @@ function login() {
 
   if (usuario && password) {
     cambiarPantalla("dashboard-screen");
-    mostrarSeccion("clientes");
+    mostrarSeccion("resumen");
   } else {
     alert("Introduce usuario y contraseña.");
   }
@@ -72,49 +72,71 @@ function cambiarPantalla(id) {
 }
 
 function mostrarSeccion(seccion) {
+  const resumenSection = document.getElementById("resumen-section");
   const clientesSection = document.getElementById("clientes-section");
   const bonosSection = document.getElementById("clientes-bonos-section");
   const entrenadoresSection = document.getElementById("entrenadores-section");
 
+  if (resumenSection) resumenSection.style.display = seccion === "resumen" ? "block" : "none";
   if (clientesSection) clientesSection.style.display = seccion === "clientes" ? "block" : "none";
   if (bonosSection) bonosSection.style.display = seccion === "clientes-bonos" ? "block" : "none";
   if (entrenadoresSection) entrenadoresSection.style.display = seccion === "entrenadores" ? "block" : "none";
 
-  document.querySelectorAll(".sidebar nav button").forEach(btn => btn.classList.remove("nav-active"));
+  document.querySelectorAll(".sidebar nav button").forEach(btn =>
+    btn.classList.remove("nav-active")
+  );
 
-  if (seccion === "clientes") {
-    document.getElementById("nav-clientes").classList.add("nav-active");
-    document.getElementById("tituloPanel").textContent = "Clientes";
-    document.getElementById("subtituloPanel").textContent = "Planificación, bonos y seguimiento";
+  if (seccion === "resumen") {
+    document.getElementById("nav-resumen").classList.add("nav-active");
+
+    document.getElementById("tituloPanel").textContent = "Resumen";
+    document.getElementById("subtituloPanel").textContent =
+      "KPIs, agenda y seguimiento general";
+
     actualizarResumen();
     renderCalendarioSemanal();
+  }
+
+  else if (seccion === "clientes") {
+    document.getElementById("nav-clientes").classList.add("nav-active");
+
+    document.getElementById("tituloPanel").textContent = "Clientes";
+    document.getElementById("subtituloPanel").textContent =
+      "Base de datos completa de clientes";
+
     renderClientes();
   }
 
-  if (seccion === "clientes-bonos") {
+  else if (seccion === "clientes-bonos") {
     document.getElementById("nav-bonos").classList.add("nav-active");
+
     document.getElementById("tituloPanel").textContent = "Bonos críticos";
-    document.getElementById("subtituloPanel").textContent = "Clientes con bonos bajos o agotados";
+    document.getElementById("subtituloPanel").textContent =
+      "Clientes con bonos bajos o agotados";
+
     verificarEstadoBonos();
     renderClientesBonos();
   }
 
-  if (seccion === "entrenadores") {
+  else if (seccion === "entrenadores") {
     document.getElementById("nav-entrenadores").classList.add("nav-active");
+
     document.getElementById("tituloPanel").textContent = "Entrenadores";
-    document.getElementById("subtituloPanel").textContent = "Colores, agenda y asignación de sesiones";
+    document.getElementById("subtituloPanel").textContent =
+      "Colores, agenda y asignación";
+
     renderEntrenadores();
   }
 
-  if (!["clientes", "clientes-bonos", "entrenadores"].includes(seccion)) {
+  else {
     alert("Módulo " + seccion + " en desarrollo.");
-    mostrarSeccion("clientes");
+    mostrarSeccion("resumen");
   }
 }
 
 function volverDashboard() {
   cambiarPantalla("dashboard-screen");
-  mostrarSeccion("clientes");
+  mostrarSeccion("resumen");
 }
 
 function agregarCliente() {
