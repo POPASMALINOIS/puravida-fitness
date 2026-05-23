@@ -1537,8 +1537,6 @@ textarea {
 }
 
 .week-event-fixed {
-  left: 4px !important;
-  right: 4px !important;
   border-radius: 10px !important;
   padding: 6px !important;
   font-size: 12px !important;
@@ -2235,4 +2233,16 @@ textarea {
   font-size: 9px !important;
   font-weight: 600 !important;
   margin-top: 2px !important;
+}
+/* EVENTOS EN PARALELO TIPO GOOGLE CALENDAR */
+
+.week-event-fixed {
+  position: absolute !important;
+  right: auto !important;
+  border-radius: 10px !important;
+  padding: 6px 7px !important;
+  overflow: hidden !important;
+  color: white !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  z-index: 10;
 }
