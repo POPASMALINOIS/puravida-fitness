@@ -1216,3 +1216,10 @@ textarea {
   color: #cbd5e1;
   letter-spacing: 0.5px;
 }
+.calendar-actions button {
+  min-width: 42px;
+}
+
+.week-calendar-fixed {
+  transition: transform 0.2s ease;
+}
