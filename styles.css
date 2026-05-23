@@ -1226,3 +1226,28 @@ textarea {
   overflow-x: auto !important;
   overflow-y: auto !important;
 }
+/* RESET DEFINITIVO CALENDARIO DESKTOP/TABLET */
+
+.week-calendar-fixed {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  transform: none !important;
+}
+
+.week-header-fixed,
+.week-body-fixed {
+  min-width: 1400px !important;
+  width: 1400px !important;
+  grid-template-columns: 70px repeat(7, 190px) !important;
+}
+
+.week-day-column-fixed {
+  min-width: 190px !important;
+}
+
+.week-day-header-fixed {
+  min-width: 190px !important;
+}
+
