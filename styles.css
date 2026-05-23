@@ -2203,3 +2203,36 @@ textarea {
   line-height: 1.05 !important;
   white-space: normal !important;
 }
+/* EVENTOS CALENDARIO - ESTILO GOOGLE COMPACTO */
+
+.week-event-fixed {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow: hidden !important;
+  line-height: 1.05 !important;
+  padding: 6px 7px !important;
+}
+
+.week-event-fixed .evento-nombre {
+  display: block !important;
+  color: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1.05 !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+}
+
+.week-event-fixed small {
+  display: block !important;
+  color: #ffffff !important;
+  opacity: 0.9 !important;
+  font-size: 9px !important;
+  font-weight: 600 !important;
+  margin-top: 2px !important;
+}
