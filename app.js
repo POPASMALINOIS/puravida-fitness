@@ -600,7 +600,6 @@ function renderCalendarioSemanal() {
           ondblclick="event.stopPropagation(); verFichaCliente(${clase.clienteId})"
         >
           <span class="evento-nombre">${clase.clienteNombre}</span>
-          <small>${clase.hora}</small>
         </div>
       `;
     });
