@@ -1512,3 +1512,46 @@ textarea {
 .week-event-fixed small {
   font-weight: 600 !important;
 }
+/* CALENDARIO MÁS AMPLIO Y PROFESIONAL */
+
+.week-header-fixed,
+.week-body-fixed {
+  grid-template-columns: 80px repeat(7, 240px) !important;
+  width: 1760px !important;
+  min-width: 1760px !important;
+}
+
+.week-day-header-fixed,
+.week-day-column-fixed {
+  width: 240px !important;
+  min-width: 240px !important;
+}
+
+.week-hour-fixed {
+  height: 36px !important;
+  font-size: 12px !important;
+}
+
+.week-slot-fixed {
+  height: 36px !important;
+}
+
+.week-event-fixed {
+  left: 4px !important;
+  right: 4px !important;
+  border-radius: 10px !important;
+  padding: 6px !important;
+  font-size: 12px !important;
+}
+
+.week-event-fixed strong {
+  font-size: 12px !important;
+}
+
+.week-event-fixed span {
+  font-size: 11px !important;
+}
+
+.week-event-fixed small {
+  font-size: 10px !important;
+}
