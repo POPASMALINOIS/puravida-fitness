@@ -599,9 +599,8 @@ function renderCalendarioSemanal() {
           onclick="event.stopPropagation(); abrirAgendaDia('${fechaISO}', '${clase.hora}')"
           ondblclick="event.stopPropagation(); verFichaCliente(${clase.clienteId})"
         >
-          <strong>${clase.hora}</strong>
-          <span>${clase.clienteNombre}</span>
-          <small>${clase.duracion} min · ${clase.entrenadorNombre}</small>
+          <span class="evento-nombre">${clase.clienteNombre}</span>
+          <small>${clase.hora}</small>
         </div>
       `;
     });
