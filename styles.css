@@ -1555,3 +1555,55 @@ textarea {
 .week-event-fixed small {
   font-size: 10px !important;
 }
+/* CALENDARIO EQUILIBRADO TIPO GOOGLE */
+
+.week-calendar-fixed {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+}
+
+.week-header-fixed,
+.week-body-fixed {
+  grid-template-columns: 70px repeat(7, minmax(145px, 1fr)) !important;
+  width: 100% !important;
+  min-width: 1120px !important;
+}
+
+.week-day-header-fixed,
+.week-day-column-fixed {
+  min-width: 145px !important;
+  width: auto !important;
+}
+
+.week-hour-fixed {
+  font-size: 12px !important;
+}
+
+.week-event-fixed {
+  border-radius: 9px !important;
+  padding: 5px !important;
+  font-size: 11px !important;
+}
+
+.week-event-fixed strong {
+  font-size: 11px !important;
+}
+
+.week-event-fixed span {
+  font-size: 10px !important;
+}
+
+.week-event-fixed small {
+  font-size: 9px !important;
+}
+
+/* En pantallas grandes se reparte mejor */
+@media (min-width: 1300px) {
+  .week-header-fixed,
+  .week-body-fixed {
+    min-width: 100% !important;
+    grid-template-columns: 70px repeat(7, 1fr) !important;
+  }
+}
