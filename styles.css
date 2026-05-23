@@ -1319,3 +1319,59 @@ textarea {
     width: 1400px !important;
   }
 }
+/* MÓVIL/TABLET: SEMANA COMPLETA SIN SCROLL LATERAL */
+
+@media (max-width: 900px) {
+  #calendarioMensual {
+    overflow-x: hidden !important;
+  }
+
+  .week-calendar-fixed {
+    width: 100% !important;
+    min-width: 100% !important;
+    overflow-x: hidden !important;
+    transform: none !important;
+  }
+
+  .week-header-fixed,
+  .week-body-fixed {
+    width: 100% !important;
+    min-width: 100% !important;
+    grid-template-columns: 42px repeat(7, 1fr) !important;
+  }
+
+  .week-day-header-fixed,
+  .week-day-column-fixed {
+    min-width: 0 !important;
+    width: auto !important;
+  }
+
+  .week-day-header-fixed {
+    padding: 6px 2px !important;
+  }
+
+  .week-day-header-fixed span {
+    font-size: 9px !important;
+  }
+
+  .week-day-header-fixed strong {
+    font-size: 15px !important;
+  }
+
+  .week-hour-fixed {
+    font-size: 9px !important;
+    padding: 4px 2px !important;
+  }
+
+  .week-event-fixed {
+    left: 2px !important;
+    right: 2px !important;
+    font-size: 8px !important;
+    padding: 3px !important;
+    border-radius: 6px !important;
+  }
+
+  .week-event-fixed small {
+    display: none !important;
+  }
+}
