@@ -708,36 +708,40 @@ function agendarClaseDia() {
   const inicioNueva = convertirHoraAMinutos(hora);
   const finNueva = inicioNueva + duracionNueva;
 
-  let haySolape = false;
+  let haySolapeMismoEntrenador = false;
   let claseSolapada = null;
 
   clientes.forEach(c => {
     c.clases.forEach(clase => {
       if (clase.fecha !== fechaDiaSeleccionado) return;
-      if (parseInt(clase.entrenadorId) !== entrenadorId) return;
       if (clase.estado === "Cancelada" || clase.estado === "Cancelada excepcional") return;
+
+      const mismoEntrenador = parseInt(clase.entrenadorId) === entrenadorId;
+      if (!mismoEntrenador) return;
 
       const duracionExistente = parseInt(clase.duracion || c.bonoDuracion || "60");
       const inicioExistente = convertirHoraAMinutos(clase.hora);
       const finExistente = inicioExistente + duracionExistente;
 
       if (inicioNueva < finExistente && finNueva > inicioExistente) {
-        haySolape = true;
+        haySolapeMismoEntrenador = true;
         claseSolapada = {
           cliente: c.nombre,
           hora: clase.hora,
-          duracion: duracionExistente
+          duracion: duracionExistente,
+          entrenador: clase.entrenadorNombre || entrenador.nombre
         };
       }
     });
   });
 
-  if (haySolape) {
+  if (haySolapeMismoEntrenador) {
     alert(
-      "No se puede reservar. El entrenador ya tiene una sesión en esa franja:\n\n" +
+      "No se puede reservar. Ese entrenador ya tiene una sesión en esa franja:\n\n" +
       claseSolapada.cliente + " · " +
       claseSolapada.hora + " · " +
-      claseSolapada.duracion + " min"
+      claseSolapada.duracion + " min · " +
+      claseSolapada.entrenador
     );
     return;
   }
