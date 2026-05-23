@@ -1440,3 +1440,57 @@ textarea {
     font-size: 10px !important;
   }
 }
+/* AJUSTE FINAL MÓVIL RESUMEN */
+
+@media (max-width: 600px) {
+  .main-panel {
+    padding: 14px !important;
+  }
+
+  .top-header {
+    margin-bottom: 14px !important;
+  }
+
+  .top-header h1 {
+    font-size: 34px !important;
+    line-height: 1 !important;
+  }
+
+  .top-header p {
+    font-size: 16px !important;
+  }
+
+  .top-header button {
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+  }
+
+  .resumen-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(90px, 1fr)) !important;
+    overflow-x: auto !important;
+    padding-bottom: 4px !important;
+  }
+
+  .resumen-card {
+    min-width: 90px !important;
+  }
+
+  .calendario-panel {
+    width: 100% !important;
+    padding: 14px !important;
+  }
+
+  .calendario-top {
+    grid-template-columns: 1fr !important;
+  }
+
+  .week-header-fixed,
+  .week-body-fixed {
+    grid-template-columns: 54px repeat(7, 1fr) !important;
+  }
+
+  .week-hour-fixed {
+    font-size: 11px !important;
+  }
+}
