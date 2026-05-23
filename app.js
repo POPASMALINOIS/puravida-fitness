@@ -1208,3 +1208,28 @@ function asegurarSeccionPagos() {
 
   return pagosSection;
 }
+let zoomCalendario = 1;
+
+function cambiarZoomCalendario(cambio) {
+  zoomCalendario += cambio;
+
+  if (zoomCalendario < 0.55) zoomCalendario = 0.55;
+  if (zoomCalendario > 1.4) zoomCalendario = 1.4;
+
+  aplicarZoomCalendario();
+}
+
+function resetZoomCalendario() {
+  zoomCalendario = 1;
+  aplicarZoomCalendario();
+}
+
+function aplicarZoomCalendario() {
+  const calendario = document.querySelector(".week-calendar-fixed");
+
+  if (!calendario) return;
+
+  calendario.style.transform = `scale(${zoomCalendario})`;
+  calendario.style.transformOrigin = "top left";
+  calendario.style.width = `${100 / zoomCalendario}%`;
+}
