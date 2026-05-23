@@ -1261,3 +1261,43 @@ function aplicarZoomCalendario() {
   calendario.style.transformOrigin = "top left";
   calendario.style.width = `${100 / zoomCalendario}%`;
 }
+/* CALENDARIO RESPONSIVE LIMPIO */
+
+.week-calendar-fixed {
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.week-header-fixed,
+.week-body-fixed {
+  min-width: 1050px;
+}
+
+@media (max-width: 768px) {
+  .resumen-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .resumen-card {
+    padding: 12px !important;
+  }
+
+  .resumen-card strong {
+    font-size: 28px !important;
+  }
+
+  .resumen-card span {
+    font-size: 12px !important;
+  }
+
+  .calendario-panel {
+    padding: 14px !important;
+    margin-top: 12px !important;
+  }
+
+  .week-calendar-fixed {
+    height: 65vh !important;
+    overflow: auto !important;
+  }
+}
