@@ -1375,3 +1375,68 @@ textarea {
     display: none !important;
   }
 }
+/* RESUMEN MÁS COMPACTO */
+
+.resumen-grid {
+  display: flex !important;
+  gap: 10px !important;
+  margin-bottom: 14px !important;
+  flex-wrap: nowrap !important;
+}
+
+.resumen-card {
+  flex: 1 !important;
+  min-height: auto !important;
+  padding: 12px 14px !important;
+  border-radius: 16px !important;
+}
+
+.resumen-card strong {
+  font-size: 26px !important;
+  line-height: 1 !important;
+}
+
+.resumen-card span {
+  font-size: 12px !important;
+  margin-top: 4px !important;
+  display: block;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .resumen-grid {
+    gap: 8px !important;
+  }
+
+  .resumen-card {
+    padding: 10px !important;
+  }
+
+  .resumen-card strong {
+    font-size: 22px !important;
+  }
+
+  .resumen-card span {
+    font-size: 11px !important;
+  }
+}
+
+/* Móvil */
+@media (max-width: 600px) {
+  .resumen-grid {
+    gap: 6px !important;
+  }
+
+  .resumen-card {
+    padding: 8px !important;
+    border-radius: 12px !important;
+  }
+
+  .resumen-card strong {
+    font-size: 18px !important;
+  }
+
+  .resumen-card span {
+    font-size: 10px !important;
+  }
+}
