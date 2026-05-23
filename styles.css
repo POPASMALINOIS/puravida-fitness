@@ -2173,3 +2173,33 @@ textarea {
 .week-calendar-fixed {
   max-height: calc(100vh - 330px) !important;
 }
+/* EVENTOS CALENDARIO - TEXTO AUTOAJUSTADO */
+
+.week-event-fixed {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  gap: 1px !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow: hidden !important;
+  line-height: 1.05 !important;
+}
+
+.week-event-fixed strong {
+  font-size: 10px !important;
+  line-height: 1 !important;
+}
+
+.week-event-fixed span {
+  font-size: 9px !important;
+  line-height: 1.05 !important;
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+}
+
+.week-event-fixed small {
+  font-size: 8px !important;
+  line-height: 1.05 !important;
+  white-space: normal !important;
+}
