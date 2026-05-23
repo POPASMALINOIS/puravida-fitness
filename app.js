@@ -596,7 +596,8 @@ function renderCalendarioSemanal() {
             right:auto;
             background:${clase.entrenadorColor};
           "
-          onclick="event.stopPropagation(); verFichaCliente(${clase.clienteId})"
+          onclick="event.stopPropagation(); abrirAgendaDia('${fechaISO}', '${clase.hora}')"
+          ondblclick="event.stopPropagation(); verFichaCliente(${clase.clienteId})"
         >
           <strong>${clase.hora}</strong>
           <span>${clase.clienteNombre}</span>
