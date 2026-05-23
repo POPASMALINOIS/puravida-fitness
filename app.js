@@ -424,9 +424,11 @@ function renderCalendarioSemanal() {
 
   const lunes = obtenerLunesSemana(fechaCalendario);
   const domingo = new Date(lunes);
+
   domingo.setDate(lunes.getDate() + 6);
 
-  tituloMes.textContent = `${formatearFechaES(obtenerFechaISO(lunes))} - ${formatearFechaES(obtenerFechaISO(domingo))}`;
+  tituloMes.textContent =
+    `${formatearFechaES(obtenerFechaISO(lunes))} - ${formatearFechaES(obtenerFechaISO(domingo))}`;
 
   const slotHeight = 42;
   const horaInicio = 6;
@@ -443,6 +445,7 @@ function renderCalendarioSemanal() {
   for (let i = 0; i < 7; i++) {
     const fecha = new Date(lunes);
     fecha.setDate(lunes.getDate() + i);
+
     const fechaISO = obtenerFechaISO(fecha);
 
     headerHtml += `
@@ -462,6 +465,7 @@ function renderCalendarioSemanal() {
   for (let slot = 0; slot < totalSlots; slot++) {
     const hora = horaInicio + Math.floor(slot / 2);
     const minutos = slot % 2 === 0 ? "00" : "30";
+
     const tramo = `${String(hora).padStart(2, "0")}:${minutos}`;
 
     bodyHtml += `
@@ -475,22 +479,35 @@ function renderCalendarioSemanal() {
 
   for (let i = 0; i < 7; i++) {
     const fecha = new Date(lunes);
+
     fecha.setDate(lunes.getDate() + i);
+
     const fechaISO = obtenerFechaISO(fecha);
+
     const clasesDia = obtenerClasesPorFecha(fechaISO);
 
-    bodyHtml += `<div class="week-day-column-fixed" style="height:${totalSlots * slotHeight}px;">`;
+    bodyHtml += `
+      <div 
+        class="week-day-column-fixed" 
+        style="height:${totalSlots * slotHeight}px;"
+      >
+    `;
 
     for (let slot = 0; slot < totalSlots; slot++) {
       const hora = horaInicio + Math.floor(slot / 2);
       const minutos = slot % 2 === 0 ? "00" : "30";
+
       const tramo = `${String(hora).padStart(2, "0")}:${minutos}`;
+
       const top = slot * slotHeight;
 
       bodyHtml += `
         <div 
           class="week-slot-fixed"
-          style="top:${top}px; height:${slotHeight}px;"
+          style="
+            top:${top}px;
+            height:${slotHeight}px;
+          "
           onclick="abrirAgendaDia('${fechaISO}', '${tramo}')"
         ></div>
       `;
@@ -500,14 +517,20 @@ function renderCalendarioSemanal() {
       if (!clase.hora) return;
 
       const [hora, minutos] = clase.hora.split(":").map(Number);
-      const slotInicio = ((hora - horaInicio) * 2) + (minutos >= 30 ? 1 : 0);
+
+      const slotInicio =
+        ((hora - horaInicio) * 2) + (minutos >= 30 ? 1 : 0);
 
       if (slotInicio < 0 || slotInicio >= totalSlots) return;
 
-      const duracion = parseInt(clase.duracion || clase.bonoDuracion || "60");
+      const duracion = parseInt(
+        clase.duracion || clase.bonoDuracion || "60"
+      );
+
       const slotsOcupados = duracion === 60 ? 2 : 1;
 
       const top = slotInicio * slotHeight;
+
       const height = (slotsOcupados * slotHeight) - 6;
 
       bodyHtml += `
@@ -522,7 +545,9 @@ function renderCalendarioSemanal() {
         >
           <strong>${clase.hora}</strong>
           <span>${clase.clienteNombre}</span>
-          <small>${duracion} min · ${clase.entrenadorNombre}</small>
+          <small>
+            ${duracion} min · ${clase.entrenadorNombre}
+          </small>
         </div>
       `;
     });
@@ -533,7 +558,10 @@ function renderCalendarioSemanal() {
   bodyHtml += `</div>`;
 
   contenedor.innerHTML = headerHtml + bodyHtml;
+
   calendario.appendChild(contenedor);
+
+  aplicarZoomCalendario();
 }
 
 function abrirAgendaDia(fechaISO, horaPreseleccionada = "") {
