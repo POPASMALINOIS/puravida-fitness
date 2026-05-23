@@ -2164,3 +2164,12 @@ textarea {
     display: none !important;
   }
 }
+/* CALENDARIO - APROVECHAR MÁS ALTURA DE PANTALLA */
+
+.calendario-panel {
+  min-height: calc(100vh - 250px) !important;
+}
+
+.week-calendar-fixed {
+  max-height: calc(100vh - 330px) !important;
+}
