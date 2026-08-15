@@ -1,4 +1,4 @@
-const CACHE_NAME = "rage-training-v2.4.6";
+const CACHE_NAME = "rage-training-v2.4.7";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -7,9 +7,9 @@ const APP_SHELL = [
   "./styles.css?v=2.3.0",
   "./modern-v2.4.css?v=2.4.1",
   "./responsive-v2.4.2.css?v=2.4.5",
-  "./settings-v2.4.6.css?v=2.4.6",
+  "./ajustes-v2.4.7.css?v=2.4.7",
   "./app.js?v=2.4.4",
-  "./settings-v2.4.6.js?v=2.4.6"
+  "./ajustes-v2.4.7.js?v=2.4.7"
 ];
 self.addEventListener("install",event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_SHELL)));});
 self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE_NAME).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
