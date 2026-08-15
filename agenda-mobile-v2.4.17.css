@@ -1,0 +1,48 @@
+/* v2.4.17 · Ajustes móviles de agenda + contraste de eventos */
+
+/* El texto de las citas del calendario debe ser legible incluso sobre colores claros */
+.week-event-fixed,
+.week-event-fixed .evento-nombre,
+.week-event-fixed .evento-nombre * {
+  color:#07101d !important;
+  text-shadow:none !important;
+}
+
+/* Evita que el selector nativo de hora se desborde en iPhone/iPad */
+.agenda-layout,
+.session-form,
+.session-form > * {
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+
+#diaClaseHora {
+  display:block;
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  inline-size:100% !important;
+  max-inline-size:100% !important;
+  min-inline-size:0 !important;
+  box-sizing:border-box !important;
+}
+
+@media (max-width:900px) {
+  .agenda-layout {
+    width:100%;
+    max-width:100%;
+    grid-template-columns:minmax(0,1fr) !important;
+  }
+
+  .session-form {
+    width:100% !important;
+    max-width:100% !important;
+    overflow:hidden;
+  }
+
+  #diaClaseHora {
+    -webkit-appearance:none;
+    appearance:none;
+  }
+}
