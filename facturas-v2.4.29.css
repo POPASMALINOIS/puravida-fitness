@@ -1,0 +1,3 @@
+/* v2.4.29 · Facturación Rage Training */
+.settings-card-fiscal{grid-column:1/-1}.fiscal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.fiscal-full{grid-column:1/-1}.factura-btn{background:#F15A24!important;color:#fff!important;border:0!important;border-radius:8px!important;padding:8px 10px!important;font-weight:700!important;white-space:nowrap}.factura-btn:hover{filter:brightness(1.05)}
+@media(max-width:900px){.fiscal-grid{grid-template-columns:minmax(0,1fr)}.fiscal-full{grid-column:auto}.factura-btn{width:100%}.pagos-section .acciones,.cliente-row .acciones{flex-wrap:wrap}}
