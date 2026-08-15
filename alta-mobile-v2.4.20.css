@@ -1,0 +1,49 @@
+/* v2.4.20 · Ajuste responsive del alta de cliente */
+#alta-screen .alta-card,
+#alta-screen .form-grid,
+#alta-screen .labeled-field,
+#alta-screen .labeled-field > *{
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+
+#clienteFechaAlta{
+  display:block;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  inline-size:100%!important;
+  max-inline-size:100%!important;
+  min-inline-size:0!important;
+  box-sizing:border-box!important;
+}
+
+@media(max-width:900px){
+  #alta-screen{
+    width:100%;
+    max-width:100%;
+    overflow-x:hidden;
+  }
+
+  #alta-screen .alta-card{
+    width:100%!important;
+    max-width:100%!important;
+    overflow-x:hidden!important;
+  }
+
+  #alta-screen .form-grid{
+    grid-template-columns:minmax(0,1fr)!important;
+    width:100%!important;
+  }
+
+  #alta-screen .labeled-field{
+    width:100%!important;
+    overflow:hidden;
+  }
+
+  #clienteFechaAlta{
+    -webkit-appearance:none;
+    appearance:none;
+  }
+}
