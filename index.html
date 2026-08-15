@@ -4,171 +4,35 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Rage Training</title>
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#07101d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="styles.css?v=2.3.0">
   <link rel="stylesheet" href="mobile-v2.3.1.css?v=2.3.1">
+  <link rel="stylesheet" href="modern-v2.4.css?v=2.4.0">
 </head>
 <body>
 <div class="app-layout">
-
   <section id="login-screen" class="screen active">
-    <div class="card login-card">
-      <img src="rage-logo.png" alt="Rage Training" class="login-logo">
-      <h1>RAGE TRAINING</h1>
-      <p>Gestión premium de entrenamiento personal</p>
-      <input type="text" id="usuario" placeholder="Usuario" autocomplete="username">
-      <input type="password" id="password" placeholder="Contraseña" autocomplete="current-password">
-      <button onclick="login()">Acceder</button>
-    </div>
+    <div class="card login-card"><img src="rage-logo.png" alt="Rage Training" class="login-logo"><h1>RAGE TRAINING</h1><p>Gestión premium de entrenamiento personal</p><input type="text" id="usuario" placeholder="Usuario" autocomplete="username"><input type="password" id="password" placeholder="Contraseña" autocomplete="current-password"><button onclick="login()">Acceder</button></div>
   </section>
-
   <section id="dashboard-screen" class="screen">
-    <aside class="sidebar">
-      <div class="logo">
-        <img src="rage-logo.png" alt="Rage Training" class="sidebar-logo">
-        <h2>RAGE</h2>
-        <span>TRAINING</span>
-      </div>
-
-      <nav>
-        <button id="nav-resumen" class="nav-active" onclick="mostrarSeccion('resumen')">Resumen</button>
-        <button id="nav-clientes" onclick="mostrarSeccion('clientes')">Clientes</button>
-        <button id="nav-bonos" onclick="mostrarSeccion('clientes-bonos')">Bonos críticos</button>
-        <button id="nav-entrenadores" onclick="mostrarSeccion('entrenadores')">Entrenadores</button>
-        <button id="nav-pagos" onclick="mostrarSeccion('pagos')">Pagos</button>
-        <button onclick="mostrarSeccion('rutinas')">Rutinas</button>
-        <button onclick="mostrarSeccion('controles')">Controles</button>
-        <button onclick="mostrarSeccion('recordatorios')">Recordatorios</button>
-        <button onclick="mostrarSeccion('ajustes')">Ajustes</button>
-      </nav>
-    </aside>
-
+    <aside class="sidebar"><div class="logo"><img src="rage-logo.png" alt="Rage Training" class="sidebar-logo"><h2>RAGE</h2><span>TRAINING</span></div><nav><button id="nav-resumen" class="nav-active" onclick="mostrarSeccion('resumen')">Resumen</button><button id="nav-clientes" onclick="mostrarSeccion('clientes')">Clientes</button><button id="nav-bonos" onclick="mostrarSeccion('clientes-bonos')">Bonos críticos</button><button id="nav-entrenadores" onclick="mostrarSeccion('entrenadores')">Entrenadores</button><button id="nav-pagos" onclick="mostrarSeccion('pagos')">Pagos</button><button onclick="mostrarSeccion('rutinas')">Rutinas</button><button onclick="mostrarSeccion('controles')">Controles</button><button onclick="mostrarSeccion('recordatorios')">Recordatorios</button><button onclick="mostrarSeccion('ajustes')">Ajustes</button></nav></aside>
     <main class="main-panel">
-      <header class="top-header">
-        <div>
-          <h1 id="tituloPanel">Resumen</h1>
-          <p id="subtituloPanel">KPIs, agenda y seguimiento general</p>
-        </div>
-        <button onclick="logout()">Salir</button>
-      </header>
-
-      <section id="resumen-section">
-        <section class="resumen-grid">
-          <div class="resumen-card">
-            <strong id="totalClientes">0</strong>
-            <span>Total clientes</span>
-          </div>
-          <div class="resumen-card">
-            <strong id="clientesActivos">0</strong>
-            <span>Activos</span>
-          </div>
-          <div class="resumen-card clickable-card" onclick="mostrarSeccion('clientes-bonos')">
-            <strong id="bonosBajos">0</strong>
-            <span>Bonos bajos / agotados</span>
-          </div>
-          <div class="resumen-card clickable-card" onclick="mostrarSesionesHoy()">
-            <strong id="clasesHoy">0</strong>
-            <span>Sesiones hoy</span>
-          </div>
-        </section>
-
-        <section class="calendario-panel">
-          <div class="calendario-top">
-            <div>
-              <h2 id="tituloMes">Calendario</h2>
-              <span>Vista semanal por horas</span>
-            </div>
-            <div class="calendar-actions">
-              <button onclick="cambiarMes(-1)" aria-label="Semana anterior">‹</button>
-              <button onclick="irMesActual()">Hoy</button>
-              <button onclick="cambiarMes(1)" aria-label="Semana siguiente">›</button>
-            </div>
-          </div>
-          <div id="calendarioMensual" class="calendar-grid"></div>
-        </section>
-      </section>
-
-      <section id="clientes-section" style="display:none;">
-        <section class="toolbar">
-          <input type="text" id="buscadorClientes" placeholder="Buscar cliente..." oninput="renderClientes()">
-          <button class="add-btn" onclick="cambiarPantalla('alta-screen')">+ Añadir cliente</button>
-        </section>
-        <section class="tabla-clientes">
-          <div class="tabla-header"><span>Cliente</span><span>Teléfono</span><span>Bono</span><span>Estado</span><span>Acciones</span></div>
-          <div id="clientesLista"></div>
-        </section>
-      </section>
-
-      <section id="clientes-bonos-section" style="display:none;">
-        <section class="tabla-clientes">
-          <div class="tabla-header"><span>Cliente</span><span>Teléfono</span><span>Bono</span><span>Estado</span><span>Acciones</span></div>
-          <div id="clientesBonosLista"></div>
-        </section>
-      </section>
-
-      <section id="entrenadores-section" style="display:none;">
-        <section class="toolbar">
-          <input type="text" id="entrenadorNombre" placeholder="Nombre del entrenador">
-          <input type="color" id="entrenadorColor" value="#F15A24">
-          <button class="add-btn" onclick="agregarEntrenador()">+ Añadir entrenador</button>
-        </section>
-        <section class="tabla-clientes">
-          <div class="tabla-header entrenadores-header"><span>Entrenador</span><span>Color</span><span>Estado</span><span>Sesiones</span><span>Acciones</span></div>
-          <div id="entrenadoresLista"></div>
-        </section>
-      </section>
-
-      <section id="pagos-section" style="display:none;">
-        <section class="toolbar">
-          <input type="text" id="buscadorPagos" placeholder="Buscar cliente..." oninput="renderPagos()">
-        </section>
-        <section class="tabla-clientes">
-          <div class="tabla-header"><span>Cliente</span><span>Estado</span><span>Último pago</span><span>Importe</span><span>Acciones</span></div>
-          <div id="pagosLista"></div>
-        </section>
-      </section>
+      <header class="top-header"><div><h1 id="tituloPanel">Resumen</h1><p id="subtituloPanel">KPIs, agenda y seguimiento general</p></div><button onclick="logout()">Salir</button></header>
+      <section id="resumen-section"><section class="resumen-grid"><div class="resumen-card"><strong id="totalClientes">0</strong><span>Total clientes</span></div><div class="resumen-card"><strong id="clientesActivos">0</strong><span>Activos</span></div><div class="resumen-card clickable-card" onclick="mostrarSeccion('clientes-bonos')"><strong id="bonosBajos">0</strong><span>Bonos bajos / agotados</span></div><div class="resumen-card clickable-card" onclick="mostrarSesionesHoy()"><strong id="clasesHoy">0</strong><span>Sesiones hoy</span></div></section><section class="calendario-panel"><div class="calendario-top"><div><h2 id="tituloMes">Calendario</h2><span>Vista semanal por horas</span></div><div class="calendar-actions"><button onclick="cambiarMes(-1)" aria-label="Semana anterior">‹</button><button onclick="irMesActual()">Hoy</button><button onclick="cambiarMes(1)" aria-label="Semana siguiente">›</button></div></div><div id="calendarioMensual" class="calendar-grid"></div></section></section>
+      <section id="clientes-section" style="display:none;"><section class="toolbar"><input type="text" id="buscadorClientes" placeholder="Buscar cliente..." oninput="renderClientes()"><button class="add-btn" onclick="cambiarPantalla('alta-screen')">+ Añadir cliente</button></section><section class="tabla-clientes"><div class="tabla-header"><span>Cliente</span><span>Teléfono</span><span>Bono</span><span>Estado</span><span>Acciones</span></div><div id="clientesLista"></div></section></section>
+      <section id="clientes-bonos-section" style="display:none;"><section class="tabla-clientes"><div class="tabla-header"><span>Cliente</span><span>Teléfono</span><span>Bono</span><span>Estado</span><span>Acciones</span></div><div id="clientesBonosLista"></div></section></section>
+      <section id="entrenadores-section" style="display:none;"><section class="toolbar"><input type="text" id="entrenadorNombre" placeholder="Nombre del entrenador"><input type="color" id="entrenadorColor" value="#F15A24"><button class="add-btn" onclick="agregarEntrenador()">+ Añadir entrenador</button></section><section class="tabla-clientes"><div class="tabla-header entrenadores-header"><span>Entrenador</span><span>Color</span><span>Estado</span><span>Sesiones</span><span>Acciones</span></div><div id="entrenadoresLista"></div></section></section>
+      <section id="pagos-section" style="display:none;"><section class="toolbar"><input type="text" id="buscadorPagos" placeholder="Buscar cliente..." oninput="renderPagos()"></section><section class="tabla-clientes"><div class="tabla-header"><span>Cliente</span><span>Estado</span><span>Último pago</span><span>Importe</span><span>Acciones</span></div><div id="pagosLista"></div></section></section>
     </main>
   </section>
-
-  <section id="alta-screen" class="screen secondary-screen">
-    <header class="dashboard-header"><h1>Nuevo Cliente</h1><button onclick="volverDashboard()">Volver</button></header>
-    <div class="card alta-card">
-      <input type="text" id="clienteNombre" placeholder="Nombre del cliente">
-      <input type="text" id="clienteTelefono" placeholder="Teléfono">
-      <input type="email" id="clienteEmail" placeholder="Email">
-      <label for="clienteFechaAlta">Fecha de alta</label>
-      <input type="date" id="clienteFechaAlta">
-      <input type="number" id="clienteCuota" placeholder="Cuota mensual (€)">
-      <select id="clienteBonoTotal"><option value="5">Bono 5 sesiones</option><option value="10">Bono 10 sesiones</option></select>
-      <select id="clienteBonoDuracion"><option value="30">Media hora</option><option value="60">Una hora</option></select>
-      <select id="clienteBonoModalidad"><option value="Individual">Individual</option><option value="Pareja">Pareja</option></select>
-      <select id="clienteEstado"><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select>
-      <textarea id="clienteObservaciones" placeholder="Observaciones"></textarea>
-      <button onclick="agregarCliente()">Guardar cliente</button>
-    </div>
-  </section>
-
-  <section id="dia-screen" class="screen secondary-screen">
-    <header class="dashboard-header"><div><h1 id="tituloDia">Agenda del día</h1><p id="subtituloDia"></p></div><button onclick="volverDashboard()">Volver</button></header>
-    <div class="agenda-layout"><div class="card"><h2>Añadir sesión</h2><select id="diaClienteSelect"></select><input type="time" id="diaClaseHora"><button onclick="agendarClaseDia()">Guardar sesión</button></div><div class="agenda-panel"><h2>Sesiones del día</h2><div id="agendaDiaLista"></div></div></div>
-  </section>
-
-  <section id="ficha-screen" class="screen secondary-screen">
-    <header class="dashboard-header"><h1>Ficha Cliente</h1><button onclick="volverDashboard()">Volver</button></header>
-    <div class="cliente-ficha" id="clienteFicha"></div>
-  </section>
+  <section id="alta-screen" class="screen secondary-screen"><header class="dashboard-header"><h1>Nuevo Cliente</h1><button onclick="volverDashboard()">Volver</button></header><div class="card alta-card"><input type="text" id="clienteNombre" placeholder="Nombre del cliente"><input type="text" id="clienteTelefono" placeholder="Teléfono"><input type="email" id="clienteEmail" placeholder="Email"><label for="clienteFechaAlta">Fecha de alta</label><input type="date" id="clienteFechaAlta"><input type="number" id="clienteCuota" placeholder="Cuota mensual (€)"><select id="clienteBonoTotal"><option value="5">Bono 5 sesiones</option><option value="10">Bono 10 sesiones</option></select><select id="clienteBonoDuracion"><option value="30">Media hora</option><option value="60">Una hora</option></select><select id="clienteBonoModalidad"><option value="Individual">Individual</option><option value="Pareja">Pareja</option></select><select id="clienteEstado"><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select><textarea id="clienteObservaciones" placeholder="Observaciones"></textarea><button onclick="agregarCliente()">Guardar cliente</button></div></section>
+  <section id="dia-screen" class="screen secondary-screen"><header class="dashboard-header"><div><h1 id="tituloDia">Agenda del día</h1><p id="subtituloDia"></p></div><button onclick="volverDashboard()">Volver</button></header><div class="agenda-layout"><div class="card"><h2>Añadir sesión</h2><select id="diaClienteSelect"></select><input type="time" id="diaClaseHora"><button onclick="agendarClaseDia()">Guardar sesión</button></div><div class="agenda-panel"><h2>Sesiones del día</h2><div id="agendaDiaLista"></div></div></div></section>
+  <section id="ficha-screen" class="screen secondary-screen"><header class="dashboard-header"><h1>Ficha Cliente</h1><button onclick="volverDashboard()">Volver</button></header><div class="cliente-ficha" id="clienteFicha"></div></section>
 </div>
-
-<script src="app.js?v=2.3.0"></script>
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js?v=2.3.0');
-  });
-}
-</script>
+<script src="app.js?v=2.4.0"></script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('service-worker.js?v=2.4.0');});}</script>
 </body>
 </html>
