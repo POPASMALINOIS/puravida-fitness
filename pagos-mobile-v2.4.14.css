@@ -1,0 +1,71 @@
+/* v2.4.14 - Pagos mobile/tablet: evita solapes y separa cada dato */
+@media (max-width: 900px){
+  html.mobile-device #pagosLista .cliente-row{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-areas:
+      'cliente acciones'
+      'estado acciones'
+      'fecha importe'!important;
+    gap:7px 12px!important;
+    align-items:start!important;
+    padding:15px 4px!important;
+    min-height:0!important;
+  }
+  html.mobile-device #pagosLista .cliente-row>div:nth-child(1){
+    grid-area:cliente!important;
+    min-width:0!important;
+  }
+  html.mobile-device #pagosLista .cliente-row>div:nth-child(1) strong{
+    display:block!important;
+    font-size:16px!important;
+    line-height:1.2!important;
+    color:#f8fafc!important;
+  }
+  html.mobile-device #pagosLista .cliente-row>div:nth-child(2){
+    grid-area:estado!important;
+    position:static!important;
+    display:block!important;
+    margin:0!important;
+    color:#9fb0c4!important;
+    font-size:13px!important;
+    line-height:1.25!important;
+    transform:none!important;
+  }
+  html.mobile-device #pagosLista .cliente-row>div:nth-child(3){
+    grid-area:fecha!important;
+    position:static!important;
+    color:#7f91a7!important;
+    font-size:12px!important;
+    line-height:1.25!important;
+    margin:0!important;
+    transform:none!important;
+  }
+  html.mobile-device #pagosLista .cliente-row>div:nth-child(4){
+    grid-area:importe!important;
+    justify-self:end!important;
+    position:static!important;
+    color:#dce6f2!important;
+    font-size:13px!important;
+    font-weight:700!important;
+    line-height:1.25!important;
+    margin:0!important;
+    transform:none!important;
+  }
+  html.mobile-device #pagosLista .cliente-row>div:nth-child(5){
+    grid-area:acciones!important;
+    align-self:start!important;
+    display:flex!important;
+    flex-direction:row!important;
+    flex-wrap:wrap!important;
+    justify-content:flex-end!important;
+    gap:7px!important;
+    max-width:180px!important;
+  }
+  html.mobile-device #pagosLista .cliente-row .acciones button{
+    min-height:34px!important;
+    padding:7px 11px!important;
+    font-size:12px!important;
+    white-space:nowrap!important;
+  }
+}
