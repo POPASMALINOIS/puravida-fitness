@@ -15,7 +15,6 @@
     window.mostrarSeccion = function(seccion) {
       ocultarVistasIntegradas();
       const result = mostrarAnterior.apply(this, arguments);
-      // Algunos wrappers anteriores vuelven a tocar displays; reforzamos al final del ciclo.
       requestAnimationFrame(ocultarVistasIntegradas);
       setTimeout(ocultarVistasIntegradas, 0);
       return result;
@@ -25,7 +24,15 @@
   document.addEventListener('click', e => {
     const boton = e.target.closest('.sidebar nav button');
     if (!boton) return;
-    // El propio botón ejecutará mostrarSeccion; esto evita restos visuales antes del render.
     ocultarVistasIntegradas();
   }, true);
+
+  // Parche funcional v2.4.36: email libre + cancelación excepcional limpia de agenda.
+  if (!document.querySelector('script[data-rage-fixes-2436]')) {
+    const s = document.createElement('script');
+    s.src = 'fixes-v2.4.36.js?v=2.4.36';
+    s.dataset.rageFixes2436 = '1';
+    s.async = false;
+    document.head.appendChild(s);
+  }
 })();
