@@ -1,4 +1,15 @@
 (() => {
+  function cargarModuloFacturas(){
+    if(!document.querySelector('link[data-rage-facturas]')){
+      const css=document.createElement('link');
+      css.rel='stylesheet';css.href='facturas-v2.4.29.css?v=2.4.29';css.dataset.rageFacturas='1';document.head.appendChild(css);
+    }
+    if(!document.querySelector('script[data-rage-facturas]')){
+      const js=document.createElement('script');
+      js.src='facturas-v2.4.29.js?v=2.4.29';js.dataset.rageFacturas='1';document.body.appendChild(js);
+    }
+  }
+
   function montarPesa(){
     const loader=document.querySelector('.rage-splash-loader');
     if(!loader) return;
@@ -36,6 +47,7 @@
     const dashboard=document.getElementById('dashboard-screen');
     const login=document.getElementById('login-screen');
 
+    cargarModuloFacturas();
     montarPesa();
     if(login) login.classList.remove('active');
     if(dashboard) dashboard.classList.add('active');
