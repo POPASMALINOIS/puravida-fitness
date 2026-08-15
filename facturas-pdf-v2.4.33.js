@@ -6,6 +6,9 @@
   function money(v){const n=Number(String(v).replace(',','.'))||0;return n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})}
   function fechaES(v){try{return typeof formatearFechaES==='function'?formatearFechaES(v):v}catch(_){return v||'-'}}
   function num(v){return Number(String(v??0).replace(',','.'))||0}
+  function safeFilename(v='Cliente'){
+    return String(v).trim().replace(/[<>:"/\\|?*\u0000-\u001F]/g,' ').replace(/\s+/g,' ').replace(/[. ]+$/g,'').slice(0,90)||'Cliente';
+  }
 
   function ensureInvoiceNumber(pago,fiscal){
     if(pago.facturaNumero)return pago.facturaNumero;
@@ -67,6 +70,20 @@
     chunks.push(asciiBytes(xt));return new Blob([concatBytes(chunks)],{type:'application/pdf'});
   }
 
+  function showPdfActions(url,filename){
+    document.getElementById('rage-pdf-actions')?.remove();
+    const wrap=document.createElement('div');
+    wrap.id='rage-pdf-actions';
+    wrap.innerHTML=`<div class="rage-pdf-backdrop"></div><div class="rage-pdf-card"><div class="rage-pdf-top"><div><span>FACTURA GENERADA</span><h3>${filename}</h3></div><button type="button" class="rage-pdf-x" aria-label="Cerrar">×</button></div><p>El PDF está listo en una sola página. Puedes guardarlo o abrirlo para imprimirlo/compartirlo.</p><div class="rage-pdf-buttons"><button type="button" class="rage-pdf-open">Abrir / Imprimir</button><button type="button" class="rage-pdf-save">Guardar PDF</button></div></div>`;
+    const style=document.createElement('style');
+    style.textContent=`#rage-pdf-actions{position:fixed;inset:0;z-index:999999;display:grid;place-items:center;padding:20px}.rage-pdf-backdrop{position:absolute;inset:0;background:rgba(2,8,18,.72);backdrop-filter:blur(6px)}.rage-pdf-card{position:relative;width:min(520px,94vw);background:#0c1728;color:#f8fafc;border:1px solid #2b3a50;border-radius:18px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.42)}.rage-pdf-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.rage-pdf-top span{font-size:11px;letter-spacing:.14em;color:#F15A24;font-weight:800}.rage-pdf-top h3{font-size:18px;margin:5px 0 0;overflow-wrap:anywhere}.rage-pdf-card p{color:#9aa8bc;font-size:14px;line-height:1.45;margin:18px 0}.rage-pdf-x{background:transparent;border:0;color:#a8b4c7;font-size:30px;line-height:1;cursor:pointer}.rage-pdf-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}.rage-pdf-buttons button{min-height:48px;border-radius:10px;font-weight:800;cursor:pointer}.rage-pdf-open{background:#18253a;color:#fff;border:1px solid #31425a}.rage-pdf-save{background:#F15A24;color:#fff;border:0}@media(max-width:640px){.rage-pdf-buttons{grid-template-columns:1fr}.rage-pdf-card{padding:18px}}`;
+    wrap.appendChild(style);document.body.appendChild(wrap);
+    const close=()=>wrap.remove();
+    wrap.querySelector('.rage-pdf-x').onclick=close;wrap.querySelector('.rage-pdf-backdrop').onclick=close;
+    wrap.querySelector('.rage-pdf-open').onclick=()=>{const w=window.open(url,'_blank');if(!w)alert('El navegador ha bloqueado la apertura del PDF. Permite ventanas emergentes para Rage Training.')};
+    wrap.querySelector('.rage-pdf-save').onclick=()=>{const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove()};
+  }
+
   async function generarFacturaPDF(clienteId){
     const cliente=(typeof clientes!=='undefined'?clientes:[]).find(c=>Number(c.id)===Number(clienteId));
     if(!cliente){alert('Cliente no encontrado.');return}
@@ -83,22 +100,17 @@
     text(ctx,'FACTURA',right,96,38,'700',DARK,'right');text(ctx,numero,right,128,18,'700',TEXT,'right');text(ctx,`Fecha: ${fechaES(pago.facturaFecha||pago.fecha)}`,right,154,16,'400',MUTED,'right');
     roundedRect(ctx,right-132,170,132,38,19,'#fff3ed');text(ctx,'PAGADO',right-66,196,15,'700','#d84b14','center');
     ctx.fillStyle=ORANGE;ctx.fillRect(m,232,W-2*m,5);
-
     text(ctx,'EMISOR',m,282,15,'700',ORANGE);text(ctx,'CLIENTE',650,282,15,'700',ORANGE);
     text(ctx,fiscal.razonSocial,m,314,20,'700');text(ctx,`NIF/CIF: ${fiscal.nif}`,m,342,17);text(ctx,fiscal.direccion,m,368,17);text(ctx,`${fiscal.cp} ${fiscal.localidad}${fiscal.provincia?', '+fiscal.provincia:''}`,m,394,17);if(fiscal.email)text(ctx,fiscal.email,m,420,17);if(fiscal.telefono)text(ctx,fiscal.telefono,m,446,17);
     text(ctx,cliente.nombre||'-',650,314,20,'700');text(ctx,`Teléfono: ${cliente.telefono||'-'}`,650,342,17);text(ctx,`Email: ${cliente.email||'-'}`,650,368,17);text(ctx,`Fecha de alta: ${fechaES(cliente.fechaAlta||'')}`,650,394,17);
-
     const gap=16,cardW=(W-2*m-gap*2)/3;labelValue(ctx,'Tipo de bono',`${cliente.bonoTotal||0} sesiones`,m,500,cardW);labelValue(ctx,'Duración',`${cliente.bonoDuracion||'-'} min`,m+cardW+gap,500,cardW);labelValue(ctx,'Modalidad',cliente.bonoModalidad||'-',m+(cardW+gap)*2,500,cardW);
-
     const sy=610,sh=46;roundedRect(ctx,m,sy,W-2*m,sh,8,DARK);text(ctx,'CONCEPTO',m+18,sy+30,14,'700','#fff');text(ctx,'BASE',845,sy+30,14,'700','#fff','right');text(ctx,'IVA',995,sy+30,14,'700','#fff','right');text(ctx,'TOTAL',right-18,sy+30,14,'700','#fff','right');
     roundedRect(ctx,m,sy+sh,W-2*m,100,0,'#fff',LINE);text(ctx,pago.concepto||'Cuota inicial / alta',m+18,sy+sh+34,17,'700');text(ctx,`Bono ${cliente.bonoTotal||0} sesiones · ${cliente.bonoDuracion||'-'} min · ${cliente.bonoModalidad||'-'}`,m+18,sy+sh+64,15,'400',MUTED);text(ctx,`${money(base)} €`,845,sy+sh+52,17,'400',TEXT,'right');text(ctx,`${money(cuotaIva)} €`,995,sy+sh+52,17,'400',TEXT,'right');text(ctx,`${money(total)} €`,right-18,sy+sh+52,17,'700',TEXT,'right');
-
     const tx=760,tw=right-tx,ty=800;ctx.strokeStyle=LINE;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(tx,ty+36);ctx.lineTo(right,ty+36);ctx.stroke();text(ctx,'Base imponible',tx,ty+24,17);text(ctx,`${money(base)} €`,right,ty+24,17,'700',TEXT,'right');ctx.beginPath();ctx.moveTo(tx,ty+78);ctx.lineTo(right,ty+78);ctx.stroke();text(ctx,`IVA (${money(iva)}%)`,tx,ty+66,17);text(ctx,`${money(cuotaIva)} €`,right,ty+66,17,'700',TEXT,'right');roundedRect(ctx,tx,ty+94,tw,64,9,DARK);text(ctx,'TOTAL',tx+18,ty+135,21,'700','#fff');text(ctx,`${money(total)} €`,right-18,ty+135,21,'700','#fff','right');
-
     const fy=1570;ctx.strokeStyle=LINE;ctx.beginPath();ctx.moveTo(m,fy);ctx.lineTo(right,fy);ctx.stroke();text(ctx,`Factura generada por Rage Training. Documento asociado al pago registrado el ${fechaES(pago.fecha)}.`,m,fy+32,13,'400',MUTED);text(ctx,'Datos registrales:',m,fy+60,13,'700','#475569');wrapText(ctx,fiscal.datosRegistrales,m+112,fy+60,right-(m+112),19,13,'400','#475569',3);
-
-    const jpeg=dataUrlBytes(ctx.canvas.toDataURL('image/jpeg',0.94)),pdf=buildSinglePagePdf(jpeg,W,H),url=URL.createObjectURL(pdf),filename=`Factura ${numero}.pdf`;
-    const a=document.createElement('a');a.href=url;a.download=filename;a.target='_blank';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+    const jpeg=dataUrlBytes(ctx.canvas.toDataURL('image/jpeg',0.94)),pdf=buildSinglePagePdf(jpeg,W,H),url=URL.createObjectURL(pdf),filename=`${safeFilename(cliente.nombre)} - ${numero}.pdf`;
+    showPdfActions(url,filename);
+    setTimeout(()=>URL.revokeObjectURL(url),10*60*1000);
   }
 
   window.generarFacturaRagePDF=generarFacturaPDF;
