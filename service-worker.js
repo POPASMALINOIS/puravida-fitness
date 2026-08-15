@@ -1,10 +1,13 @@
-const CACHE_NAME = "rage-training-v2.3.0";
+const CACHE_NAME = "rage-training-v2.3.1";
 
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./rage-logo.png"
+  "./rage-logo.png",
+  "./styles.css?v=2.3.0",
+  "./mobile-v2.3.1.css?v=2.3.1",
+  "./app.js?v=2.3.0"
 ];
 
 self.addEventListener("install", event => {
@@ -30,7 +33,7 @@ self.addEventListener("fetch", event => {
   if (url.origin !== self.location.origin) return;
 
   event.respondWith(
-    fetch(request)
+    fetch(request, { cache: "no-store" })
       .then(response => {
         if (response && response.status === 200) {
           const copy = response.clone();
