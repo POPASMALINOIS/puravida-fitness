@@ -134,7 +134,6 @@
     };
   }
 
-  /* v2.4.21 · Registrar la cuota como pagada al crear el cliente */
   function instalarPagoAlta() {
     const cuota = document.getElementById('clienteCuota');
     if (!cuota || document.getElementById('clientePagadoAlta')) return;
@@ -175,12 +174,7 @@
       if (pagado && Array.isArray(clientes) && clientes.length > cantidadAntes) {
         const cliente = clientes[clientes.length - 1];
         cliente.pagos = Array.isArray(cliente.pagos) ? cliente.pagos : [];
-        cliente.pagos.push({
-          id: Date.now(),
-          fecha: fechaAlta,
-          importe: cuota,
-          concepto: 'Cuota inicial / alta'
-        });
+        cliente.pagos.push({id:Date.now(),fecha:fechaAlta,importe:cuota,concepto:'Cuota inicial / alta'});
         cliente.pagoPendiente = false;
         if (typeof guardarDatos === 'function') guardarDatos();
         if (typeof actualizarResumen === 'function') actualizarResumen();
@@ -192,7 +186,42 @@
     };
   }
 
+  function scrollTopApp(){document.documentElement.scrollTop=0;document.body.scrollTop=0;window.scrollTo(0,0);const main=document.querySelector('.main-panel');if(main)main.scrollTop=0;}
+  function ensureAltaIntegrada(){
+    const main=document.querySelector('.main-panel');
+    if(!main)return null;
+    let section=document.getElementById('alta-cliente-integrada-section');
+    if(!section){section=document.createElement('section');section.id='alta-cliente-integrada-section';section.style.display='none';section.className='alta-cliente-integrada';main.appendChild(section);}
+    const legacy=document.getElementById('alta-screen');
+    if(legacy&&!section.dataset.mounted){Array.from(legacy.children).forEach(child=>section.appendChild(child));section.dataset.mounted='1';}
+    return section;
+  }
+  function mostrarAltaIntegrada(){
+    const section=ensureAltaIntegrada();if(!section)return;
+    const dashboard=document.getElementById('dashboard-screen');
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    dashboard?.classList.add('active');
+    document.querySelectorAll('.main-panel > section').forEach(s=>{s.style.display=s.id==='alta-cliente-integrada-section'?'block':'none';});
+    const titulo=document.getElementById('tituloPanel');const subtitulo=document.getElementById('subtituloPanel');
+    if(titulo)titulo.textContent='Nuevo cliente';if(subtitulo)subtitulo.textContent='Alta y configuración inicial';
+    document.querySelectorAll('.sidebar nav button').forEach(btn=>btn.classList.remove('nav-active'));document.getElementById('nav-clientes')?.classList.add('nav-active');
+    scrollTopApp();requestAnimationFrame(scrollTopApp);
+  }
+  function instalarAltaIntegrada(){
+    const altaBtn=document.querySelector('#clientes-section .add-btn');
+    if(altaBtn)altaBtn.onclick=mostrarAltaIntegrada;
+    const alta=ensureAltaIntegrada();
+    const back=alta?.querySelector('.dashboard-header button');
+    if(back)back.onclick=()=>{alta.style.display='none';if(typeof window.mostrarSeccion==='function')window.mostrarSeccion('clientes');};
+  }
+  function instalarEstilosAltaIntegrada(){
+    if(document.getElementById('alta-integrada-inline-style'))return;
+    const style=document.createElement('style');style.id='alta-integrada-inline-style';style.textContent=`.alta-cliente-integrada{width:100%;min-width:0;box-sizing:border-box;padding-bottom:100px}.alta-cliente-integrada .dashboard-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:0 0 16px;padding:0;background:transparent;border:0}.alta-cliente-integrada .alta-card{width:100%;max-width:760px;margin:0;box-sizing:border-box}.alta-cliente-integrada .form-grid,.alta-cliente-integrada .labeled-field,.alta-cliente-integrada input,.alta-cliente-integrada select,.alta-cliente-integrada textarea{min-width:0;max-width:100%;box-sizing:border-box}@media(max-width:900px){.alta-cliente-integrada{padding-bottom:120px}.alta-cliente-integrada .alta-card{max-width:100%;margin:0!important;padding:18px!important}.alta-cliente-integrada .form-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important}}`;document.head.appendChild(style);
+  }
+
   instalarEstilosPagoAlta();
-  document.addEventListener('DOMContentLoaded', instalarPagoAlta);
+  instalarEstilosAltaIntegrada();
+  document.addEventListener('DOMContentLoaded',()=>{instalarPagoAlta();instalarAltaIntegrada();});
   instalarPagoAlta();
+  instalarAltaIntegrada();
 })();
