@@ -1,0 +1,24 @@
+/* RAGE TRAINING v2.4.2 — mobile category navigation */
+.mobile-category-nav{display:none}
+
+@media (max-width:760px){
+  body{padding-bottom:0!important}
+  .sidebar{display:none!important}
+  .main-panel{margin-left:0!important;width:100%!important;padding:12px 10px 20px!important}
+
+  .top-header{position:sticky!important;top:0!important;z-index:1200!important;margin:0 -10px 0!important;padding:10px 10px 8px!important;background:rgba(7,16,29,.96)!important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(148,163,184,.10)!important}
+
+  .mobile-category-nav{display:flex!important;position:sticky;top:61px;z-index:1190;gap:6px;width:calc(100% + 20px);margin:0 -10px 12px;padding:8px 10px 9px;overflow-x:auto;overflow-y:hidden;background:rgba(7,16,29,.96);border-bottom:1px solid rgba(148,163,184,.10);scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+  .mobile-category-nav::-webkit-scrollbar{display:none}
+  .mobile-category-nav button{flex:0 0 auto;min-height:35px;padding:0 12px;border:1px solid rgba(148,163,184,.15);border-radius:999px;background:#0d192a;color:#9fb0c5;font-size:10px;font-weight:750;white-space:nowrap;scroll-snap-align:start}
+  .mobile-category-nav button:active{background:rgba(241,90,36,.16);border-color:rgba(241,90,36,.34);color:#fff}
+  .mobile-category-nav button:first-child{background:rgba(241,90,36,.14);border-color:rgba(241,90,36,.25);color:#fff}
+
+  .header-copy .eyebrow{display:none!important}
+  .header-copy h1{font-size:20px!important;margin:0 0 2px!important}
+  .header-copy p{font-size:9px!important;margin:0!important;max-width:235px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .header-actions .ghost-btn{height:31px!important;padding:0 9px!important}
+
+  .section-heading{margin-top:4px!important}
+  #resumen-section{padding-top:0!important}
+}
