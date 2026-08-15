@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css?v=2.2.0">
+  <link rel="stylesheet" href="styles.css?v=2.3.0">
 </head>
 <body>
 <div class="app-layout">
@@ -96,18 +96,14 @@
           <button class="add-btn" onclick="cambiarPantalla('alta-screen')">+ Añadir cliente</button>
         </section>
         <section class="tabla-clientes">
-          <div class="tabla-header">
-            <span>Cliente</span><span>Teléfono</span><span>Bono</span><span>Estado</span><span>Acciones</span>
-          </div>
+          <div class="tabla-header"><span>Cliente</span><span>Teléfono</span><span>Bono</span><span>Estado</span><span>Acciones</span></div>
           <div id="clientesLista"></div>
         </section>
       </section>
 
       <section id="clientes-bonos-section" style="display:none;">
         <section class="tabla-clientes">
-          <div class="tabla-header">
-            <span>Cliente</span><span>Teléfono</span><span>Bono</span><span>Estado</span><span>Acciones</span>
-          </div>
+          <div class="tabla-header"><span>Cliente</span><span>Teléfono</span><span>Bono</span><span>Estado</span><span>Acciones</span></div>
           <div id="clientesBonosLista"></div>
         </section>
       </section>
@@ -119,9 +115,7 @@
           <button class="add-btn" onclick="agregarEntrenador()">+ Añadir entrenador</button>
         </section>
         <section class="tabla-clientes">
-          <div class="tabla-header entrenadores-header">
-            <span>Entrenador</span><span>Color</span><span>Estado</span><span>Sesiones</span><span>Acciones</span>
-          </div>
+          <div class="tabla-header entrenadores-header"><span>Entrenador</span><span>Color</span><span>Estado</span><span>Sesiones</span><span>Acciones</span></div>
           <div id="entrenadoresLista"></div>
         </section>
       </section>
@@ -131,9 +125,7 @@
           <input type="text" id="buscadorPagos" placeholder="Buscar cliente..." oninput="renderPagos()">
         </section>
         <section class="tabla-clientes">
-          <div class="tabla-header">
-            <span>Cliente</span><span>Estado</span><span>Último pago</span><span>Importe</span><span>Acciones</span>
-          </div>
+          <div class="tabla-header"><span>Cliente</span><span>Estado</span><span>Último pago</span><span>Importe</span><span>Acciones</span></div>
           <div id="pagosLista"></div>
         </section>
       </section>
@@ -141,10 +133,7 @@
   </section>
 
   <section id="alta-screen" class="screen secondary-screen">
-    <header class="dashboard-header">
-      <h1>Nuevo Cliente</h1>
-      <button onclick="volverDashboard()">Volver</button>
-    </header>
+    <header class="dashboard-header"><h1>Nuevo Cliente</h1><button onclick="volverDashboard()">Volver</button></header>
     <div class="card alta-card">
       <input type="text" id="clienteNombre" placeholder="Nombre del cliente">
       <input type="text" id="clienteTelefono" placeholder="Teléfono">
@@ -152,63 +141,31 @@
       <label for="clienteFechaAlta">Fecha de alta</label>
       <input type="date" id="clienteFechaAlta">
       <input type="number" id="clienteCuota" placeholder="Cuota mensual (€)">
-      <select id="clienteBonoTotal">
-        <option value="5">Bono 5 sesiones</option>
-        <option value="10">Bono 10 sesiones</option>
-      </select>
-      <select id="clienteBonoDuracion">
-        <option value="30">Media hora</option>
-        <option value="60">Una hora</option>
-      </select>
-      <select id="clienteBonoModalidad">
-        <option value="Individual">Individual</option>
-        <option value="Pareja">Pareja</option>
-      </select>
-      <select id="clienteEstado">
-        <option value="Activo">Activo</option>
-        <option value="Inactivo">Inactivo</option>
-      </select>
+      <select id="clienteBonoTotal"><option value="5">Bono 5 sesiones</option><option value="10">Bono 10 sesiones</option></select>
+      <select id="clienteBonoDuracion"><option value="30">Media hora</option><option value="60">Una hora</option></select>
+      <select id="clienteBonoModalidad"><option value="Individual">Individual</option><option value="Pareja">Pareja</option></select>
+      <select id="clienteEstado"><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select>
       <textarea id="clienteObservaciones" placeholder="Observaciones"></textarea>
       <button onclick="agregarCliente()">Guardar cliente</button>
     </div>
   </section>
 
   <section id="dia-screen" class="screen secondary-screen">
-    <header class="dashboard-header">
-      <div>
-        <h1 id="tituloDia">Agenda del día</h1>
-        <p id="subtituloDia"></p>
-      </div>
-      <button onclick="volverDashboard()">Volver</button>
-    </header>
-    <div class="agenda-layout">
-      <div class="card">
-        <h2>Añadir sesión</h2>
-        <select id="diaClienteSelect"></select>
-        <input type="time" id="diaClaseHora">
-        <button onclick="agendarClaseDia()">Guardar sesión</button>
-      </div>
-      <div class="agenda-panel">
-        <h2>Sesiones del día</h2>
-        <div id="agendaDiaLista"></div>
-      </div>
-    </div>
+    <header class="dashboard-header"><div><h1 id="tituloDia">Agenda del día</h1><p id="subtituloDia"></p></div><button onclick="volverDashboard()">Volver</button></header>
+    <div class="agenda-layout"><div class="card"><h2>Añadir sesión</h2><select id="diaClienteSelect"></select><input type="time" id="diaClaseHora"><button onclick="agendarClaseDia()">Guardar sesión</button></div><div class="agenda-panel"><h2>Sesiones del día</h2><div id="agendaDiaLista"></div></div></div>
   </section>
 
   <section id="ficha-screen" class="screen secondary-screen">
-    <header class="dashboard-header">
-      <h1>Ficha Cliente</h1>
-      <button onclick="volverDashboard()">Volver</button>
-    </header>
+    <header class="dashboard-header"><h1>Ficha Cliente</h1><button onclick="volverDashboard()">Volver</button></header>
     <div class="cliente-ficha" id="clienteFicha"></div>
   </section>
 </div>
 
-<script src="app.js?v=2.2.0"></script>
+<script src="app.js?v=2.3.0"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js?v=2.2.0');
+    navigator.serviceWorker.register('service-worker.js?v=2.3.0');
   });
 }
 </script>

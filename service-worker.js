@@ -1,4 +1,4 @@
-const CACHE_NAME = "rage-training-v2.2.0";
+const CACHE_NAME = "rage-training-v2.3.0";
 
 const APP_SHELL = [
   "./",
@@ -24,11 +24,9 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   const request = event.request;
-
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
-
   if (url.origin !== self.location.origin) return;
 
   event.respondWith(
@@ -43,11 +41,7 @@ self.addEventListener("fetch", event => {
       .catch(async () => {
         const cached = await caches.match(request);
         if (cached) return cached;
-
-        if (request.mode === "navigate") {
-          return caches.match("./index.html");
-        }
-
+        if (request.mode === "navigate") return caches.match("./index.html");
         return Response.error();
       })
   );
