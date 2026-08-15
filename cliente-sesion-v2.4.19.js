@@ -133,4 +133,66 @@
       return result;
     };
   }
+
+  /* v2.4.21 · Registrar la cuota como pagada al crear el cliente */
+  function instalarPagoAlta() {
+    const cuota = document.getElementById('clienteCuota');
+    if (!cuota || document.getElementById('clientePagadoAlta')) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'alta-cuota-pago';
+    cuota.parentNode.insertBefore(wrap, cuota);
+    wrap.appendChild(cuota);
+
+    const label = document.createElement('label');
+    label.className = 'alta-pago-toggle';
+    label.innerHTML = `
+      <input type="checkbox" id="clientePagadoAlta">
+      <span class="alta-pago-switch"></span>
+      <span class="alta-pago-copy"><strong>Pagado</strong><small>Registrar cuota inicial</small></span>`;
+    wrap.appendChild(label);
+  }
+
+  function instalarEstilosPagoAlta() {
+    if (document.getElementById('alta-pago-inline-style')) return;
+    const style = document.createElement('style');
+    style.id = 'alta-pago-inline-style';
+    style.textContent = `
+      .alta-cuota-pago{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:stretch;min-width:0}.alta-cuota-pago>#clienteCuota{margin:0;min-width:0}.alta-pago-toggle{display:flex!important;align-items:center;gap:9px;margin:0!important;padding:0 12px;min-height:48px;border:1px solid rgba(148,163,184,.16);border-radius:10px;background:#0c1728;cursor:pointer;white-space:nowrap}.alta-pago-toggle input{position:absolute;opacity:0;pointer-events:none}.alta-pago-switch{position:relative;display:block;width:36px;height:20px;flex:0 0 36px;border-radius:999px;background:#25344a;transition:.18s}.alta-pago-switch:after{content:'';position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:.18s}.alta-pago-toggle input:checked+.alta-pago-switch{background:#F15A24}.alta-pago-toggle input:checked+.alta-pago-switch:after{transform:translateX(16px)}.alta-pago-copy{display:flex;flex-direction:column;line-height:1.1}.alta-pago-copy strong{font-size:12px;color:#f8fafc}.alta-pago-copy small{margin-top:3px;font-size:9px;color:#8ea0b8}@media(max-width:900px){.alta-cuota-pago{grid-template-columns:minmax(0,1fr)}.alta-pago-toggle{width:100%;min-width:0;padding:10px 12px;white-space:normal}.alta-pago-copy small{font-size:10px}}`;
+    document.head.appendChild(style);
+  }
+
+  const agregarClienteAnterior = window.agregarCliente;
+  if (typeof agregarClienteAnterior === 'function') {
+    window.agregarCliente = function() {
+      const pagado = !!document.getElementById('clientePagadoAlta')?.checked;
+      const cuota = document.getElementById('clienteCuota')?.value || '0';
+      const fechaAlta = document.getElementById('clienteFechaAlta')?.value || hoyISO();
+      const cantidadAntes = Array.isArray(clientes) ? clientes.length : 0;
+
+      const result = agregarClienteAnterior.apply(this, arguments);
+
+      if (pagado && Array.isArray(clientes) && clientes.length > cantidadAntes) {
+        const cliente = clientes[clientes.length - 1];
+        cliente.pagos = Array.isArray(cliente.pagos) ? cliente.pagos : [];
+        cliente.pagos.push({
+          id: Date.now(),
+          fecha: fechaAlta,
+          importe: cuota,
+          concepto: 'Cuota inicial / alta'
+        });
+        cliente.pagoPendiente = false;
+        if (typeof guardarDatos === 'function') guardarDatos();
+        if (typeof actualizarResumen === 'function') actualizarResumen();
+      }
+
+      const check = document.getElementById('clientePagadoAlta');
+      if (check) check.checked = false;
+      return result;
+    };
+  }
+
+  instalarEstilosPagoAlta();
+  document.addEventListener('DOMContentLoaded', instalarPagoAlta);
+  instalarPagoAlta();
 })();
