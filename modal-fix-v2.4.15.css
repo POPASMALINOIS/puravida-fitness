@@ -1,0 +1,46 @@
+/* v2.4.15 - fix measurement modal overflow on phone/tablet */
+.tracking-modal,
+.tracking-modal-body,
+.tracking-form-grid,
+.tracking-field,
+.unit-input{
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+.tracking-field input,
+.tracking-field textarea,
+.tracking-field select,
+.unit-input input{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+.tracking-field input[type="date"]{
+  display:block;
+  inline-size:100%!important;
+  max-inline-size:100%!important;
+  min-inline-size:0!important;
+}
+@media(max-width:900px){
+  .tracking-modal-backdrop{
+    padding:10px!important;
+  }
+  .tracking-modal{
+    width:calc(100vw - 20px)!important;
+    max-width:calc(100vw - 20px)!important;
+    overflow-x:hidden!important;
+  }
+  .tracking-modal-body{
+    width:100%!important;
+    overflow-x:hidden!important;
+  }
+  .tracking-form-grid{
+    width:100%!important;
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  .tracking-field{
+    width:100%!important;
+  }
+}
