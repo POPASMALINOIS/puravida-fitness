@@ -1,4 +1,4 @@
-const CACHE_NAME = "rage-training-v2.4.34";
+const CACHE_NAME = "rage-training-v2.4.35";
 const APP_SHELL = [
   "./",
   "./index.html",
