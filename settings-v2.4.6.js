@@ -14,7 +14,7 @@
   function top(){document.documentElement.scrollTop=0;document.body.scrollTop=0;window.scrollTo(0,0);const m=document.querySelector('.main-panel');if(m)m.scrollTop=0}
   function inject(){
     const main=document.querySelector('.main-panel'); if(!main||document.getElementById('ajustes-section'))return;
-    const s=document.createElement('section'); s.id='ajustes-section';
+    const s=document.createElement('section'); s.id='ajustes-section'; s.style.display='none';
     s.innerHTML=`
       <div class="section-heading"><div><span class="section-kicker">CONFIGURACIÓN</span><h2>Ajustes</h2><p>Preferencias del centro, reglas de gestión y copias de seguridad.</p></div></div>
       <div class="settings-grid">
@@ -35,7 +35,7 @@
         <article class="settings-card"><div class="settings-card-head"><div><span class="section-kicker">DATOS</span><h3>Copias de seguridad</h3><p>Exporta o restaura todos los datos guardados por la aplicación.</p></div><span class="settings-icon">⇩</span></div>
           <div class="settings-actions"><button class="settings-btn primary" onclick="exportarBackupRage()">Exportar copia</button><button class="settings-btn" onclick="document.getElementById('importBackupRage').click()">Importar copia</button><button class="settings-btn danger" onclick="reiniciarDatosRage()">Borrar datos</button></div><input class="settings-file" id="importBackupRage" type="file" accept="application/json"><div id="settingsStatus" class="settings-status"></div>
         </article>
-        <article class="settings-card settings-wide"><div class="settings-card-head"><div><span class="section-kicker">APLICACIÓN</span><h3>Información</h3><p>Estado de esta versión de trabajo.</p></div><span class="settings-icon">i</span></div><div class="settings-version"><div><strong>Rage Training</strong><span> · PWA instalada / navegador</span></div><span>v2.4.6</span></div><div class="settings-actions"><button class="settings-btn primary" onclick="guardarAjustesRage()">Guardar ajustes</button><button class="settings-btn" onclick="restaurarAjustesRage()">Restaurar valores</button></div></article>
+        <article class="settings-card settings-wide"><div class="settings-card-head"><div><span class="section-kicker">APLICACIÓN</span><h3>Información</h3><p>Estado de esta versión de trabajo.</p></div><span class="settings-icon">i</span></div><div class="settings-version"><div><strong>Rage Training</strong><span> · PWA instalada / navegador</span></div><span>v2.4.8</span></div><div class="settings-actions"><button class="settings-btn primary" onclick="guardarAjustesRage()">Guardar ajustes</button><button class="settings-btn" onclick="restaurarAjustesRage()">Restaurar valores</button></div></article>
       </div>`;
     main.appendChild(s);
     document.getElementById('importBackupRage').addEventListener('change',importarBackupRage);
@@ -48,13 +48,23 @@
     cfg={centroNombre:document.getElementById('setCentroNombre').value.trim()||'Rage Training',centroTelefono:document.getElementById('setCentroTelefono').value.trim(),centroEmail:document.getElementById('setCentroEmail').value.trim(),centroDireccion:document.getElementById('setCentroDireccion').value.trim(),bonoUmbral:parseInt(document.getElementById('setBonoUmbral').value)||2,pagosDiaLimite:parseInt(document.getElementById('setPagosDiaLimite').value)||5,densidad:document.getElementById('setCompacta').checked?'compacta':'normal',reducirMovimiento:document.getElementById('setMovimiento').checked};save(cfg);apply();try{verificarEstadoBonos();verificarPagosPendientes();actualizarResumen()}catch(e){}status('Ajustes guardados.');
   };
   window.restaurarAjustesRage=function(){cfg={...defaults};save(cfg);fill();try{verificarEstadoBonos();verificarPagosPendientes();actualizarResumen()}catch(e){}status('Valores restaurados.');};
-  window.exportarBackupRage=function(){const data={version:'2.4.6',fecha:new Date().toISOString(),clientes:JSON.parse(localStorage.getItem('clientes')||'[]'),entrenadores:JSON.parse(localStorage.getItem('entrenadores')||'[]'),ajustes:load()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='rage-training-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);status('Copia exportada correctamente.');};
+  window.exportarBackupRage=function(){const data={version:'2.4.8',fecha:new Date().toISOString(),clientes:JSON.parse(localStorage.getItem('clientes')||'[]'),entrenadores:JSON.parse(localStorage.getItem('entrenadores')||'[]'),ajustes:load()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='rage-training-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);status('Copia exportada correctamente.');};
   window.importarBackupRage=function(ev){const file=ev.target.files&&ev.target.files[0];if(!file)return;const r=new FileReader();r.onload=function(){try{const d=JSON.parse(r.result);if(!Array.isArray(d.clientes)||!Array.isArray(d.entrenadores))throw new Error('Formato no válido');localStorage.setItem('clientes',JSON.stringify(d.clientes));localStorage.setItem('entrenadores',JSON.stringify(d.entrenadores));if(d.ajustes)localStorage.setItem(KEY,JSON.stringify(Object.assign({},defaults,d.ajustes)));alert('Copia restaurada correctamente. La aplicación se recargará.');location.reload();}catch(e){status('No se ha podido importar la copia.',true)}};r.readAsText(file);};
   window.reiniciarDatosRage=function(){const ok=prompt('Esta acción borra clientes, entrenadores y ajustes de este dispositivo. Escribe BORRAR para continuar.');if(ok!=='BORRAR')return;localStorage.removeItem('clientes');localStorage.removeItem('entrenadores');localStorage.removeItem(KEY);alert('Datos eliminados. La aplicación se recargará.');location.reload();};
+
   const originalMostrar=window.mostrarSeccion;
   window.mostrarSeccion=function(seccion){
-    if(seccion!=='ajustes')return originalMostrar(seccion);
-    ['resumen-section','clientes-section','clientes-bonos-section','entrenadores-section','pagos-section','ajustes-section'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=id==='ajustes-section'?'block':'none'});
+    const ajustes=document.getElementById('ajustes-section');
+
+    if(seccion!=='ajustes'){
+      if(ajustes)ajustes.style.display='none';
+      return originalMostrar(seccion);
+    }
+
+    ['resumen-section','clientes-section','clientes-bonos-section','entrenadores-section','pagos-section','ajustes-section'].forEach(id=>{
+      const e=document.getElementById(id);
+      if(e)e.style.display=id==='ajustes-section'?'block':'none';
+    });
     document.querySelectorAll('.sidebar nav button').forEach(b=>b.classList.remove('nav-active'));
     const btn=[...document.querySelectorAll('.sidebar nav button')].find(b=>(b.getAttribute('onclick')||'').includes("'ajustes'"));if(btn)btn.classList.add('nav-active');
     const t=document.getElementById('tituloPanel'),st=document.getElementById('subtituloPanel');if(t)t.textContent='Ajustes';if(st)st.textContent='Configuración, datos y preferencias de la aplicación';fill();top();requestAnimationFrame(top);setTimeout(top,30);
