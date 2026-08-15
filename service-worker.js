@@ -1,4 +1,4 @@
-const CACHE_NAME = "rage-training-v2.4.19";
+const CACHE_NAME = "rage-training-v2.4.20";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -16,12 +16,15 @@ const APP_SHELL = [
   "./modal-fix-v2.4.15.css?v=2.4.15",
   "./agenda-integrada-v2.4.16.css?v=2.4.16",
   "./agenda-mobile-v2.4.17.css?v=2.4.18",
+  "./cliente-sesion-v2.4.19.css?v=2.4.19",
+  "./alta-mobile-v2.4.20.css?v=2.4.20",
   "./app.js?v=2.4.4",
   "./ajustes-v2.4.7.js?v=2.4.8",
   "./clientes-seguimiento-v2.4.9.js?v=2.4.9",
   "./cliente-detalle-v2.4.10.js?v=2.4.10",
   "./mediciones-extra-v2.4.11.js?v=2.4.11",
-  "./agenda-integrada-v2.4.16.js?v=2.4.16"
+  "./agenda-integrada-v2.4.16.js?v=2.4.16",
+  "./cliente-sesion-v2.4.19.js?v=2.4.19"
 ];
 self.addEventListener("install",event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_SHELL)));});
 self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE_NAME).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
