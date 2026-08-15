@@ -14,8 +14,8 @@
     if(splash){
       setTimeout(()=>{
         splash.classList.add('is-hidden');
-        setTimeout(()=>splash.remove(),450);
-      },900);
+        setTimeout(()=>splash.remove(),500);
+      },5000);
     }
   }
 
