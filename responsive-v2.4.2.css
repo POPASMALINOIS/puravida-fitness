@@ -1,30 +1,180 @@
-/* v2.4.2 - forced phone layout independent of Safari initial viewport quirks */
-html.mobile-device body{padding-bottom:74px!important;overflow-x:hidden!important}
+/* v2.4.3 - phone layout locked to viewport, no page zoom/overflow */
+html.mobile-device{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  overflow-x:hidden;
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
+html.mobile-device body{
+  width:100%;
+  max-width:100vw;
+  min-width:0;
+  margin:0;
+  padding-bottom:calc(82px + env(safe-area-inset-bottom,0px))!important;
+  overflow-x:hidden!important;
+  overscroll-behavior-x:none;
+}
+html.mobile-device *{box-sizing:border-box}
+html.mobile-device .app-layout,
+html.mobile-device #dashboard-screen,
+html.mobile-device #dashboard-screen.active,
+html.mobile-device .main-panel,
+html.mobile-device #resumen-section,
+html.mobile-device #clientes-section,
+html.mobile-device #clientes-bonos-section,
+html.mobile-device #entrenadores-section,
+html.mobile-device #pagos-section{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+}
 html.mobile-device #dashboard-screen.active{display:block!important}
-html.mobile-device .main-panel{margin-left:0!important;width:100%!important;max-width:100%!important;padding:12px 12px 88px!important}
-html.mobile-device .sidebar{position:fixed!important;left:8px!important;right:8px!important;top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;width:auto!important;height:60px!important;min-height:60px!important;max-height:60px!important;padding:5px 6px!important;border:1px solid rgba(148,163,184,.24)!important;border-radius:16px!important;background:rgba(9,19,33,.97)!important;box-shadow:0 14px 34px rgba(0,0,0,.38)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;overflow:hidden!important;z-index:5000!important;display:block!important}
-html.mobile-device .brand-lockup,html.mobile-device .nav-caption,html.mobile-device .sidebar-footer,html.mobile-device .nav-divider{display:none!important}
-html.mobile-device .sidebar nav{display:flex!important;flex-direction:row!important;align-items:center!important;gap:2px!important;width:100%!important;height:100%!important;padding:0!important;margin:0!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
+html.mobile-device .main-panel{
+  margin-left:0!important;
+  padding:12px 12px calc(96px + env(safe-area-inset-bottom,0px))!important;
+  overflow-x:hidden!important;
+}
+
+/* Fixed floating navigation island */
+html.mobile-device .sidebar{
+  position:fixed!important;
+  left:8px!important;
+  right:8px!important;
+  top:auto!important;
+  bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;
+  width:auto!important;
+  max-width:calc(100vw - 16px)!important;
+  height:60px!important;
+  min-height:60px!important;
+  max-height:60px!important;
+  padding:5px 6px!important;
+  margin:0!important;
+  border:1px solid rgba(148,163,184,.24)!important;
+  border-radius:16px!important;
+  background:rgba(9,19,33,.97)!important;
+  box-shadow:0 14px 34px rgba(0,0,0,.38)!important;
+  backdrop-filter:blur(18px)!important;
+  -webkit-backdrop-filter:blur(18px)!important;
+  overflow:hidden!important;
+  z-index:99999!important;
+  display:block!important;
+  transform:translateZ(0);
+  -webkit-transform:translateZ(0);
+}
+html.mobile-device .brand-lockup,
+html.mobile-device .nav-caption,
+html.mobile-device .sidebar-footer,
+html.mobile-device .nav-divider{display:none!important}
+html.mobile-device .sidebar nav{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  gap:2px!important;
+  width:100%!important;
+  max-width:100%!important;
+  height:100%!important;
+  padding:0!important;
+  margin:0!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  scrollbar-width:none!important;
+  overscroll-behavior-x:contain;
+}
 html.mobile-device .sidebar nav::-webkit-scrollbar{display:none!important}
-html.mobile-device .sidebar nav button{display:flex!important;flex:0 0 auto!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:2px!important;min-width:64px!important;width:auto!important;height:48px!important;min-height:48px!important;padding:3px 8px!important;margin:0!important;border-radius:11px!important;background:transparent!important;color:#95a6ba!important;text-align:center!important;font-size:8px!important;line-height:1!important;white-space:nowrap!important}
-html.mobile-device .sidebar nav button .nav-icon{display:grid!important;place-items:center!important;width:22px!important;height:20px!important;font-size:12px!important;background:transparent!important;color:inherit!important}
-html.mobile-device .sidebar nav button.nav-active{background:rgba(241,90,36,.17)!important;color:#fff!important;box-shadow:none!important}
+html.mobile-device .sidebar nav button{
+  display:flex!important;
+  flex:0 0 64px!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:2px!important;
+  min-width:64px!important;
+  width:64px!important;
+  height:48px!important;
+  min-height:48px!important;
+  padding:3px 5px!important;
+  margin:0!important;
+  border-radius:11px!important;
+  background:transparent!important;
+  color:#95a6ba!important;
+  text-align:center!important;
+  font-size:8px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+html.mobile-device .sidebar nav button .nav-icon{
+  display:grid!important;
+  place-items:center!important;
+  width:22px!important;
+  height:20px!important;
+  font-size:12px!important;
+  background:transparent!important;
+  color:inherit!important;
+}
+html.mobile-device .sidebar nav button.nav-active{
+  background:rgba(241,90,36,.17)!important;
+  color:#fff!important;
+  box-shadow:none!important;
+}
 html.mobile-device .sidebar nav button.nav-active::before{display:none!important}
-html.mobile-device .top-header{margin-bottom:10px!important}
+
+/* Prevent iOS focus zoom */
+html.mobile-device input,
+html.mobile-device select,
+html.mobile-device textarea{
+  font-size:16px!important;
+  max-width:100%!important;
+}
+
+/* Header / content */
+html.mobile-device .top-header{margin-bottom:10px!important;min-width:0!important}
+html.mobile-device .top-header>div{min-width:0!important}
 html.mobile-device .top-header h1{font-size:20px!important}
 html.mobile-device .top-header p{font-size:9px!important;max-width:230px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-html.mobile-device .resumen-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
-html.mobile-device .resumen-card{padding:10px 11px!important}
+html.mobile-device .resumen-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;max-width:100%!important;overflow:hidden!important}
+html.mobile-device .resumen-card{padding:10px 11px!important;min-width:0!important}
 html.mobile-device .resumen-card strong{font-size:22px!important}
-html.mobile-device .calendario-panel{min-height:calc(100dvh - 214px)!important}
-html.mobile-device .section-heading{margin-bottom:12px!important}
+
+/* Calendar owns its horizontal scroll; page itself never grows */
+html.mobile-device .calendario-panel{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  min-height:calc(100dvh - 214px)!important;
+  overflow:hidden!important;
+}
+html.mobile-device .calendar-grid,
+html.mobile-device .semana-grid{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  overflow:hidden!important;
+}
+html.mobile-device .week-calendar-fixed{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  overflow-x:auto!important;
+  overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior-x:contain!important;
+}
+
+/* Sections */
+html.mobile-device .section-heading{margin-bottom:12px!important;min-width:0!important}
 html.mobile-device .section-heading h2{font-size:21px!important}
 html.mobile-device .section-heading p{font-size:9px!important}
-html.mobile-device .toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:7px!important}
-html.mobile-device .search-wrap{max-width:none!important}
+html.mobile-device .toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:7px!important;max-width:100%!important;min-width:0!important}
+html.mobile-device .search-wrap{max-width:none!important;min-width:0!important}
 html.mobile-device .tabla-header{display:none!important}
-html.mobile-device .data-surface,html.mobile-device .tabla-clientes{border:0!important;background:transparent!important;box-shadow:none!important;border-radius:0!important;overflow:visible!important}
-html.mobile-device .cliente-row,html.mobile-device .entrenador-row{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:5px 9px!important;min-height:0!important;padding:11px 2px!important;border:0!important;border-bottom:1px solid rgba(148,163,184,.13)!important;border-radius:0!important;background:transparent!important}
+html.mobile-device .data-surface,
+html.mobile-device .tabla-clientes{width:100%!important;max-width:100%!important;min-width:0!important;border:0!important;background:transparent!important;box-shadow:none!important;border-radius:0!important;overflow:visible!important}
+html.mobile-device .cliente-row,
+html.mobile-device .entrenador-row{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:5px 9px!important;min-width:0!important;max-width:100%!important;min-height:0!important;padding:11px 2px!important;border:0!important;border-bottom:1px solid rgba(148,163,184,.13)!important;border-radius:0!important;background:transparent!important}
+html.mobile-device .cliente-row>* ,html.mobile-device .entrenador-row>*{min-width:0!important}
 html.mobile-device #entrenadores-section .trainers-toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:7px!important}
 html.mobile-device #entrenadores-section .add-btn{grid-column:1/-1!important;width:100%!important}
 html.mobile-device #entrenadores-section .entrenador-row{grid-template-columns:minmax(0,1fr) auto auto!important;grid-template-areas:'nombre color acciones' 'estado sesiones acciones'!important}
@@ -33,6 +183,19 @@ html.mobile-device #entrenadores-section .entrenador-row>div:nth-child(2){grid-a
 html.mobile-device #entrenadores-section .entrenador-row>div:nth-child(3){grid-area:estado!important}
 html.mobile-device #entrenadores-section .entrenador-row>div:nth-child(4){grid-area:sesiones!important}
 html.mobile-device #entrenadores-section .entrenador-row>div:nth-child(5){grid-area:acciones!important}
-html.mobile-device .secondary-screen,html.mobile-device #dia-screen,html.mobile-device #alta-screen,html.mobile-device #ficha-screen{padding:12px!important}
-html.mobile-device .agenda-layout,html.mobile-device .cliente-ficha,html.mobile-device .form-grid{grid-template-columns:1fr!important}
+
+/* Secondary screens */
+html.mobile-device .secondary-screen,
+html.mobile-device #dia-screen,
+html.mobile-device #alta-screen,
+html.mobile-device #ficha-screen{
+  width:100%!important;
+  max-width:100vw!important;
+  min-width:0!important;
+  padding:12px 12px calc(24px + env(safe-area-inset-bottom,0px))!important;
+  overflow-x:hidden!important;
+}
+html.mobile-device .agenda-layout,
+html.mobile-device .cliente-ficha,
+html.mobile-device .form-grid{grid-template-columns:1fr!important;width:100%!important;max-width:100%!important;min-width:0!important}
 html.mobile-device .ficha-card:nth-last-child(-n+2){grid-column:auto!important}
