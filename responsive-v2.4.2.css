@@ -1,4 +1,4 @@
-/* v2.4.3 - phone layout locked to viewport, no page zoom/overflow */
+/* v2.4.5 - phone layout locked to viewport, no page zoom/overflow */
 html.mobile-device{
   width:100%;
   max-width:100%;
@@ -33,7 +33,10 @@ html.mobile-device #pagos-section{
 html.mobile-device #dashboard-screen.active{display:block!important}
 html.mobile-device .main-panel{
   margin-left:0!important;
-  padding:12px 12px calc(96px + env(safe-area-inset-bottom,0px))!important;
+  padding-left:12px!important;
+  padding-right:12px!important;
+  padding-top:calc(12px + env(safe-area-inset-top,0px))!important;
+  padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))!important;
   overflow-x:hidden!important;
 }
 
@@ -192,10 +195,20 @@ html.mobile-device #ficha-screen{
   width:100%!important;
   max-width:100vw!important;
   min-width:0!important;
-  padding:12px 12px calc(24px + env(safe-area-inset-bottom,0px))!important;
+  padding-left:12px!important;
+  padding-right:12px!important;
+  padding-top:calc(12px + env(safe-area-inset-top,0px))!important;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))!important;
   overflow-x:hidden!important;
 }
 html.mobile-device .agenda-layout,
 html.mobile-device .cliente-ficha,
 html.mobile-device .form-grid{grid-template-columns:1fr!important;width:100%!important;max-width:100%!important;min-width:0!important}
 html.mobile-device .ficha-card:nth-last-child(-n+2){grid-column:auto!important}
+
+/* iOS standalone/PWA safe-area: never render page content behind the status bar */
+@supports (padding-top: env(safe-area-inset-top)){
+  html.mobile-device body{min-height:100dvh!important}
+  html.mobile-device #dashboard-screen.active{min-height:100dvh!important}
+  html.mobile-device .main-panel{min-height:100dvh!important}
+}
