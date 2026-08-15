@@ -1,0 +1,47 @@
+/* v2.4.12 - clientes mobile/tablet */
+@media (max-width: 900px){
+  html.mobile-device #clientesLista .cliente-row,
+  html.mobile-device #clientesBonosLista .cliente-row{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-areas:
+      'nombre acciones'
+      'telefono acciones'
+      'bono estado'!important;
+    gap:6px 10px!important;
+    align-items:center!important;
+    padding:14px 4px!important;
+  }
+  html.mobile-device #clientesLista .cliente-row>div:nth-child(1),
+  html.mobile-device #clientesBonosLista .cliente-row>div:nth-child(1){grid-area:nombre!important;}
+  html.mobile-device #clientesLista .cliente-row>div:nth-child(2),
+  html.mobile-device #clientesBonosLista .cliente-row>div:nth-child(2){grid-area:telefono!important;color:#93a4b8!important;font-size:13px!important;line-height:1.2!important;}
+  html.mobile-device #clientesLista .cliente-row>div:nth-child(3),
+  html.mobile-device #clientesBonosLista .cliente-row>div:nth-child(3){grid-area:bono!important;display:flex!important;align-items:center!important;min-height:28px!important;}
+  html.mobile-device #clientesLista .cliente-row>div:nth-child(4),
+  html.mobile-device #clientesBonosLista .cliente-row>div:nth-child(4){grid-area:estado!important;justify-self:end!important;display:flex!important;align-items:center!important;min-height:28px!important;}
+  html.mobile-device #clientesLista .cliente-row>div:nth-child(5),
+  html.mobile-device #clientesBonosLista .cliente-row>div:nth-child(5){grid-area:acciones!important;align-self:start!important;display:flex!important;flex-wrap:wrap!important;justify-content:flex-end!important;gap:6px!important;max-width:170px!important;}
+  html.mobile-device #clientesLista .cliente-row .estado-activo,
+  html.mobile-device #clientesLista .cliente-row .estado-inactivo,
+  html.mobile-device #clientesBonosLista .cliente-row .estado-activo,
+  html.mobile-device #clientesBonosLista .cliente-row .estado-inactivo{
+    position:static!important;
+    display:inline-flex!important;
+    width:auto!important;
+    white-space:nowrap!important;
+    margin:0!important;
+    transform:none!important;
+  }
+  html.mobile-device #clientesLista .cliente-row .acciones button,
+  html.mobile-device #clientesBonosLista .cliente-row .acciones button{
+    min-height:34px!important;
+    padding:7px 10px!important;
+    font-size:12px!important;
+  }
+  html.mobile-device .quick-measure-btn{
+    background:rgba(241,90,36,.14)!important;
+    color:#ff8b63!important;
+    border:1px solid rgba(241,90,36,.35)!important;
+  }
+}
