@@ -37,32 +37,8 @@
   const observer = new MutationObserver(configurarEmail);
   observer.observe(document.documentElement, { childList: true, subtree: true });
 
-  // Una sesión cancelada nunca debe mostrarse como programada en calendario/agenda.
-  const obtenerClasesOriginal = window.obtenerClasesPorFecha;
-  if (typeof obtenerClasesOriginal === 'function') {
-    window.obtenerClasesPorFecha = function (fechaISO) {
-      return obtenerClasesOriginal(fechaISO).filter(clase =>
-        clase.estado !== 'Cancelada' && clase.estado !== 'Cancelada excepcional'
-      );
-    };
-  }
-
-  // La cancelación excepcional devuelve el bono si procede y elimina la reserva de la agenda.
-  window.cancelarClaseExcepcional = function (clienteId, claseId) {
-    const cliente = (typeof clientes !== 'undefined' ? clientes : []).find(c => Number(c.id) === Number(clienteId));
-    if (!cliente) return;
-
-    const clase = (cliente.clases || []).find(c => Number(c.id) === Number(claseId));
-    if (!clase) return;
-
-    if (!confirm('¿Cancelar excepcionalmente esta sesión y devolver la sesión al bono?')) return;
-
-    if (clase.consumida && Number(cliente.bonoDisponible) < Number(cliente.bonoTotal)) {
-      cliente.bonoDisponible = Number(cliente.bonoDisponible) + 1;
-    }
-
-    cliente.clases = (cliente.clases || []).filter(c => Number(c.id) !== Number(claseId));
-
+  // Refresco común tras eliminar una sesión de la agenda.
+  function refrescarTrasCancelar(clienteId) {
     if (typeof guardarDatos === 'function') guardarDatos();
     if (typeof verificarEstadoBonos === 'function') verificarEstadoBonos();
     if (typeof actualizarResumen === 'function') actualizarResumen();
@@ -73,6 +49,65 @@
     if (typeof clienteActual !== 'undefined' && clienteActual && Number(clienteActual.id) === Number(clienteId) && typeof verFichaCliente === 'function') {
       verFichaCliente(clienteId);
     }
+  }
+
+  // Como protección adicional, ninguna sesión marcada como cancelada se representa en calendario/agenda.
+  const obtenerClasesOriginal = window.obtenerClasesPorFecha;
+  if (typeof obtenerClasesOriginal === 'function') {
+    window.obtenerClasesPorFecha = function (fechaISO) {
+      return obtenerClasesOriginal(fechaISO).filter(clase =>
+        clase.estado !== 'Cancelada' && clase.estado !== 'Cancelada excepcional'
+      );
+    };
+  }
+
+  // CANCELAR: la sesión contabiliza en el bono y desaparece completamente de la agenda.
+  window.cancelarClase = function (clienteId, claseId) {
+    const cliente = (typeof clientes !== 'undefined' ? clientes : []).find(c => Number(c.id) === Number(clienteId));
+    if (!cliente) return;
+
+    const clase = (cliente.clases || []).find(c => Number(c.id) === Number(claseId));
+    if (!clase) return;
+
+    const ahora = new Date();
+    const fechaClase = new Date(`${clase.fecha}T${clase.hora}:00`);
+    const diferenciaHoras = (fechaClase - ahora) / (1000 * 60 * 60);
+
+    // Conservamos la regla existente: cancelación normal solo con más de 12 h.
+    if (diferenciaHoras <= 12) {
+      alert('No se puede cancelar con menos de 12 horas. Usa la cancelación excepcional si procede.');
+      return;
+    }
+
+    if (!confirm('¿Cancelar esta sesión? La sesión contabilizará en el bono y se eliminará de la agenda.')) return;
+
+    // Si aún no había sido consumida automáticamente, la contabilizamos ahora una única vez.
+    if (!clase.consumida && Number(cliente.bonoDisponible) > 0) {
+      cliente.bonoDisponible = Number(cliente.bonoDisponible) - 1;
+    }
+
+    // Igual que Borrar a nivel de calendario: la reserva deja de existir.
+    cliente.clases = (cliente.clases || []).filter(c => Number(c.id) !== Number(claseId));
+    refrescarTrasCancelar(clienteId);
+  };
+
+  // EXCEPCIONAL: devuelve el bono si ya se había consumido y elimina completamente la reserva.
+  window.cancelarClaseExcepcional = function (clienteId, claseId) {
+    const cliente = (typeof clientes !== 'undefined' ? clientes : []).find(c => Number(c.id) === Number(clienteId));
+    if (!cliente) return;
+
+    const clase = (cliente.clases || []).find(c => Number(c.id) === Number(claseId));
+    if (!clase) return;
+
+    if (!confirm('¿Cancelar excepcionalmente esta sesión? Se devolverá al bono si estaba contabilizada y se eliminará de la agenda.')) return;
+
+    if (clase.consumida && Number(cliente.bonoDisponible) < Number(cliente.bonoTotal)) {
+      cliente.bonoDisponible = Number(cliente.bonoDisponible) + 1;
+    }
+
+    // Igual que Borrar a nivel de calendario: la reserva deja de existir.
+    cliente.clases = (cliente.clases || []).filter(c => Number(c.id) !== Number(claseId));
+    refrescarTrasCancelar(clienteId);
   };
 
   if (document.readyState === 'loading') {
