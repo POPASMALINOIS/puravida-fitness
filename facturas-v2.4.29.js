@@ -2,7 +2,7 @@
   const FISCAL_KEY = 'rageTrainingFiscal';
   const DEFAULT_FISCAL = {
     razonSocial: '', nif: '', direccion: '', cp: '', localidad: '', provincia: '',
-    email: '', telefono: '', serie: 'RT', iva: 21
+    email: '', telefono: '', serie: 'RT', iva: 21, datosRegistrales: ''
   };
 
   function fiscalData(){
@@ -10,7 +10,7 @@
     catch(_) { return { ...DEFAULT_FISCAL }; }
   }
   function saveFiscal(data){ localStorage.setItem(FISCAL_KEY, JSON.stringify(data)); }
-  function esc(v=''){ return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+  function esc(v=''){ return String(v).replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c])); }
   function money(v){ const n=Number(String(v).replace(',','.'))||0; return n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}); }
   function fechaES(v){ try{return typeof formatearFechaES==='function'?formatearFechaES(v):v}catch(_){return v||'-'} }
   function yearNow(){ return new Date().getFullYear(); }
@@ -34,6 +34,7 @@
         <label class="settings-field"><span>IVA (%)</span><input id="fiscalIva" type="number" min="0" max="100" step="0.01"></label>
         <label class="settings-field"><span>Email</span><input id="fiscalEmail" type="email"></label>
         <label class="settings-field"><span>Teléfono</span><input id="fiscalTelefono" type="text"></label>
+        <label class="settings-field fiscal-full"><span>Datos registrales *</span><input id="fiscalRegistro" type="text" placeholder="Ej.: Registro Mercantil de Madrid, Tomo ..., Folio ..., Hoja ..., Inscripción ..."></label>
       </div>
       <p class="settings-help">Los campos marcados con * deben estar cumplimentados antes de emitir una factura.</p>`;
     grid.insertBefore(card, grid.firstChild?.nextSibling || null);
@@ -42,7 +43,7 @@
 
   function fillFiscal(){
     const d=fiscalData();
-    const map={fiscalRazon:'razonSocial',fiscalNif:'nif',fiscalDireccion:'direccion',fiscalCp:'cp',fiscalLocalidad:'localidad',fiscalProvincia:'provincia',fiscalEmail:'email',fiscalTelefono:'telefono',fiscalSerie:'serie',fiscalIva:'iva'};
+    const map={fiscalRazon:'razonSocial',fiscalNif:'nif',fiscalDireccion:'direccion',fiscalCp:'cp',fiscalLocalidad:'localidad',fiscalProvincia:'provincia',fiscalEmail:'email',fiscalTelefono:'telefono',fiscalSerie:'serie',fiscalIva:'iva',fiscalRegistro:'datosRegistrales'};
     Object.entries(map).forEach(([id,key])=>{ const el=document.getElementById(id); if(el) el.value=d[key]??''; });
   }
 
@@ -51,11 +52,12 @@
     return {
       razonSocial:val('fiscalRazon'), nif:val('fiscalNif'), direccion:val('fiscalDireccion'), cp:val('fiscalCp'),
       localidad:val('fiscalLocalidad'), provincia:val('fiscalProvincia'), email:val('fiscalEmail'), telefono:val('fiscalTelefono'),
-      serie:(val('fiscalSerie')||'RT').toUpperCase(), iva:Math.max(0,Math.min(100,Number(val('fiscalIva')||'21')))
+      serie:(val('fiscalSerie')||'RT').toUpperCase(), iva:Math.max(0,Math.min(100,Number(val('fiscalIva')||'21'))),
+      datosRegistrales:val('fiscalRegistro')
     };
   }
 
-  function fiscalComplete(d){ return !!(d.razonSocial&&d.nif&&d.direccion&&d.cp&&d.localidad); }
+  function fiscalComplete(d){ return !!(d.razonSocial&&d.nif&&d.direccion&&d.cp&&d.localidad&&d.datosRegistrales); }
 
   function saveFiscalFromForm(){
     if(!document.getElementById('rage-fiscal-card')) return;
@@ -87,7 +89,7 @@
     if(!pagos.length){ alert('Este cliente todavía no tiene ningún pago registrado. Registra el pago antes de generar la factura.'); return; }
     const fiscal=fiscalData();
     if(!fiscalComplete(fiscal)){
-      alert('Completa primero los datos fiscales en Ajustes → Datos de facturación.');
+      alert('Completa primero todos los datos fiscales, incluidos los datos registrales, en Ajustes → Datos de facturación.');
       if(typeof mostrarSeccion==='function') mostrarSeccion('ajustes');
       setTimeout(()=>document.getElementById('rage-fiscal-card')?.scrollIntoView({behavior:'smooth',block:'start'}),100);
       return;
@@ -103,13 +105,13 @@
     const facturaFecha=pago.facturaFecha||pago.fecha;
 
     const html=`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Factura ${esc(numero)}</title><style>
-      @page{size:A4;margin:14mm}*{box-sizing:border-box}body{margin:0;background:#eef2f6;font-family:Arial,Helvetica,sans-serif;color:#111827}.page{width:210mm;min-height:297mm;margin:0 auto;background:#fff;padding:18mm 17mm 16mm}.top{display:flex;justify-content:space-between;gap:28px;align-items:flex-start;border-bottom:3px solid #F15A24;padding-bottom:18px}.logo{width:150px;max-height:72px;object-fit:contain;object-position:left top}.invoice-head{text-align:right}.invoice-head h1{font-size:31px;letter-spacing:.08em;margin:0 0 8px}.invoice-head strong{font-size:15px}.muted{color:#64748b}.cols{display:grid;grid-template-columns:1fr 1fr;gap:34px;margin:28px 0}.block h3{font-size:11px;letter-spacing:.13em;color:#F15A24;margin:0 0 10px}.block p{margin:4px 0;font-size:13px;line-height:1.45}.service{border:1px solid #dbe2ea;border-radius:10px;overflow:hidden;margin-top:18px}.service-head,.service-row{display:grid;grid-template-columns:1fr 95px 95px 105px;gap:0}.service-head{background:#07101d;color:#fff;font-size:10px;letter-spacing:.08em;text-transform:uppercase}.service-head div,.service-row div{padding:12px 13px}.service-row{font-size:12px;border-top:1px solid #e5e7eb}.service-row div:not(:first-child){text-align:right}.details{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.detail{background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:12px}.detail span{display:block;color:#64748b;font-size:9px;text-transform:uppercase;letter-spacing:.07em}.detail strong{display:block;margin-top:5px;font-size:12px}.totals{margin:22px 0 0 auto;width:310px}.totals div{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e7eb;font-size:13px}.totals .grand{border:0;background:#07101d;color:#fff;padding:14px;border-radius:8px;margin-top:7px;font-size:17px;font-weight:700}.paid{display:inline-flex;margin-top:16px;padding:8px 12px;border-radius:999px;background:#fff3ed;color:#d84b14;font-size:11px;font-weight:700;letter-spacing:.08em}.foot{margin-top:55px;padding-top:14px;border-top:1px solid #e5e7eb;color:#64748b;font-size:9px;line-height:1.5}.actions{position:fixed;right:18px;bottom:18px;display:flex;gap:8px}.actions button{border:0;border-radius:9px;padding:11px 14px;font-weight:700;cursor:pointer}.print{background:#F15A24;color:#fff}.close{background:#fff;border:1px solid #d1d5db!important}@media print{body{background:#fff}.page{width:auto;min-height:auto;margin:0;padding:0}.actions{display:none}}
+      @page{size:A4;margin:14mm}*{box-sizing:border-box}body{margin:0;background:#eef2f6;font-family:Arial,Helvetica,sans-serif;color:#111827}.page{width:210mm;min-height:297mm;margin:0 auto;background:#fff;padding:18mm 17mm 16mm;display:flex;flex-direction:column}.top{display:flex;justify-content:space-between;gap:28px;align-items:flex-start;border-bottom:3px solid #F15A24;padding-bottom:18px}.logo{width:150px;max-height:72px;object-fit:contain;object-position:left top}.invoice-head{text-align:right}.invoice-head h1{font-size:31px;letter-spacing:.08em;margin:0 0 8px}.invoice-head strong{font-size:15px}.muted{color:#64748b}.cols{display:grid;grid-template-columns:1fr 1fr;gap:34px;margin:28px 0}.block h3{font-size:11px;letter-spacing:.13em;color:#F15A24;margin:0 0 10px}.block p{margin:4px 0;font-size:13px;line-height:1.45}.service{border:1px solid #dbe2ea;border-radius:10px;overflow:hidden;margin-top:18px}.service-head,.service-row{display:grid;grid-template-columns:1fr 95px 95px 105px;gap:0}.service-head{background:#07101d;color:#fff;font-size:10px;letter-spacing:.08em;text-transform:uppercase}.service-head div,.service-row div{padding:12px 13px}.service-row{font-size:12px;border-top:1px solid #e5e7eb}.service-row div:not(:first-child){text-align:right}.details{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.detail{background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:12px}.detail span{display:block;color:#64748b;font-size:9px;text-transform:uppercase;letter-spacing:.07em}.detail strong{display:block;margin-top:5px;font-size:12px}.totals{margin:22px 0 0 auto;width:310px}.totals div{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e7eb;font-size:13px}.totals .grand{border:0;background:#07101d;color:#fff;padding:14px;border-radius:8px;margin-top:7px;font-size:17px;font-weight:700}.paid{display:inline-flex;margin-top:16px;padding:8px 12px;border-radius:999px;background:#fff3ed;color:#d84b14;font-size:11px;font-weight:700;letter-spacing:.08em}.foot{margin-top:auto;padding-top:14px;border-top:1px solid #e5e7eb;color:#64748b;font-size:9px;line-height:1.5}.registry{margin-top:7px;color:#475569}.actions{position:fixed;right:18px;bottom:18px;display:flex;gap:8px}.actions button{border:0;border-radius:9px;padding:11px 14px;font-weight:700;cursor:pointer}.print{background:#F15A24;color:#fff}.close{background:#fff;border:1px solid #d1d5db!important}@media print{body{background:#fff}.page{width:auto;min-height:267mm;margin:0;padding:0}.actions{display:none}}
       </style></head><body><main class="page"><section class="top"><img class="logo" src="${logo}" alt="Rage Training"><div class="invoice-head"><h1>FACTURA</h1><strong>${esc(numero)}</strong><p class="muted">Fecha: ${fechaES(facturaFecha)}</p><span class="paid">PAGADO</span></div></section>
       <section class="cols"><div class="block"><h3>EMISOR</h3><p><strong>${esc(fiscal.razonSocial)}</strong></p><p>NIF/CIF: ${esc(fiscal.nif)}</p><p>${esc(fiscal.direccion)}</p><p>${esc(fiscal.cp)} ${esc(fiscal.localidad)}${fiscal.provincia?`, ${esc(fiscal.provincia)}`:''}</p>${fiscal.email?`<p>${esc(fiscal.email)}</p>`:''}${fiscal.telefono?`<p>${esc(fiscal.telefono)}</p>`:''}</div><div class="block"><h3>CLIENTE</h3><p><strong>${esc(cliente.nombre)}</strong></p><p>Teléfono: ${esc(cliente.telefono||'-')}</p><p>Email: ${esc(cliente.email||'-')}</p><p>Fecha de alta: ${fechaES(cliente.fechaAlta||'')}</p></div></section>
       <section class="details"><div class="detail"><span>Tipo de bono</span><strong>${esc(cliente.bonoTotal||0)} sesiones</strong></div><div class="detail"><span>Duración</span><strong>${esc(cliente.bonoDuracion||'-')} min</strong></div><div class="detail"><span>Modalidad</span><strong>${esc(cliente.bonoModalidad||'-')}</strong></div></section>
       <section class="service"><div class="service-head"><div>Concepto</div><div>Base</div><div>IVA</div><div>Total</div></div><div class="service-row"><div>${concepto}<br><span class="muted">Bono ${esc(cliente.bonoTotal||0)} sesiones · ${esc(cliente.bonoDuracion||'-')} min · ${esc(cliente.bonoModalidad||'-')}</span></div><div>${money(base)} €</div><div>${money(cuotaIva)} €</div><div><strong>${money(total)} €</strong></div></div></section>
       <section class="totals"><div><span>Base imponible</span><strong>${money(base)} €</strong></div><div><span>IVA (${money(iva)}%)</span><strong>${money(cuotaIva)} €</strong></div><div class="grand"><span>TOTAL</span><span>${money(total)} €</span></div></section>
-      <section class="foot">Factura generada por Rage Training. Documento asociado al pago registrado el ${fechaES(pago.fecha)}.</section></main><div class="actions"><button class="close" onclick="window.close()">Cerrar</button><button class="print" onclick="window.print()">Guardar PDF / Imprimir</button></div></body></html>`;
+      <section class="foot"><div>Factura generada por Rage Training. Documento asociado al pago registrado el ${fechaES(pago.fecha)}.</div><div class="registry"><strong>Datos registrales:</strong> ${esc(fiscal.datosRegistrales)}</div></section></main><div class="actions"><button class="close" onclick="window.close()">Cerrar</button><button class="print" onclick="window.print()">Guardar PDF / Imprimir</button></div></body></html>`;
     const w=window.open('','_blank');
     if(!w){ alert('El navegador ha bloqueado la ventana de factura. Permite ventanas emergentes para Rage Training.'); return; }
     w.document.open();w.document.write(html);w.document.close();
