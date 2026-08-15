@@ -1,7 +1,24 @@
 (() => {
-  // Email: campo totalmente libre para letras, números y signos habituales.
+  function configurarEmail() {
+    const email = document.getElementById('clienteEmail');
+    if (!email) return;
+    email.type = 'text';
+    email.setAttribute('inputmode', 'email');
+    email.setAttribute('autocomplete', 'email');
+    email.setAttribute('autocapitalize', 'none');
+    email.setAttribute('spellcheck', 'false');
+    email.style.textTransform = 'none';
+  }
+
+  // Evita que el conversor global a mayúsculas altere el email.
+  document.addEventListener('input', event => {
+    if (event.target && event.target.id === 'clienteEmail') {
+      event.stopImmediatePropagation();
+    }
+  }, true);
+
   window.convertirInputsMayusculas = function () {
-    document.querySelectorAll("#alta-screen input[type='text']:not(#clienteEmail), #alta-screen textarea").forEach(input => {
+    document.querySelectorAll("#alta-screen input[type='text']:not(#clienteEmail), #alta-cliente-integrada-section input[type='text']:not(#clienteEmail), #alta-screen textarea, #alta-cliente-integrada-section textarea").forEach(input => {
       if (input.dataset.rageUppercaseBound === '1') return;
       input.dataset.rageUppercaseBound = '1';
       input.addEventListener('input', function () {
@@ -13,19 +30,14 @@
         }
       });
     });
-
-    const email = document.getElementById('clienteEmail');
-    if (email) {
-      email.type = 'text';
-      email.setAttribute('inputmode', 'email');
-      email.setAttribute('autocomplete', 'email');
-      email.setAttribute('autocapitalize', 'none');
-      email.setAttribute('spellcheck', 'false');
-      email.style.textTransform = 'none';
-    }
+    configurarEmail();
   };
 
-  // Asegura que cualquier sesión cancelada no vuelva a aparecer en agenda/calendario.
+  configurarEmail();
+  const observer = new MutationObserver(configurarEmail);
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+
+  // Una sesión cancelada nunca debe mostrarse como programada en calendario/agenda.
   const obtenerClasesOriginal = window.obtenerClasesPorFecha;
   if (typeof obtenerClasesOriginal === 'function') {
     window.obtenerClasesPorFecha = function (fechaISO) {
@@ -35,7 +47,7 @@
     };
   }
 
-  // Cancelación excepcional: devuelve la sesión al bono y elimina la reserva de la agenda.
+  // La cancelación excepcional devuelve el bono si procede y elimina la reserva de la agenda.
   window.cancelarClaseExcepcional = function (clienteId, claseId) {
     const cliente = (typeof clientes !== 'undefined' ? clientes : []).find(c => Number(c.id) === Number(clienteId));
     if (!cliente) return;
@@ -63,7 +75,9 @@
     }
   };
 
-  document.addEventListener('DOMContentLoaded', () => {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => window.convertirInputsMayusculas(), { once: true });
+  } else {
     window.convertirInputsMayusculas();
-  });
+  }
 })();
