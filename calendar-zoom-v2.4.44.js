@@ -367,3 +367,288 @@
     normal: () => setManualSlot(BASE_SLOT, false)
   };
 })();
+
+/* v2.4.45 · Ajuste automático de altura + navegación semanal por gesto lateral */
+(() => {
+  const VERSION = '2.4.45';
+  let syncFrame = 0;
+  let weekCooldownUntil = 0;
+  let suppressClickUntil = 0;
+  let wheelAccumulator = 0;
+  let wheelResetTimer = null;
+
+  function calendarElement() {
+    return document.querySelector('#resumen-section .week-calendar-fixed');
+  }
+
+  function panelElement() {
+    return document.querySelector('#resumen-section .calendario-panel');
+  }
+
+  function installStyles() {
+    if (document.getElementById('rage-calendar-v245-style')) return;
+    const style = document.createElement('style');
+    style.id = 'rage-calendar-v245-style';
+    style.textContent = `
+      #resumen-section .calendario-panel.rage-calendar-autoheight{
+        min-height:0!important;
+        height:auto!important;
+      }
+      #resumen-section .calendario-panel.rage-calendar-autoheight .week-calendar-fixed{
+        min-height:0!important;
+      }
+      #resumen-section .calendario-panel.rage-calendar-week-changing .week-calendar-fixed{
+        opacity:.68;
+        transform:translateX(var(--rage-week-shift,0));
+        transition:opacity .16s ease,transform .16s ease;
+      }
+      .rage-calendar-week-toast{
+        position:fixed;
+        left:50%;
+        bottom:max(84px,calc(env(safe-area-inset-bottom) + 72px));
+        z-index:250000;
+        transform:translate(-50%,12px);
+        padding:9px 14px;
+        border:1px solid rgba(148,163,184,.2);
+        border-radius:999px;
+        background:rgba(7,16,29,.94);
+        color:#f8fafc;
+        box-shadow:0 14px 34px rgba(0,0,0,.35);
+        font-size:11px;
+        font-weight:800;
+        opacity:0;
+        pointer-events:none;
+        transition:.18s ease;
+      }
+      .rage-calendar-week-toast.is-visible{
+        opacity:1;
+        transform:translate(-50%,0);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function viewportAvailable(calendar) {
+    if (!calendar) return 600;
+    const viewport = window.visualViewport;
+    const top = viewport?.offsetTop || 0;
+    const bottom = top + (viewport?.height || window.innerHeight || 800);
+    const rect = calendar.getBoundingClientRect();
+    const reserve = window.innerWidth <= 760 ? 80 : 14;
+    return Math.max(280, Math.floor(bottom - Math.max(rect.top, top) - reserve));
+  }
+
+  function bodyHeight(calendar) {
+    const body = calendar?.querySelector('.week-body-fixed');
+    if (!body) return 0;
+    const inline = parseFloat(body.style.height);
+    if (Number.isFinite(inline) && inline > 0) return inline;
+    const column = body.querySelector('.week-day-column-fixed');
+    const columnInline = parseFloat(column?.style.height);
+    if (Number.isFinite(columnInline) && columnInline > 0) return columnInline;
+    return Math.max(body.scrollHeight, body.getBoundingClientRect().height, 0);
+  }
+
+  function syncCalendarHeight() {
+    syncFrame = 0;
+    const calendar = calendarElement();
+    const panel = panelElement();
+    if (!calendar || !panel) return;
+
+    const headerHeight = calendar.querySelector('.week-header-fixed')?.offsetHeight || 0;
+    const contentHeight = Math.ceil(headerHeight + bodyHeight(calendar));
+    if (contentHeight <= headerHeight) return;
+
+    const available = viewportAvailable(calendar);
+    const target = Math.max(headerHeight + 48, Math.min(contentHeight, available));
+    const needsVerticalScroll = contentHeight > available + 2;
+
+    panel.classList.add('rage-calendar-autoheight');
+    panel.style.setProperty('min-height', '0px', 'important');
+    panel.style.setProperty('height', 'auto', 'important');
+    calendar.style.setProperty('height', `${target}px`, 'important');
+    calendar.style.setProperty('max-height', `${available}px`, 'important');
+    calendar.style.setProperty('overflow-y', needsVerticalScroll ? 'auto' : 'hidden', 'important');
+  }
+
+  function scheduleHeightSync() {
+    if (syncFrame) cancelAnimationFrame(syncFrame);
+    syncFrame = requestAnimationFrame(syncCalendarHeight);
+    setTimeout(syncCalendarHeight, 40);
+    setTimeout(syncCalendarHeight, 140);
+  }
+
+  function showWeekToast(direction) {
+    document.querySelector('.rage-calendar-week-toast')?.remove();
+    const toast = document.createElement('div');
+    toast.className = 'rage-calendar-week-toast';
+    toast.textContent = direction > 0 ? 'Semana siguiente' : 'Semana anterior';
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('is-visible'));
+    setTimeout(() => toast.classList.remove('is-visible'), 720);
+    setTimeout(() => toast.remove(), 980);
+  }
+
+  function navigateWeek(direction) {
+    if (Date.now() < weekCooldownUntil || typeof window.cambiarMes !== 'function') return;
+    weekCooldownUntil = Date.now() + 520;
+    suppressClickUntil = Date.now() + 650;
+
+    const panel = panelElement();
+    if (panel) {
+      panel.style.setProperty('--rage-week-shift', direction > 0 ? '-12px' : '12px');
+      panel.classList.add('rage-calendar-week-changing');
+    }
+
+    window.cambiarMes(direction);
+    showWeekToast(direction);
+
+    const finish = () => {
+      const calendar = calendarElement();
+      if (calendar) {
+        const max = Math.max(0, calendar.scrollWidth - calendar.clientWidth);
+        calendar.scrollLeft = direction > 0 ? 0 : max;
+        bindWeekNavigation(calendar);
+      }
+      const currentPanel = panelElement();
+      if (currentPanel) currentPanel.classList.remove('rage-calendar-week-changing');
+      scheduleHeightSync();
+    };
+
+    requestAnimationFrame(finish);
+    setTimeout(finish, 60);
+    setTimeout(finish, 160);
+  }
+
+  function bindWeekNavigation(calendar) {
+    if (!calendar || calendar.dataset.rageWeekSwipe === '1') return;
+    calendar.dataset.rageWeekSwipe = '1';
+
+    let gesture = null;
+
+    calendar.addEventListener('touchstart', event => {
+      if (event.touches.length !== 1) {
+        gesture = null;
+        return;
+      }
+      const touch = event.touches[0];
+      const max = Math.max(0, calendar.scrollWidth - calendar.clientWidth);
+      gesture = {
+        x: touch.clientX,
+        y: touch.clientY,
+        time: performance.now(),
+        max,
+        startScroll: calendar.scrollLeft,
+        atStart: calendar.scrollLeft <= 8,
+        atEnd: calendar.scrollLeft >= max - 8
+      };
+    }, { passive: true });
+
+    calendar.addEventListener('touchmove', event => {
+      if (event.touches.length !== 1) gesture = null;
+    }, { passive: true });
+
+    calendar.addEventListener('touchend', event => {
+      if (!gesture || !event.changedTouches.length) return;
+      const touch = event.changedTouches[0];
+      const dx = touch.clientX - gesture.x;
+      const dy = touch.clientY - gesture.y;
+      const elapsed = Math.max(1, performance.now() - gesture.time);
+      const horizontal = Math.abs(dx) >= 72 && Math.abs(dx) > Math.abs(dy) * 1.25;
+      const quick = Math.abs(dx) / elapsed > 0.22;
+      const direction = dx < 0 ? 1 : -1;
+      const maxNow = Math.max(0, calendar.scrollWidth - calendar.clientWidth);
+      const noHorizontalOverflow = maxNow <= 8;
+      const endAtStart = calendar.scrollLeft <= 4;
+      const endAtEnd = calendar.scrollLeft >= maxNow - 4;
+      const startEdge = direction > 0 ? gesture.atEnd : gesture.atStart;
+      const strongArrival = Math.abs(dx) >= 150 && (direction > 0 ? endAtEnd : endAtStart);
+
+      gesture = null;
+      if (!horizontal || !quick) return;
+      if (noHorizontalOverflow || startEdge || strongArrival) navigateWeek(direction);
+    }, { passive: true });
+
+    calendar.addEventListener('touchcancel', () => { gesture = null; }, { passive: true });
+
+    calendar.addEventListener('wheel', event => {
+      if (event.ctrlKey || Math.abs(event.deltaX) <= Math.abs(event.deltaY) * 1.05) return;
+      const max = Math.max(0, calendar.scrollWidth - calendar.clientWidth);
+      const direction = event.deltaX > 0 ? 1 : -1;
+      const atEdge = max <= 8 || (direction > 0 ? calendar.scrollLeft >= max - 4 : calendar.scrollLeft <= 4);
+      if (!atEdge) {
+        wheelAccumulator = 0;
+        return;
+      }
+
+      wheelAccumulator += event.deltaX;
+      clearTimeout(wheelResetTimer);
+      wheelResetTimer = setTimeout(() => { wheelAccumulator = 0; }, 180);
+
+      if (Math.abs(wheelAccumulator) >= 90) {
+        event.preventDefault();
+        wheelAccumulator = 0;
+        navigateWeek(direction);
+      }
+    }, { passive: false });
+  }
+
+  function setup() {
+    installStyles();
+    const calendar = calendarElement();
+    if (calendar) bindWeekNavigation(calendar);
+    scheduleHeightSync();
+  }
+
+  document.addEventListener('click', event => {
+    if (Date.now() >= suppressClickUntil) return;
+    if (!event.target.closest?.('#resumen-section .week-calendar-fixed')) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }, true);
+
+  document.addEventListener('input', event => {
+    if (event.target.matches?.('[data-rage-zoom-range]')) scheduleHeightSync();
+  }, true);
+
+  document.addEventListener('click', event => {
+    if (event.target.closest?.('.rage-calendar-zoom')) scheduleHeightSync();
+  }, true);
+
+  const previousRender = window.renderCalendarioSemanal;
+  if (typeof previousRender === 'function') {
+    window.renderCalendarioSemanal = function () {
+      const result = previousRender.apply(this, arguments);
+      requestAnimationFrame(setup);
+      setTimeout(setup, 50);
+      setTimeout(setup, 150);
+      return result;
+    };
+  }
+
+  const observer = new MutationObserver(() => {
+    if (calendarElement()) setup();
+  });
+  const mount = document.getElementById('calendarioMensual') || document.documentElement;
+  observer.observe(mount, { childList: true, subtree: true });
+
+  window.addEventListener('resize', scheduleHeightSync, { passive: true });
+  window.addEventListener('orientationchange', () => {
+    setTimeout(scheduleHeightSync, 120);
+    setTimeout(scheduleHeightSync, 480);
+  }, { passive: true });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup, { once: true });
+  } else {
+    setup();
+  }
+
+  window.RageCalendarNavigation = {
+    version: VERSION,
+    nextWeek: () => navigateWeek(1),
+    previousWeek: () => navigateWeek(-1),
+    syncHeight: syncCalendarHeight
+  };
+})();
