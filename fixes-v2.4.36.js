@@ -174,3 +174,30 @@
     limpiarCancelacionesAntiguas();
   }
 })();
+
+/* Cargador operativo v2.4.46. Se mantiene aquí para que llegue también a las PWA ya instaladas. */
+(() => {
+  function loadOperativaV246() {
+    if (!document.querySelector('link[data-rage-operativa-v246]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'operativa-v2.4.46.css?v=2.4.46';
+      link.dataset.rageOperativaV246 = '1';
+      document.head.appendChild(link);
+    }
+
+    if (!document.querySelector('script[data-rage-operativa-v246]')) {
+      const script = document.createElement('script');
+      script.src = 'operativa-v2.4.46.js?v=2.4.46';
+      script.dataset.rageOperativaV246 = '1';
+      script.async = false;
+      document.head.appendChild(script);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadOperativaV246, { once: true });
+  } else {
+    loadOperativaV246();
+  }
+})();
