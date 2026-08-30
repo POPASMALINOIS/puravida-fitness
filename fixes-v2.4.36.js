@@ -37,21 +37,80 @@
   const observer = new MutationObserver(configurarEmail);
   observer.observe(document.documentElement, { childList: true, subtree: true });
 
-  // Refresco común tras eliminar una sesión de la agenda.
-  function refrescarTrasCancelar(clienteId) {
-    if (typeof guardarDatos === 'function') guardarDatos();
-    if (typeof verificarEstadoBonos === 'function') verificarEstadoBonos();
-    if (typeof actualizarResumen === 'function') actualizarResumen();
-    if (typeof renderAgendaDia === 'function') renderAgendaDia();
-    if (typeof renderCalendarioSemanal === 'function') renderCalendarioSemanal();
-    if (typeof renderClientes === 'function') renderClientes();
-
-    if (typeof clienteActual !== 'undefined' && clienteActual && Number(clienteActual.id) === Number(clienteId) && typeof verFichaCliente === 'function') {
-      verFichaCliente(clienteId);
-    }
+  function listaClientes() {
+    try { return Array.isArray(clientes) ? clientes : []; }
+    catch (_) { return []; }
   }
 
-  // Como protección adicional, ninguna sesión marcada como cancelada se representa en calendario/agenda.
+  function ejecutarSeguro(fn) {
+    try { if (typeof fn === 'function') fn(); } catch (error) { console.error(error); }
+  }
+
+  function refrescarTrasEliminar(clienteId) {
+    ejecutarSeguro(() => guardarDatos());
+    ejecutarSeguro(() => verificarEstadoBonos());
+    ejecutarSeguro(() => actualizarResumen());
+    ejecutarSeguro(() => renderAgendaDia());
+    ejecutarSeguro(() => renderCalendarioSemanal());
+    ejecutarSeguro(() => renderClientes());
+
+    // Refuerzo porque algunas vistas integradas se repintan al final del ciclo del navegador.
+    requestAnimationFrame(() => {
+      ejecutarSeguro(() => renderAgendaDia());
+      ejecutarSeguro(() => renderCalendarioSemanal());
+    });
+    setTimeout(() => {
+      ejecutarSeguro(() => renderAgendaDia());
+      ejecutarSeguro(() => renderCalendarioSemanal());
+    }, 40);
+
+    try {
+      if (clienteActual && Number(clienteActual.id) === Number(clienteId) && typeof verFichaCliente === 'function') {
+        verFichaCliente(clienteId);
+      }
+    } catch (_) {}
+  }
+
+  function localizarSesion(clienteId, claseId) {
+    const cliente = listaClientes().find(c => Number(c.id) === Number(clienteId));
+    if (!cliente || !Array.isArray(cliente.clases)) return null;
+    const indice = cliente.clases.findIndex(c => Number(c.id) === Number(claseId));
+    if (indice < 0) return null;
+    return { cliente, clase: cliente.clases[indice], indice };
+  }
+
+  function eliminarSesion(clienteId, claseId, modo) {
+    const encontrada = localizarSesion(clienteId, claseId);
+    if (!encontrada) {
+      // Aunque el dato ya no exista, limpiamos cualquier resto visual.
+      refrescarTrasEliminar(clienteId);
+      return;
+    }
+
+    const { cliente, clase, indice } = encontrada;
+
+    if (modo === 'cancelar') {
+      if (!confirm('¿Cancelar esta sesión? La sesión contabilizará en el bono y se eliminará de la agenda.')) return;
+
+      // Cancelación normal: cuenta una sesión. Si aún no se había descontado, se descuenta ahora.
+      if (!clase.consumida && Number(cliente.bonoDisponible) > 0) {
+        cliente.bonoDisponible = Number(cliente.bonoDisponible) - 1;
+      }
+    } else {
+      if (!confirm('¿Cancelar excepcionalmente esta sesión? Se devolverá al bono si estaba contabilizada y se eliminará de la agenda.')) return;
+
+      // Cancelación excepcional: si ya estaba contabilizada, devuelve una sesión.
+      if (clase.consumida && Number(cliente.bonoDisponible) < Number(cliente.bonoTotal)) {
+        cliente.bonoDisponible = Number(cliente.bonoDisponible) + 1;
+      }
+    }
+
+    // Mutación sobre el mismo array: evita que cualquier vista conserve una referencia antigua.
+    cliente.clases.splice(indice, 1);
+    refrescarTrasEliminar(clienteId);
+  }
+
+  // Protección adicional: una sesión cancelada nunca se representa.
   const obtenerClasesOriginal = window.obtenerClasesPorFecha;
   if (typeof obtenerClasesOriginal === 'function') {
     window.obtenerClasesPorFecha = function (fechaISO) {
@@ -61,58 +120,57 @@
     };
   }
 
-  // CANCELAR: la sesión contabiliza en el bono y desaparece completamente de la agenda.
   window.cancelarClase = function (clienteId, claseId) {
-    const cliente = (typeof clientes !== 'undefined' ? clientes : []).find(c => Number(c.id) === Number(clienteId));
-    if (!cliente) return;
-
-    const clase = (cliente.clases || []).find(c => Number(c.id) === Number(claseId));
-    if (!clase) return;
-
-    const ahora = new Date();
-    const fechaClase = new Date(`${clase.fecha}T${clase.hora}:00`);
-    const diferenciaHoras = (fechaClase - ahora) / (1000 * 60 * 60);
-
-    // Conservamos la regla existente: cancelación normal solo con más de 12 h.
-    if (diferenciaHoras <= 12) {
-      alert('No se puede cancelar con menos de 12 horas. Usa la cancelación excepcional si procede.');
-      return;
-    }
-
-    if (!confirm('¿Cancelar esta sesión? La sesión contabilizará en el bono y se eliminará de la agenda.')) return;
-
-    // Si aún no había sido consumida automáticamente, la contabilizamos ahora una única vez.
-    if (!clase.consumida && Number(cliente.bonoDisponible) > 0) {
-      cliente.bonoDisponible = Number(cliente.bonoDisponible) - 1;
-    }
-
-    // Igual que Borrar a nivel de calendario: la reserva deja de existir.
-    cliente.clases = (cliente.clases || []).filter(c => Number(c.id) !== Number(claseId));
-    refrescarTrasCancelar(clienteId);
+    eliminarSesion(clienteId, claseId, 'cancelar');
   };
 
-  // EXCEPCIONAL: devuelve el bono si ya se había consumido y elimina completamente la reserva.
   window.cancelarClaseExcepcional = function (clienteId, claseId) {
-    const cliente = (typeof clientes !== 'undefined' ? clientes : []).find(c => Number(c.id) === Number(clienteId));
-    if (!cliente) return;
-
-    const clase = (cliente.clases || []).find(c => Number(c.id) === Number(claseId));
-    if (!clase) return;
-
-    if (!confirm('¿Cancelar excepcionalmente esta sesión? Se devolverá al bono si estaba contabilizada y se eliminará de la agenda.')) return;
-
-    if (clase.consumida && Number(cliente.bonoDisponible) < Number(cliente.bonoTotal)) {
-      cliente.bonoDisponible = Number(cliente.bonoDisponible) + 1;
-    }
-
-    // Igual que Borrar a nivel de calendario: la reserva deja de existir.
-    cliente.clases = (cliente.clases || []).filter(c => Number(c.id) !== Number(claseId));
-    refrescarTrasCancelar(clienteId);
+    eliminarSesion(clienteId, claseId, 'excepcional');
   };
+
+  // Intercepta los botones antes del onclick antiguo para garantizar que siempre se use esta lógica.
+  document.addEventListener('click', event => {
+    const boton = event.target.closest('button[onclick*="cancelarClaseExcepcional("], button[onclick*="cancelarClase("]');
+    if (!boton) return;
+
+    const codigo = boton.getAttribute('onclick') || '';
+    const excepcional = codigo.includes('cancelarClaseExcepcional(');
+    const coincidencia = codigo.match(/cancelarClase(?:Excepcional)?\s*\(\s*([^,]+)\s*,\s*([^\)]+)\s*\)/);
+    if (!coincidencia) return;
+
+    const clienteId = Number(String(coincidencia[1]).replace(/[^0-9.-]/g, ''));
+    const claseId = Number(String(coincidencia[2]).replace(/[^0-9.-]/g, ''));
+    if (!Number.isFinite(clienteId) || !Number.isFinite(claseId)) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    eliminarSesion(clienteId, claseId, excepcional ? 'excepcional' : 'cancelar');
+  }, true);
+
+  function limpiarCancelacionesAntiguas() {
+    let cambio = false;
+    listaClientes().forEach(cliente => {
+      if (!Array.isArray(cliente.clases)) return;
+      const antes = cliente.clases.length;
+      cliente.clases = cliente.clases.filter(clase =>
+        clase.estado !== 'Cancelada' && clase.estado !== 'Cancelada excepcional'
+      );
+      if (cliente.clases.length !== antes) cambio = true;
+    });
+    if (cambio) {
+      ejecutarSeguro(() => guardarDatos());
+      ejecutarSeguro(() => renderCalendarioSemanal());
+    }
+  }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => window.convertirInputsMayusculas(), { once: true });
+    document.addEventListener('DOMContentLoaded', () => {
+      window.convertirInputsMayusculas();
+      limpiarCancelacionesAntiguas();
+    }, { once: true });
   } else {
     window.convertirInputsMayusculas();
+    limpiarCancelacionesAntiguas();
   }
 })();
