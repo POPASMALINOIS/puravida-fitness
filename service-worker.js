@@ -1,4 +1,4 @@
-const CACHE_NAME = "rage-training-v2.4.49";
+const CACHE_NAME = "rage-training-v2.4.50";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -25,8 +25,8 @@ const APP_SHELL = [
   "./mesociclo-plan-editor-v2.4.43.css?v=2.4.43",
   "./calendar-zoom-v2.4.44.css?v=2.4.44",
   "./operativa-v2.4.46.css?v=2.4.46",
-  "./recurrencias-v2.4.47.css?v=2.4.49",
-  "./recurrencias-fix-v2.4.48.css?v=2.4.49",
+  "./recurrencias-v2.4.47.css?v=2.4.50",
+  "./recurrencias-fix-v2.4.48.css?v=2.4.50",
   "./app.js?v=2.4.4",
   "./ajustes-v2.4.7.js?v=2.4.8",
   "./clientes-seguimiento-v2.4.9.js?v=2.4.9",
@@ -47,9 +47,9 @@ const APP_SHELL = [
   "./mesociclo-plan-editor-v2.4.43.js?v=2.4.43",
   "./calendar-zoom-v2.4.44.js?v=2.4.45",
   "./operativa-v2.4.46.js?v=2.4.46",
-  "./recurrencias-loader-v2.4.47.js?v=2.4.49",
-  "./recurrencias-v2.4.47.js?v=2.4.49",
-  "./recurrencias-fix-v2.4.48.js?v=2.4.49"
+  "./recurrencias-loader-v2.4.47.js?v=2.4.50",
+  "./recurrencias-v2.4.47.js?v=2.4.50",
+  "./recurrencias-save-v2.4.50.js?v=2.4.50"
 ];
 
 self.addEventListener("install", event => {
@@ -72,17 +72,17 @@ self.addEventListener("fetch", event => {
   if (url.origin !== self.location.origin) return;
 
   let networkRequest = request;
-  const forceV249 = [
+  const forceV250 = [
     "/recurrencias-loader-v2.4.47.js",
     "/recurrencias-v2.4.47.js",
     "/recurrencias-v2.4.47.css",
-    "/recurrencias-fix-v2.4.48.js",
-    "/recurrencias-fix-v2.4.48.css"
+    "/recurrencias-fix-v2.4.48.css",
+    "/recurrencias-save-v2.4.50.js"
   ].some(path => url.pathname.endsWith(path));
 
-  if (url.pathname.endsWith("/calendar-zoom-v2.4.44.js") || forceV249) {
+  if (url.pathname.endsWith("/calendar-zoom-v2.4.44.js") || forceV250) {
     const freshUrl = new URL(request.url);
-    freshUrl.searchParams.set("v", forceV249 ? "2.4.49" : "2.4.45");
+    freshUrl.searchParams.set("v", forceV250 ? "2.4.50" : "2.4.45");
     networkRequest = new Request(freshUrl.toString(), request);
   }
 
