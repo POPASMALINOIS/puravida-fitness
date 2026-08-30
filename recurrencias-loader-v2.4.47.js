@@ -1,8 +1,13 @@
 (() => {
-  if (window.RageRecurrenciasLoaderV249) return;
+  if (window.RageRecurrenciasLoaderV250) return;
+  window.RageRecurrenciasLoaderV250 = true;
   window.RageRecurrenciasLoaderV249 = true;
   window.RageRecurrenciasLoaderV248 = true;
   window.RageRecurrenciasLoaderV247 = true;
+
+  // Impide que se ejecute el guardado anterior, que contenía el identificador mal escrito.
+  window.RageRecurrenciasFixV249 = true;
+  window.RageRecurrenciasFixV248 = true;
 
   function loadStyle(href, attribute) {
     let link = document.querySelector(`link[${attribute}]`);
@@ -40,25 +45,27 @@
     return script;
   }
 
-  function loadFix() {
-    loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.49', 'data-rage-recurrencias-fix-v249');
-    if (!window.RageRecurrenciasFixV249) {
-      loadScript('recurrencias-fix-v2.4.48.js?v=2.4.49', 'data-rage-recurrencias-fix-v249');
-    }
+  function loadSaveHandler() {
+    if (window.RageRecurrenciasSaveV250) return;
+    loadScript(
+      'recurrencias-save-v2.4.50.js?v=2.4.50',
+      'data-rage-recurrencias-save-v250'
+    );
   }
 
   function loadCore() {
-    loadStyle('recurrencias-v2.4.47.css?v=2.4.49', 'data-rage-recurrencias-v247');
+    loadStyle('recurrencias-v2.4.47.css?v=2.4.50', 'data-rage-recurrencias-v247');
+    loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.50', 'data-rage-recurrencias-fix-v250');
 
     if (window.RageRecurrenciasVersion) {
-      loadFix();
+      loadSaveHandler();
       return;
     }
 
     loadScript(
-      'recurrencias-v2.4.47.js?v=2.4.49',
+      'recurrencias-v2.4.47.js?v=2.4.50',
       'data-rage-recurrencias-v247',
-      loadFix
+      loadSaveHandler
     );
   }
 
@@ -71,8 +78,8 @@
   }
 
   function start() {
-    loadStyle('recurrencias-v2.4.47.css?v=2.4.49', 'data-rage-recurrencias-v247');
-    loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.49', 'data-rage-recurrencias-fix-v249');
+    loadStyle('recurrencias-v2.4.47.css?v=2.4.50', 'data-rage-recurrencias-v247');
+    loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.50', 'data-rage-recurrencias-fix-v250');
     waitForOperativa();
   }
 
