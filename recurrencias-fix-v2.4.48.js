@@ -1,11 +1,14 @@
 (() => {
-  if (window.RageRecurrenciasFixV248) return;
-  window.RageRecurrenciasFixV248 = true;
+  if (window.RageRecurrenciasFixV249) return;
+  window.RageRecurrenciasFixV249 = true;
 
-  const VERSION = '2.4.48';
+  const VERSION = '2.4.49';
   const MODAL_ID = 'rageRecurringModal';
   const MAX_DAYS = 730;
   const MAX_SESSIONS = 366;
+  const HOUR_START = 6 * 60;
+  const HOUR_END = 24 * 60;
+  let suppressSyntheticClickUntil = 0;
 
   const clientesLista = () => {
     try { return Array.isArray(clientes) ? clientes : []; }
@@ -17,8 +20,12 @@
     catch (_) { return []; }
   };
 
-  const clientePorId = id => clientesLista().find(cliente => Number(cliente.id) === Number(id));
-  const entrenadorPorId = id => entrenadoresLista().find(entrenador => Number(entrenador.id) === Number(id));
+  const clientePorId = id => clientesLista().find(cliente => Number(cliente?.id) === Number(id));
+  const entrenadorPorId = id => entrenadoresLista().find(entrenador => Number(entrenador?.id) === Number(id));
+
+  function sesionesCliente(cliente) {
+    return Array.isArray(cliente?.clases) ? cliente.clases.filter(Boolean) : [];
+  }
 
   function parseFechaISO(value) {
     const [year, month, day] = String(value || '').split('-').map(Number);
@@ -96,15 +103,15 @@
   function sesionFuente(cliente, modal) {
     const date = modal.querySelector('#rageRecurringStart')?.value || '';
     const hour = modal.querySelector('#rageRecurringHour')?.value || '';
-    return (cliente?.clases || []).find(session =>
-      session.fecha === date && session.hora === hour &&
+    return sesionesCliente(cliente).find(session =>
+      session && session.fecha === date && session.hora === hour &&
       session.estado !== 'Cancelada' && session.estado !== 'Cancelada excepcional'
     ) || null;
   }
 
   function sesionDuplicada(cliente, date, hour) {
-    return (cliente.clases || []).some(session =>
-      session.fecha === date && session.hora === hour &&
+    return sesionesCliente(cliente).some(session =>
+      session && session.fecha === date && session.hora === hour &&
       session.estado !== 'Cancelada' && session.estado !== 'Cancelada excepcional'
     );
   }
@@ -112,15 +119,18 @@
   function conflictoEntrenador({ trainerId, date, hour, duration }) {
     const start = minutosHora(hour);
     const end = start + Number(duration || 60);
+    if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
 
     for (const client of clientesLista()) {
-      for (const session of (client.clases || [])) {
+      for (const session of sesionesCliente(client)) {
+        if (!session || typeof session !== 'object') continue;
         if (session.fecha !== date) continue;
         if (session.estado === 'Cancelada' || session.estado === 'Cancelada excepcional') continue;
         if (Number(session.entrenadorId || 0) !== Number(trainerId)) continue;
 
         const otherStart = minutosHora(session.hora);
-        const otherDuration = Number(session.duracion || client.bonoDuracion || 60);
+        const otherDuration = Number(session.duracion || client?.bonoDuracion || 60);
+        if (!Number.isFinite(otherStart) || !Number.isFinite(otherDuration)) continue;
         if (start < otherStart + otherDuration && end > otherStart) return { client, session };
       }
     }
@@ -129,7 +139,7 @@
 
   function ejecutarSeguro(callback) {
     try { if (typeof callback === 'function') callback(); }
-    catch (error) { console.error('[Rage recurrentes]', error); }
+    catch (error) { console.error('[Rage recurrentes] Actualización visual:', error); }
   }
 
   function cerrarModal() {
@@ -154,6 +164,103 @@
     button.disabled = false;
     button.removeAttribute('aria-busy');
     button.textContent = originalText || 'Crear sesiones';
+  }
+
+  function stringifySeguro(value) {
+    const seen = new WeakSet();
+    return JSON.stringify(value, (_key, item) => {
+      if (typeof item === 'bigint') return String(item);
+      if (typeof item === 'function' || typeof item === 'symbol') return undefined;
+      if (item && typeof item === 'object') {
+        if (typeof Node !== 'undefined' && item instanceof Node) return undefined;
+        if (seen.has(item)) return undefined;
+        seen.add(item);
+      }
+      return item;
+    });
+  }
+
+  function payloadCompactado() {
+    const serialized = stringifySeguro(clientesLista());
+    if (!serialized) throw new Error('No se ha podido preparar la información de los clientes.');
+    const payload = JSON.parse(serialized);
+
+    payload.forEach(client => {
+      if (!Array.isArray(client.clases)) client.clases = [];
+      if (!Array.isArray(client.seriesRecurrentes)) client.seriesRecurrentes = [];
+
+      const registered = new Set(client.seriesRecurrentes.map(series => String(series?.id || '')));
+      client.clases.forEach(session => {
+        if (!session || typeof session !== 'object' || !session.serieId) return;
+        const seriesId = String(session.serieId);
+        if (!registered.has(seriesId)) {
+          client.seriesRecurrentes.push({
+            id: seriesId,
+            tipo: session.serieTipo || 'semanal',
+            inicio: session.serieInicio || session.fecha || '',
+            fin: session.serieFin || session.fecha || '',
+            dias: Array.isArray(session.serieDias) ? [...session.serieDias] : [],
+            hora: session.hora || '',
+            entrenadorId: session.entrenadorId || null,
+            creadaEn: session.serieCreadaEn || ''
+          });
+          registered.add(seriesId);
+        }
+        delete session.serieInicio;
+        delete session.serieFin;
+        delete session.serieDias;
+        delete session.serieCreadaEn;
+      });
+    });
+
+    return payload;
+  }
+
+  function esErrorCuota(error) {
+    return !!error && (
+      error.name === 'QuotaExceededError' ||
+      error.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+      error.code === 22 || error.code === 1014 ||
+      /quota|almacenamiento|storage/i.test(String(error.message || ''))
+    );
+  }
+
+  function persistirClientes(expectedClientId, expectedSessionIds) {
+    if (!window.localStorage) throw new Error('El almacenamiento local no está disponible.');
+
+    let serialized = stringifySeguro(clientesLista());
+    if (!serialized) throw new Error('No se ha podido serializar la base de clientes.');
+
+    try {
+      localStorage.setItem('clientes', serialized);
+    } catch (firstError) {
+      if (!esErrorCuota(firstError)) throw firstError;
+      const compact = payloadCompactado();
+      serialized = stringifySeguro(compact);
+      localStorage.setItem('clientes', serialized);
+    }
+
+    const storedRaw = localStorage.getItem('clientes');
+    if (!storedRaw) throw new Error('El navegador no ha confirmado el guardado.');
+    const storedClients = JSON.parse(storedRaw);
+    if (!Array.isArray(storedClients)) throw new Error('La copia guardada no contiene una lista válida de clientes.');
+
+    const storedClient = storedClients.find(client => Number(client?.id) === Number(expectedClientId));
+    if (!storedClient || !Array.isArray(storedClient.clases)) {
+      throw new Error('No se ha encontrado el cliente en la copia guardada.');
+    }
+
+    const storedIds = new Set(storedClient.clases.map(session => String(session?.id || '')));
+    const missing = expectedSessionIds.filter(id => !storedIds.has(String(id)));
+    if (missing.length) throw new Error(`Faltan ${missing.length} sesiones en la comprobación del guardado.`);
+  }
+
+  function mensajeErrorGuardado(error) {
+    if (esErrorCuota(error)) {
+      return 'No se han podido guardar las sesiones porque el almacenamiento de esta tablet está lleno. Cierra el aviso y exporta una copia antes de liberar datos.';
+    }
+    const detail = String(error?.message || error?.name || 'Error desconocido').trim();
+    return `No se han podido guardar las sesiones recurrentes. Detalle: ${detail}`;
   }
 
   function refrescarDespuesDeGuardar(cliente) {
@@ -185,10 +292,13 @@
     }
 
     let completed = false;
+    let cliente = null;
+    let createdSessions = [];
+    let seriesRecord = null;
 
     try {
       const clientId = Number(modal.dataset.clientId || 0);
-      const cliente = clientePorId(clientId);
+      cliente = clientePorId(clientId);
       const trainerId = Number(modal.querySelector('#rageRecurringTrainer')?.value || 0);
       const trainer = entrenadorPorId(trainerId);
       const hour = modal.querySelector('#rageRecurringHour')?.value || '';
@@ -215,20 +325,29 @@
       }
 
       const startMinutes = minutosHora(hour);
-      if (!Number.isFinite(startMinutes) || startMinutes < 6 * 60 || startMinutes + duration > 24 * 60) {
+      if (!Number.isFinite(startMinutes) || !Number.isFinite(duration) || duration <= 0 || startMinutes < HOUR_START || startMinutes + duration > HOUR_END) {
         alert('La sesión debe quedar comprendida entre las 06:00 y las 24:00.');
         return;
       }
 
-      cliente.clases = Array.isArray(cliente.clases) ? cliente.clases : [];
+      if (!Array.isArray(cliente.clases)) cliente.clases = [];
+      if (!Array.isArray(cliente.seriesRecurrentes)) cliente.seriesRecurrentes = [];
 
       const seriesId = `RAGE-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
-      const idBase = Date.now() * 1000;
-      let created = 0;
+      const usedIds = new Set(cliente.clases.map(session => Number(session?.id)).filter(Number.isFinite));
+      let nextId = Date.now();
+      const newId = () => {
+        while (usedIds.has(nextId)) nextId += 1;
+        const id = nextId;
+        usedIds.add(id);
+        nextId += 1;
+        return id;
+      };
+
       let duplicates = 0;
       let conflicts = 0;
 
-      dates.forEach((date, index) => {
+      dates.forEach(date => {
         if (sesionDuplicada(cliente, date, hour)) {
           duplicates += 1;
           return;
@@ -240,8 +359,8 @@
           return;
         }
 
-        cliente.clases.push({
-          id: idBase + index + 1,
+        createdSessions.push({
+          id: newId(),
           fecha: date,
           hora: hour,
           estado: 'Programada',
@@ -252,16 +371,11 @@
           entrenadorColor: trainer.color,
           consumida: false,
           serieId,
-          serieTipo: 'semanal',
-          serieInicio: startValue,
-          serieFin: fechaISO(endDate),
-          serieDias: [...days],
-          serieCreadaEn: new Date().toISOString()
+          serieTipo: 'semanal'
         });
-        created += 1;
       });
 
-      if (!created) {
+      if (!createdSessions.length) {
         const reasons = [
           conflicts ? `${conflicts} con el horario del entrenador ocupado` : '',
           duplicates ? `${duplicates} porque ya existían` : ''
@@ -270,8 +384,30 @@
         return;
       }
 
-      if (typeof guardarDatos !== 'function') throw new Error('No está disponible el guardado de datos.');
-      guardarDatos();
+      seriesRecord = {
+        id: seriesId,
+        tipo: 'semanal',
+        inicio: startValue,
+        fin: fechaISO(endDate),
+        dias: [...days],
+        hora,
+        entrenadorId: trainer.id,
+        duracion: String(duration),
+        modalidad,
+        creadaEn: new Date().toISOString()
+      };
+
+      cliente.clases.push(...createdSessions);
+      cliente.seriesRecurrentes.push(seriesRecord);
+
+      try {
+        persistirClientes(cliente.id, createdSessions.map(session => session.id));
+      } catch (storageError) {
+        const createdIds = new Set(createdSessions.map(session => String(session.id)));
+        cliente.clases = cliente.clases.filter(session => !createdIds.has(String(session?.id)));
+        cliente.seriesRecurrentes = cliente.seriesRecurrentes.filter(series => String(series?.id) !== String(seriesRecord?.id));
+        throw storageError;
+      }
 
       completed = true;
       cerrarModal();
@@ -282,36 +418,36 @@
         duplicates ? `${duplicates} ya existente${duplicates === 1 ? '' : 's'}` : ''
       ].filter(Boolean);
       mostrarToast(
-        `${created} sesión${created === 1 ? '' : 'es'} creada${created === 1 ? '' : 's'}${extras.length ? ` · ${extras.join(' · ')}` : ''}`,
+        `${createdSessions.length} sesión${createdSessions.length === 1 ? '' : 'es'} creada${createdSessions.length === 1 ? '' : 's'}${extras.length ? ` · ${extras.join(' · ')}` : ''}`,
         conflicts ? 'warning' : 'ok'
       );
     } catch (error) {
       console.error('[Rage recurrentes] Error al crear sesiones:', error);
-      alert('No se han podido guardar las sesiones recurrentes. Se ha evitado cerrar el formulario para que puedas revisarlo.');
+      alert(mensajeErrorGuardado(error));
     } finally {
       if (!completed) restaurarBoton(modal, button, originalText);
     }
   }
 
   function prepararModal(modal) {
-    if (!modal || modal.dataset.rageFixV248 === '1') return;
-    modal.dataset.rageFixV248 = '1';
-
-    const footer = modal.querySelector('.rage-recurring-foot');
+    if (!modal) return;
     const saveButton = modal.querySelector('.rage-recurring-save');
+    const footer = modal.querySelector('.rage-recurring-foot');
     if (footer) footer.setAttribute('aria-label', 'Acciones de programación recurrente');
-    if (saveButton) {
-      saveButton.type = 'button';
-      saveButton.dataset.rageSafeSave = '1';
-      saveButton.setAttribute('touch-action', 'manipulation');
-    }
+    if (!saveButton || saveButton.dataset.rageFixV249 === '1') return;
+
+    saveButton.dataset.rageFixV249 = '1';
+    saveButton.type = 'button';
+    saveButton.onclick = null;
+    saveButton.removeAttribute('onclick');
+    saveButton.setAttribute('touch-action', 'manipulation');
   }
 
   function activarDesdeEvento(event) {
     const button = event.target.closest?.(`#${MODAL_ID} .rage-recurring-save`);
     if (!button) return false;
     const modal = button.closest(`#${MODAL_ID}`);
-    if (!modal) return false;
+    if (!modal || button.disabled) return false;
 
     event.preventDefault();
     event.stopPropagation();
@@ -320,20 +456,25 @@
     return true;
   }
 
-  // En Android algunas PWA pierden el click al cerrar el teclado. Pointerup asegura la activación táctil.
   document.addEventListener('pointerup', event => {
     if (event.pointerType === 'mouse') return;
-    activarDesdeEvento(event);
+    const handled = activarDesdeEvento(event);
+    if (handled) suppressSyntheticClickUntil = Date.now() + 1000;
   }, true);
 
-  // Ratón, teclado y navegadores que sí generan click con normalidad.
   document.addEventListener('click', event => {
+    const button = event.target.closest?.(`#${MODAL_ID} .rage-recurring-save`);
+    if (!button) return;
+    if (Date.now() < suppressSyntheticClickUntil) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      return;
+    }
     activarDesdeEvento(event);
   }, true);
 
-  const observer = new MutationObserver(() => {
-    prepararModal(document.getElementById(MODAL_ID));
-  });
+  const observer = new MutationObserver(() => prepararModal(document.getElementById(MODAL_ID)));
   observer.observe(document.documentElement, { childList: true, subtree: true });
 
   prepararModal(document.getElementById(MODAL_ID));
