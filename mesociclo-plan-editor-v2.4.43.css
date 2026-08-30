@@ -1,0 +1,53 @@
+/* v2.4.43 · Edición directa del plan de ejercicios + teclado Android */
+.rage-plan-edit-button{
+  margin-left:auto;border:1px solid rgba(241,90,36,.42);border-radius:9px;padding:8px 11px;
+  background:rgba(241,90,36,.14);color:#fff;font-size:10px;font-weight:900;cursor:pointer;white-space:nowrap
+}
+.rage-plan-edit-button:hover{background:rgba(241,90,36,.24)}
+.meso-exercise-display-title{gap:12px}.meso-exercise-display-title>div{min-width:0}
+
+html.rage-plan-editor-open,html.rage-plan-editor-open body{overflow:hidden!important;overscroll-behavior:none!important}
+.rage-plan-editor-overlay{position:fixed;inset:0;z-index:350000;display:flex;align-items:stretch;justify-content:center;padding:10px;box-sizing:border-box}
+.rage-plan-editor-backdrop{position:absolute;inset:0;background:rgba(2,8,18,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.rage-plan-editor-shell{position:relative;z-index:1;display:flex;flex-direction:column;width:min(920px,100%);height:min(94dvh,900px);max-height:100%;margin:auto;overflow:hidden;border:1px solid rgba(148,163,184,.22);border-radius:18px;background:#081321;color:#f8fafc;box-shadow:0 28px 90px rgba(0,0,0,.52)}
+.rage-plan-editor-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex:0 0 auto;padding:16px 18px;border-bottom:1px solid rgba(148,163,184,.14);background:#0b1728}
+.rage-plan-editor-head>div:first-child{min-width:0}.rage-plan-editor-head span{color:#F15A24;font-size:10px;font-weight:900;letter-spacing:.13em}.rage-plan-editor-head h3{margin:4px 0 2px;font-size:21px}.rage-plan-editor-head p{margin:0;color:#8fa0b5;font-size:11px;overflow-wrap:anywhere}
+.rage-plan-head-actions{display:flex;align-items:center;gap:8px}.rage-plan-head-save{border:0;border-radius:9px;padding:9px 12px;background:#F15A24;color:#fff;font-weight:900;cursor:pointer}.rage-plan-close{border:0;background:transparent;color:#9daac0;font-size:30px;line-height:1;cursor:pointer}
+.rage-plan-editor-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:0 0 auto;padding:11px 18px;border-bottom:1px solid rgba(148,163,184,.12);background:#091625}.rage-plan-editor-toolbar p{margin:0;color:#8d9eb3;font-size:11px}.rage-plan-add{border:0;border-radius:9px;padding:9px 12px;background:#16263c;color:#fff;font-weight:800;cursor:pointer;white-space:nowrap}
+.rage-plan-editor-body{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scroll-behavior:smooth;scroll-padding-top:14px;scroll-padding-bottom:150px;padding:14px 16px 150px;box-sizing:border-box}
+.rage-plan-rows{display:flex;flex-direction:column;gap:12px}.rage-plan-row{scroll-margin-top:12px;scroll-margin-bottom:180px;padding:13px;border:1px solid rgba(148,163,184,.16);border-radius:13px;background:linear-gradient(180deg,#0e1c30,#0a1626)}
+.rage-plan-row-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.rage-plan-row-head span{color:#F15A24;font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase}.rage-plan-remove{border:1px solid rgba(244,63,94,.28);border-radius:8px;padding:7px 9px;background:rgba(127,29,29,.22);color:#fda4af;font-size:10px;font-weight:800;cursor:pointer}
+.rage-plan-row-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}.rage-plan-field{display:flex;flex-direction:column;gap:6px;min-width:0}.rage-plan-field.full{grid-column:1/-1}.rage-plan-field>span{color:#8193aa;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.rage-plan-field input,.rage-plan-field textarea{width:100%;min-width:0;max-width:100%;margin:0;padding:11px 12px;border:1px solid rgba(148,163,184,.18);border-radius:9px;background:#071321;color:#fff;font:inherit;font-size:16px;outline:none;box-sizing:border-box}.rage-plan-field input:focus,.rage-plan-field textarea:focus{border-color:rgba(241,90,36,.75);box-shadow:0 0 0 3px rgba(241,90,36,.12)}.rage-plan-field textarea{min-height:78px;resize:vertical}
+.rage-plan-editor-foot{display:flex;justify-content:flex-end;gap:9px;flex:0 0 auto;padding:11px 16px max(11px,env(safe-area-inset-bottom));border-top:1px solid rgba(148,163,184,.14);background:#0b1728;box-shadow:0 -10px 28px rgba(2,8,18,.36)}.rage-plan-editor-foot button{min-height:44px;border-radius:9px;padding:9px 14px;font-weight:900;cursor:pointer}.rage-plan-cancel{border:1px solid rgba(148,163,184,.2);background:#142238;color:#cbd5e1}.rage-plan-save{border:0;background:#F15A24;color:#fff}
+.rage-plan-keyboard-spacer{display:none;height:1px}
+
+html.rage-plan-keyboard-active .rage-plan-editor-body,
+html.rage-plan-keyboard-active #rageTrackingModal .tracking-modal-body{
+  padding-bottom:max(52vh,420px)!important;
+  scroll-padding-bottom:max(52vh,420px)!important;
+}
+html.rage-plan-keyboard-active .rage-plan-keyboard-spacer{display:block;height:max(52vh,420px)}
+html.rage-plan-keyboard-active #rageTrackingModal [data-exercise-row],
+html.rage-plan-keyboard-active .rage-plan-row{scroll-margin-bottom:max(52vh,420px)!important}
+
+@media(pointer:coarse), (max-width:1100px){
+  .rage-plan-editor-overlay{inset:auto 0 auto 0;top:var(--rage-plan-viewport-top,0px);width:100vw;height:var(--rage-plan-viewport-height,100dvh);padding:7px max(7px,env(safe-area-inset-right)) max(7px,env(safe-area-inset-bottom)) max(7px,env(safe-area-inset-left))}
+  .rage-plan-editor-shell{width:100%;height:100%;max-height:100%;margin:0;border-radius:14px}
+  .rage-plan-editor-head{padding:12px 14px}.rage-plan-editor-head h3{font-size:18px}.rage-plan-editor-toolbar{padding:9px 14px}.rage-plan-editor-body{padding:12px 12px 140px}.rage-plan-editor-foot{padding:9px 12px max(9px,env(safe-area-inset-bottom))}
+  .rage-plan-field input,.rage-plan-field textarea{font-size:16px!important}
+}
+
+@media(pointer:coarse) and (min-width:600px){
+  .rage-plan-editor-shell{max-width:1050px}.rage-plan-row{padding:14px}.rage-plan-row-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  html.rage-plan-keyboard-active .rage-plan-editor-head{padding:7px 12px}.rage-plan-head-save{display:inline-flex}
+  html.rage-plan-keyboard-active .rage-plan-editor-toolbar{display:none}
+  html.rage-plan-keyboard-active .rage-plan-editor-body{padding-top:8px!important}
+  html.rage-plan-keyboard-active .rage-plan-editor-foot{display:none}
+  html.rage-plan-keyboard-active #rageTrackingModal .tracking-modal-head{padding:7px 12px!important}
+  html.rage-plan-keyboard-active #rageTrackingModal .tracking-modal-actions{display:none!important}
+}
+
+@media(max-width:599px){
+  .rage-plan-editor-head p{display:none}.rage-plan-head-save{display:none}.rage-plan-editor-toolbar{align-items:stretch;flex-direction:column}.rage-plan-add{width:100%}.rage-plan-row-grid{grid-template-columns:minmax(0,1fr)}.rage-plan-field.full{grid-column:auto}
+  .meso-exercise-display-title{align-items:flex-start}.rage-plan-edit-button{padding:7px 9px}
+}
