@@ -64,10 +64,18 @@
     );
   }
 
+  function loadSupabaseShadowBridge() {
+    if (window.RageSupabaseBridge || document.querySelector('script[data-rage-supabase-config]')) return;
+    loadScript('supabase-config.js?v=2.5.0-alpha1', 'data-rage-supabase-config', () => {
+      loadScript('supabase-bridge-v2.5.0.js?v=2.5.0-alpha1', 'data-rage-supabase-bridge');
+    });
+  }
+
   function loadCore() {
     loadStyle('recurrencias-v2.4.47.css?v=2.4.52', 'data-rage-recurrencias-v247');
     loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.52', 'data-rage-recurrencias-fix-v252');
     loadCalendarClientNavigation();
+    loadSupabaseShadowBridge();
 
     if (window.RageRecurrenciasVersion) {
       loadSaveHandler();
