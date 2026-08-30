@@ -1,5 +1,5 @@
 (() => {
-  const VERSION = '2.4.41';
+  const VERSION = '2.4.42';
   const root = document.documentElement;
   let virtualKeyboardHeight = 0;
   let revealTimers = [];
@@ -148,6 +148,120 @@
       @media (pointer:coarse) and (orientation:landscape) and (max-height:620px){
         html.rage-soft-keyboard-open #rageTrackingModal .tracking-modal-head{
           display:none!important;
+        }
+      }
+
+      /* Ficha del cliente: ejercicios en cuadrícula en tablets Android. */
+      @media (pointer:coarse) and (min-width:600px){
+        #clienteTrackingRage,
+        #clienteTrackingRage .tracking-pane,
+        #clienteTrackingRage .meso-item,
+        #clienteTrackingRage .meso-exercise-display,
+        #clienteTrackingRage .meso-exercise-table-wrap{
+          width:100%!important;
+          max-width:none!important;
+          min-width:0!important;
+          box-sizing:border-box!important;
+        }
+        #clienteTrackingRage .meso-exercise-table-wrap{
+          overflow:visible!important;
+        }
+        #clienteTrackingRage .meso-exercise-table{
+          display:block!important;
+          width:100%!important;
+          max-width:none!important;
+          table-layout:auto!important;
+          border-collapse:separate!important;
+        }
+        #clienteTrackingRage .meso-exercise-table thead{
+          display:none!important;
+        }
+        #clienteTrackingRage .meso-exercise-table tbody{
+          display:grid!important;
+          grid-template-columns:repeat(auto-fit,minmax(285px,1fr))!important;
+          gap:12px!important;
+          width:100%!important;
+          padding:12px!important;
+          box-sizing:border-box!important;
+        }
+        #clienteTrackingRage .meso-exercise-table tbody tr{
+          display:grid!important;
+          grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+          gap:10px 12px!important;
+          width:auto!important;
+          min-width:0!important;
+          margin:0!important;
+          padding:13px!important;
+          border:1px solid rgba(148,163,184,.17)!important;
+          border-radius:12px!important;
+          background:linear-gradient(180deg,#0e1b2e,#0a1626)!important;
+          box-shadow:0 8px 22px rgba(2,8,18,.2)!important;
+          box-sizing:border-box!important;
+        }
+        #clienteTrackingRage .meso-exercise-table tbody tr:last-child{
+          border-bottom:1px solid rgba(148,163,184,.17)!important;
+        }
+        #clienteTrackingRage .meso-exercise-table tbody td{
+          display:flex!important;
+          flex-direction:column!important;
+          align-items:stretch!important;
+          gap:4px!important;
+          width:auto!important;
+          min-width:0!important;
+          padding:0!important;
+          border:0!important;
+          color:#d8e0ea!important;
+          overflow-wrap:anywhere!important;
+          box-sizing:border-box!important;
+        }
+        #clienteTrackingRage .meso-exercise-table tbody td:before{
+          content:attr(data-label)!important;
+          display:block!important;
+          margin:0!important;
+          color:#7f90a8!important;
+          font-size:9px!important;
+          font-weight:900!important;
+          letter-spacing:.08em!important;
+          line-height:1.2!important;
+          text-transform:uppercase!important;
+        }
+        #clienteTrackingRage .meso-exercise-table tbody td:nth-child(1),
+        #clienteTrackingRage .meso-exercise-table tbody td:nth-child(4){
+          grid-column:1/-1!important;
+        }
+        #clienteTrackingRage .meso-exercise-table tbody td:nth-child(1){
+          padding-bottom:8px!important;
+          border-bottom:1px solid rgba(148,163,184,.12)!important;
+        }
+        #clienteTrackingRage .meso-exercise-table tbody td:nth-child(1) strong{
+          color:#fff!important;
+          font-size:14px!important;
+          line-height:1.3!important;
+        }
+        #clienteTrackingRage .meso-exercise-table tbody td:nth-child(2),
+        #clienteTrackingRage .meso-exercise-table tbody td:nth-child(3){
+          padding:8px 10px!important;
+          border-radius:8px!important;
+          background:rgba(255,255,255,.035)!important;
+        }
+        #clienteTrackingRage .meso-exercise-table tbody td:nth-child(4){
+          padding-top:4px!important;
+          white-space:pre-wrap!important;
+        }
+      }
+      @media (pointer:coarse) and (min-width:1000px){
+        #clienteTrackingRage .meso-exercise-table tbody{
+          grid-template-columns:repeat(3,minmax(0,1fr))!important;
+        }
+      }
+      @media (pointer:coarse) and (min-width:600px) and (max-width:760px){
+        #clienteTrackingRage .meso-exercise-table tbody{
+          grid-template-columns:repeat(2,minmax(0,1fr))!important;
+          gap:9px!important;
+          padding:9px!important;
+        }
+        #clienteTrackingRage .meso-exercise-table tbody tr{
+          padding:10px!important;
         }
       }
     `;
