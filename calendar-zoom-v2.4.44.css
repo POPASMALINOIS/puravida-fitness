@@ -1,0 +1,164 @@
+/* v2.4.44 · Zoom vertical del calendario y vista del día completo */
+.calendario-top{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+}
+.rage-calendar-tools{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  min-width:0;
+  flex-wrap:wrap;
+}
+.rage-calendar-tools .calendar-actions{order:2}
+.rage-calendar-zoom{
+  order:1;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  padding:4px;
+  border:1px solid rgba(148,163,184,.16);
+  border-radius:10px;
+  background:#091524;
+  box-shadow:0 5px 16px rgba(2,8,18,.14);
+}
+.rage-calendar-zoom button{
+  display:grid;
+  place-items:center;
+  min-width:30px!important;
+  width:auto;
+  height:30px!important;
+  margin:0!important;
+  padding:0 8px!important;
+  border:1px solid rgba(148,163,184,.16)!important;
+  border-radius:7px!important;
+  background:#122037!important;
+  color:#f8fafc!important;
+  font-size:15px!important;
+  font-weight:850!important;
+  line-height:1!important;
+}
+.rage-calendar-zoom button:hover{background:#192b45!important}
+.rage-calendar-zoom input[type="range"]{
+  width:92px;
+  height:24px;
+  margin:0!important;
+  padding:0!important;
+  accent-color:#F15A24;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.rage-calendar-zoom output{
+  min-width:38px;
+  color:#aebbd0;
+  font-size:9px;
+  font-weight:800;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+.rage-calendar-zoom .rage-calendar-fit-button{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  min-width:auto!important;
+  padding:0 9px!important;
+  font-size:9px!important;
+  white-space:nowrap;
+}
+.rage-calendar-fit-button>span:first-child{font-size:13px}
+.rage-calendar-fit-button.is-active{
+  border-color:rgba(241,90,36,.7)!important;
+  background:rgba(241,90,36,.20)!important;
+  color:#fff!important;
+  box-shadow:inset 0 0 0 1px rgba(241,90,36,.16);
+}
+
+.calendario-panel.rage-calendar-fit{
+  min-height:0!important;
+}
+.calendario-panel.rage-calendar-fit .week-calendar-fixed{
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+}
+.calendario-panel.rage-calendar-compact .week-hour-fixed{
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+  padding:2px 4px!important;
+  font-size:8px!important;
+  line-height:1!important;
+}
+.calendario-panel.rage-calendar-compact .week-event-fixed{
+  padding:2px 4px!important;
+  border-radius:4px!important;
+}
+.calendario-panel.rage-calendar-compact .week-event-fixed .evento-nombre{
+  font-size:8px!important;
+  line-height:1!important;
+}
+.calendario-panel.rage-calendar-dense .week-hour-fixed{
+  padding:1px 3px!important;
+  font-size:7px!important;
+  line-height:1!important;
+}
+.calendario-panel.rage-calendar-dense .week-hour-fixed:nth-child(even){
+  color:transparent!important;
+}
+.calendario-panel.rage-calendar-dense .week-event-fixed{
+  padding:1px 3px!important;
+  border-radius:3px!important;
+}
+.calendario-panel.rage-calendar-dense .week-event-fixed .evento-nombre{
+  display:block!important;
+  overflow:hidden!important;
+  font-size:7px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  text-overflow:ellipsis!important;
+}
+.calendario-panel.rage-calendar-spacious .week-event-fixed{
+  padding:6px 8px!important;
+}
+.calendario-panel.rage-calendar-spacious .week-event-fixed .evento-nombre{
+  font-size:11px!important;
+}
+
+@media(max-width:1100px) and (min-width:761px){
+  .calendario-top{align-items:start!important}
+  .rage-calendar-tools{max-width:390px}
+  .rage-calendar-zoom input[type="range"]{width:74px}
+  .rage-calendar-zoom .rage-calendar-fit-button{padding:0 8px!important}
+}
+
+@media(max-width:760px){
+  .calendario-top{
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:8px!important;
+  }
+  .rage-calendar-tools{
+    width:100%;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:6px;
+  }
+  .rage-calendar-tools .calendar-actions{
+    grid-column:2;
+    grid-row:1;
+  }
+  .rage-calendar-zoom{
+    grid-column:1;
+    grid-row:1;
+    min-width:0;
+  }
+  .rage-calendar-zoom input[type="range"]{
+    flex:1;
+    width:auto;
+    min-width:44px;
+  }
+  .rage-calendar-zoom output{min-width:32px}
+  .rage-calendar-zoom .rage-calendar-fit-button>span:last-child{display:none}
+  .rage-calendar-zoom .rage-calendar-fit-button{padding:0 8px!important}
+}
