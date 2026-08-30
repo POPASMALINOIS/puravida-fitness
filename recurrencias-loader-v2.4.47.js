@@ -82,6 +82,13 @@
   function start() {
     loadStyle('recurrencias-v2.4.47.css?v=2.4.51', 'data-rage-recurrencias-v247');
     loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.51', 'data-rage-recurrencias-fix-v251');
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js?v=2.4.51').catch(error =>
+        console.warn('[Rage] No se pudo actualizar el service worker:', error)
+      );
+    }
+
     waitForOperativa();
   }
 
