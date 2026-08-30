@@ -1,4 +1,4 @@
-const CACHE_NAME = "rage-training-v2.4.46";
+const CACHE_NAME = "rage-training-v2.4.47";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -25,6 +25,7 @@ const APP_SHELL = [
   "./mesociclo-plan-editor-v2.4.43.css?v=2.4.43",
   "./calendar-zoom-v2.4.44.css?v=2.4.44",
   "./operativa-v2.4.46.css?v=2.4.46",
+  "./recurrencias-v2.4.47.css?v=2.4.47",
   "./app.js?v=2.4.4",
   "./ajustes-v2.4.7.js?v=2.4.8",
   "./clientes-seguimiento-v2.4.9.js?v=2.4.9",
@@ -44,7 +45,9 @@ const APP_SHELL = [
   "./tablet-android-v2.4.41.js?v=2.4.43",
   "./mesociclo-plan-editor-v2.4.43.js?v=2.4.43",
   "./calendar-zoom-v2.4.44.js?v=2.4.45",
-  "./operativa-v2.4.46.js?v=2.4.46"
+  "./operativa-v2.4.46.js?v=2.4.46",
+  "./recurrencias-loader-v2.4.47.js?v=2.4.47",
+  "./recurrencias-v2.4.47.js?v=2.4.47"
 ];
 
 self.addEventListener("install", event => {
