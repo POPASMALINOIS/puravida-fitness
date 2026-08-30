@@ -77,12 +77,12 @@ html.mobile-device .sidebar nav button .nav-icon{
     height:64px!important;
     min-height:64px!important;
     padding:5px 4px!important;
-    font-size:9px!important;
+    font-size:10px!important;
   }
   html.mobile-device .sidebar nav button .nav-icon{
-    width:26px!important;
-    height:25px!important;
-    font-size:13px!important;
+    width:28px!important;
+    height:26px!important;
+    font-size:14px!important;
   }
 }
 @media(max-width:430px){
