@@ -1,5 +1,6 @@
 (() => {
-  if (window.RageRecurrenciasLoaderV251) return;
+  if (window.RageRecurrenciasLoaderV252) return;
+  window.RageRecurrenciasLoaderV252 = true;
   window.RageRecurrenciasLoaderV251 = true;
   window.RageRecurrenciasLoaderV250 = true;
   window.RageRecurrenciasLoaderV249 = true;
@@ -50,14 +51,23 @@
   function loadSaveHandler() {
     if (window.RageRecurrenciasSaveV251) return;
     loadScript(
-      'recurrencias-save-v2.4.51.js?v=2.4.51',
+      'recurrencias-save-v2.4.51.js?v=2.4.52',
       'data-rage-recurrencias-save-v251'
     );
   }
 
+  function loadCalendarClientNavigation() {
+    if (window.RageCalendarClientOpenV252) return;
+    loadScript(
+      'calendar-client-open-v2.4.52.js?v=2.4.52',
+      'data-rage-calendar-client-open-v252'
+    );
+  }
+
   function loadCore() {
-    loadStyle('recurrencias-v2.4.47.css?v=2.4.51', 'data-rage-recurrencias-v247');
-    loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.51', 'data-rage-recurrencias-fix-v251');
+    loadStyle('recurrencias-v2.4.47.css?v=2.4.52', 'data-rage-recurrencias-v247');
+    loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.52', 'data-rage-recurrencias-fix-v252');
+    loadCalendarClientNavigation();
 
     if (window.RageRecurrenciasVersion) {
       loadSaveHandler();
@@ -65,7 +75,7 @@
     }
 
     loadScript(
-      'recurrencias-v2.4.47.js?v=2.4.51',
+      'recurrencias-v2.4.47.js?v=2.4.52',
       'data-rage-recurrencias-v247',
       loadSaveHandler
     );
@@ -80,11 +90,11 @@
   }
 
   function start() {
-    loadStyle('recurrencias-v2.4.47.css?v=2.4.51', 'data-rage-recurrencias-v247');
-    loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.51', 'data-rage-recurrencias-fix-v251');
+    loadStyle('recurrencias-v2.4.47.css?v=2.4.52', 'data-rage-recurrencias-v247');
+    loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.52', 'data-rage-recurrencias-fix-v252');
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js?v=2.4.51').catch(error =>
+      navigator.serviceWorker.register('service-worker.js?v=2.4.52').catch(error =>
         console.warn('[Rage] No se pudo actualizar el service worker:', error)
       );
     }
