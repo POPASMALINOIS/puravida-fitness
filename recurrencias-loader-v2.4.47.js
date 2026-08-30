@@ -1,13 +1,15 @@
 (() => {
-  if (window.RageRecurrenciasLoaderV250) return;
+  if (window.RageRecurrenciasLoaderV251) return;
+  window.RageRecurrenciasLoaderV251 = true;
   window.RageRecurrenciasLoaderV250 = true;
   window.RageRecurrenciasLoaderV249 = true;
   window.RageRecurrenciasLoaderV248 = true;
   window.RageRecurrenciasLoaderV247 = true;
 
-  // Impide que se ejecute el guardado anterior, que contenía el identificador mal escrito.
+  // Bloquea los controladores de guardado anteriores.
   window.RageRecurrenciasFixV249 = true;
   window.RageRecurrenciasFixV248 = true;
+  window.RageRecurrenciasSaveV250 = true;
 
   function loadStyle(href, attribute) {
     let link = document.querySelector(`link[${attribute}]`);
@@ -46,16 +48,16 @@
   }
 
   function loadSaveHandler() {
-    if (window.RageRecurrenciasSaveV250) return;
+    if (window.RageRecurrenciasSaveV251) return;
     loadScript(
-      'recurrencias-save-v2.4.50.js?v=2.4.50',
-      'data-rage-recurrencias-save-v250'
+      'recurrencias-save-v2.4.51.js?v=2.4.51',
+      'data-rage-recurrencias-save-v251'
     );
   }
 
   function loadCore() {
-    loadStyle('recurrencias-v2.4.47.css?v=2.4.50', 'data-rage-recurrencias-v247');
-    loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.50', 'data-rage-recurrencias-fix-v250');
+    loadStyle('recurrencias-v2.4.47.css?v=2.4.51', 'data-rage-recurrencias-v247');
+    loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.51', 'data-rage-recurrencias-fix-v251');
 
     if (window.RageRecurrenciasVersion) {
       loadSaveHandler();
@@ -63,7 +65,7 @@
     }
 
     loadScript(
-      'recurrencias-v2.4.47.js?v=2.4.50',
+      'recurrencias-v2.4.47.js?v=2.4.51',
       'data-rage-recurrencias-v247',
       loadSaveHandler
     );
@@ -78,8 +80,8 @@
   }
 
   function start() {
-    loadStyle('recurrencias-v2.4.47.css?v=2.4.50', 'data-rage-recurrencias-v247');
-    loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.50', 'data-rage-recurrencias-fix-v250');
+    loadStyle('recurrencias-v2.4.47.css?v=2.4.51', 'data-rage-recurrencias-v247');
+    loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.51', 'data-rage-recurrencias-fix-v251');
     waitForOperativa();
   }
 
