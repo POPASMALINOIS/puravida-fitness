@@ -1,14 +1,19 @@
 (() => {
-  if (window.RageGruposV254) return;
-  window.RageGruposV254 = true;
+  if (window.RageGruposV257) return;
+  window.RageGruposV257 = true;
 
-  const VERSION = '2.4.54';
+  const VERSION = '2.4.57';
   const list = () => { try { return Array.isArray(clientes) ? clientes : []; } catch (_) { return []; } };
   const byId = id => list().find(c => Number(c?.id) === Number(id));
-  const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const isGroup = mode => mode === 'Pareja' || mode === 'Trío';
   const memberLimit = mode => mode === 'Trío' ? 3 : mode === 'Pareja' ? 2 : 1;
   const modeLabel = mode => mode === 'Trío' ? 'TRÍO' : mode === 'Pareja' ? 'PAREJA' : 'INDIVIDUAL';
+
+  function save() {
+    try { if (typeof guardarDatos === 'function') guardarDatos(); }
+    catch (error) { console.error('[Rage] No se pudieron guardar los integrantes:', error); }
+  }
 
   function ensurePersonArrays(person) {
     if (!person) return;
@@ -17,14 +22,19 @@
   }
 
   function newPersonId(client, order) {
-    return `PERSONA-${client.id}-${order}-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+    return `PERSONA-${client.id}-${order}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   }
 
   function blankPerson(client, order, baseDate = '') {
     return {
       id: newPersonId(client, order),
-      nombre: '', telefono: '', email: '', fechaAlta: baseDate || '', observaciones: '',
-      mesociclos: [], mediciones: []
+      nombre: '',
+      telefono: '',
+      email: '',
+      fechaAlta: baseDate || '',
+      observaciones: '',
+      mesociclos: [],
+      mediciones: []
     };
   }
 
@@ -49,6 +59,7 @@
   }
 
   function updateDisplayName(client) {
+    if (!client) return;
     const limit = memberLimit(client.bonoModalidad);
     const names = (client.personas || []).slice(0, limit).map(p => p?.nombre?.trim()).filter(Boolean);
     if (isGroup(client.bonoModalidad)) {
@@ -61,64 +72,56 @@
   function normalizeClient(client) {
     if (!client) return false;
     let changed = false;
+
     if (!Array.isArray(client.personas) || !client.personas.length) {
       client.personas = [{
         id: newPersonId(client, 1),
-        nombre: client.nombre || '', telefono: client.telefono || '', email: client.email || '',
-        fechaAlta: client.fechaAlta || '', observaciones: client.observaciones || '',
+        nombre: client.nombre || '',
+        telefono: client.telefono || '',
+        email: client.email || '',
+        fechaAlta: client.fechaAlta || '',
+        observaciones: client.observaciones || '',
         mesociclos: Array.isArray(client.mesociclos) ? client.mesociclos : [],
         mediciones: Array.isArray(client.mediciones) ? client.mediciones : (Array.isArray(client.controles) ? client.controles : [])
       }];
       client.seguimientoPersonaActivaId = client.personas[0].id;
       changed = true;
     }
+
     client.personas.forEach(ensurePersonArrays);
+
     if (!client.personas.some(p => String(p.id) === String(client.seguimientoPersonaActivaId))) {
       client.seguimientoPersonaActivaId = client.personas[0].id;
       changed = true;
     }
+
     if (!isGroup(client.bonoModalidad)) {
-      const p = client.personas[0];
-      client.telefono = p.telefono || '';
-      client.email = p.email || '';
-      client.fechaAlta = p.fechaAlta || '';
-      client.observaciones = p.observaciones || '';
+      const person = client.personas[0];
+      person.nombre = client.nombre || person.nombre || '';
+      person.telefono = client.telefono ?? person.telefono ?? '';
+      person.email = client.email ?? person.email ?? '';
+      person.fechaAlta = client.fechaAlta ?? person.fechaAlta ?? '';
+      person.observaciones = client.observaciones ?? person.observaciones ?? '';
+      client.nombre = person.nombre;
+      client.telefono = person.telefono;
+      client.email = person.email;
+      client.fechaAlta = person.fechaAlta;
+      client.observaciones = person.observaciones;
     }
-    const before = client.nombre;
+
+    const oldName = client.nombre;
     updateDisplayName(client);
-    if (before !== client.nombre) changed = true;
+    if (oldName !== client.nombre) changed = true;
     activatePerson(client, client.seguimientoPersonaActivaId);
     return changed;
   }
 
-  const savePrevious = window.guardarDatos;
-  if (typeof savePrevious === 'function') {
-    window.guardarDatos = function () {
-      list().forEach(client => {
-        normalizeClient(client);
-        syncActiveTracking(client);
-        if (!isGroup(client.bonoModalidad) && client.personas?.[0]) {
-          const p = client.personas[0];
-          p.nombre = client.nombre || p.nombre;
-          p.telefono = client.telefono || '';
-          p.email = client.email || '';
-          p.fechaAlta = client.fechaAlta || '';
-          p.observaciones = client.observaciones || '';
-        }
-        updateDisplayName(client);
-      });
-      return savePrevious.apply(this, arguments);
-    };
-  }
-
   function ensureModeOption(select) {
-    if (!select) return;
-    if (![...select.options].some(o => o.value === 'Trío')) {
-      const option = document.createElement('option');
-      option.value = 'Trío';
-      option.textContent = 'Trío';
-      select.appendChild(option);
-    }
+    if (!select || [...select.options].some(option => option.value === 'Trío')) return;
+    const option = document.createElement('option');
+    option.value = 'Trío';
+    option.textContent = 'Trío';
+    select.appendChild(option);
   }
 
   function personCreateBlock(order) {
@@ -152,7 +155,8 @@
     const toggle = () => {
       const limit = memberLimit(mode.value);
       container.querySelectorAll('[data-rage-member-block]').forEach(block => {
-        block.hidden = Number(block.dataset.rageMemberBlock) > limit;
+        const shouldHide = Number(block.dataset.rageMemberBlock) > limit;
+        if (block.hidden !== shouldHide) block.hidden = shouldHide;
       });
       const card = grid.closest('.alta-card, .form-surface, .card');
       if (card) {
@@ -160,6 +164,7 @@
         card.classList.toggle('rage-is-trio', mode.value === 'Trío');
       }
     };
+
     if (mode.dataset.rageGroupBound !== '1') {
       mode.dataset.rageGroupBound = '1';
       mode.addEventListener('change', toggle);
@@ -191,55 +196,60 @@
         observaciones: document.getElementById('clienteObservaciones')?.value.trim() || ''
       };
       const extra = [readCreatePerson(2, primary.fechaAlta), readCreatePerson(3, primary.fechaAlta)];
-      for (let i = 2; i <= limit; i++) {
-        if (!extra[i - 2].nombre) {
-          alert(`Introduce el nombre de la persona ${i} del ${mode.toLowerCase()}.`);
+
+      for (let order = 2; order <= limit; order++) {
+        if (!extra[order - 2].nombre) {
+          alert(`Introduce el nombre de la persona ${order} del ${mode.toLowerCase()}.`);
           return;
         }
       }
 
-      const before = new Set(list().map(c => String(c.id)));
+      const before = new Set(list().map(client => String(client.id)));
       const result = addPrevious.apply(this, arguments);
-      const created = list().find(c => !before.has(String(c.id)));
+      const created = list().find(client => !before.has(String(client.id)));
       if (!created) return result;
 
-      const p1 = {
-        id: newPersonId(created, 1), ...primary,
+      const person1 = {
+        id: newPersonId(created, 1),
+        ...primary,
         mesociclos: Array.isArray(created.mesociclos) ? created.mesociclos : [],
         mediciones: Array.isArray(created.mediciones) ? created.mediciones : (Array.isArray(created.controles) ? created.controles : [])
       };
-      created.personas = [p1];
+      created.personas = [person1];
       for (let order = 2; order <= limit; order++) {
         created.personas.push({ id: newPersonId(created, order), ...extra[order - 2], mesociclos: [], mediciones: [] });
       }
-      created.telefono = p1.telefono;
-      created.email = p1.email;
-      created.fechaAlta = p1.fechaAlta;
-      created.observaciones = p1.observaciones;
-      created.seguimientoPersonaActivaId = p1.id;
+      created.telefono = person1.telefono;
+      created.email = person1.email;
+      created.fechaAlta = person1.fechaAlta;
+      created.observaciones = person1.observaciones;
+      created.seguimientoPersonaActivaId = person1.id;
       updateDisplayName(created);
-      activatePerson(created, p1.id);
-      if (typeof window.guardarDatos === 'function') window.guardarDatos();
-      if (typeof renderClientes === 'function') renderClientes();
+      activatePerson(created, person1.id);
+      save();
+      try { if (typeof renderClientes === 'function') renderClientes(); } catch (_) {}
 
       for (let order = 2; order <= 3; order++) {
-        ['Nombre','Telefono','Email','FechaAlta','Observaciones'].forEach(suffix => {
-          const el = document.getElementById(`grupo${order}${suffix}`); if (el) el.value = '';
+        ['Nombre', 'Telefono', 'Email', 'FechaAlta', 'Observaciones'].forEach(suffix => {
+          const element = document.getElementById(`grupo${order}${suffix}`);
+          if (element) element.value = '';
         });
       }
       return result;
     };
   }
 
-  function closeEditor() { document.getElementById('ragePairEditor')?.remove(); }
+  function closeEditor() {
+    document.getElementById('ragePairEditor')?.remove();
+  }
 
-  function personForm(prefix, label, p) {
-    return `<section class="rage-person-edit-card"><div class="rage-person-edit-title"><span>${label}</span><strong>${esc(p.nombre || 'Sin completar')}</strong></div><div class="rage-person-edit-grid">
-      <label><span>Nombre completo *</span><input id="${prefix}Name" type="text" value="${esc(p.nombre)}"></label>
-      <label><span>Teléfono</span><input id="${prefix}Phone" type="tel" inputmode="tel" value="${esc(p.telefono)}"></label>
-      <label><span>Email</span><input id="${prefix}Email" type="text" inputmode="email" value="${esc(p.email)}"></label>
-      <label><span>Fecha de alta</span><input id="${prefix}Date" type="date" value="${esc(p.fechaAlta)}"></label>
-      <label class="full"><span>Observaciones personales</span><textarea id="${prefix}Notes" rows="2">${esc(p.observaciones)}</textarea></label>
+  function personForm(prefix, label, person) {
+    return `<section class="rage-person-edit-card"><div class="rage-person-edit-title"><span>${label}</span><strong>${esc(person.nombre || 'Sin completar')}</strong></div><div class="rage-person-edit-grid">
+      <label><span>Nombre completo *</span><input id="${prefix}Name" type="text" value="${esc(person.nombre)}"></label>
+      <label><span>Teléfono</span><input id="${prefix}Phone" type="tel" inputmode="tel" value="${esc(person.telefono)}"></label>
+      <label><span>Email</span><input id="${prefix}Email" type="text" inputmode="email" value="${esc(person.email)}"></label>
+      <label><span>Fecha de alta</span><input id="${prefix}Date" type="date" value="${esc(person.fechaAlta)}"></label>
+      <label class="full"><span>Observaciones personales</span><textarea id="${prefix}Notes" rows="2">${esc(person.observaciones)}</textarea></label>
     </div></section>`;
   }
 
@@ -247,8 +257,11 @@
     normalizeClient(client);
     const limit = memberLimit(client.bonoModalidad);
     if (limit === 1) return;
+
     const people = [];
-    for (let i = 0; i < limit; i++) people.push(client.personas[i] || blankPerson(client, i + 1, client.personas[0]?.fechaAlta || ''));
+    for (let index = 0; index < limit; index++) {
+      people.push(client.personas[index] || blankPerson(client, index + 1, client.personas[0]?.fechaAlta || ''));
+    }
 
     closeEditor();
     const wrap = document.createElement('div');
@@ -259,165 +272,223 @@
       <section class="rage-pair-editor" role="dialog" aria-modal="true">
         <header><div><span>BONO EN ${modeLabel(client.bonoModalidad)}</span><h3>Datos de ${limit === 2 ? 'las dos' : 'las tres'} personas</h3><p>El bono, pagos y agenda son comunes; mesociclos, mediciones y planes son individuales.</p></div><button type="button" class="rage-pair-editor-close">×</button></header>
         <div class="rage-pair-editor-body ${limit === 3 ? 'rage-three-members' : ''}">
-          ${people.map((p,i) => personForm(`gp${i+1}`, `PERSONA ${i+1}`, p)).join('')}
+          ${people.map((person, index) => personForm(`gp${index + 1}`, `PERSONA ${index + 1}`, person)).join('')}
         </div>
         <footer><button type="button" class="rage-pair-editor-cancel">Cancelar</button><button type="button" class="rage-pair-editor-save">Guardar personas</button></footer>
       </section>`;
     document.body.appendChild(wrap);
+
     wrap.querySelector('.rage-pair-editor-backdrop').onclick = closeEditor;
     wrap.querySelector('.rage-pair-editor-close').onclick = closeEditor;
     wrap.querySelector('.rage-pair-editor-cancel').onclick = closeEditor;
     wrap.querySelector('.rage-pair-editor-save').onclick = () => {
-      const values = people.map((p,i) => {
-        const prefix = `gp${i+1}`;
-        return { person:p, data:{
-          nombre: document.getElementById(`${prefix}Name`).value.trim(),
-          telefono: document.getElementById(`${prefix}Phone`).value.trim(),
-          email: document.getElementById(`${prefix}Email`).value.trim(),
-          fechaAlta: document.getElementById(`${prefix}Date`).value,
-          observaciones: document.getElementById(`${prefix}Notes`).value.trim()
-        }};
+      const values = people.map((person, index) => {
+        const prefix = `gp${index + 1}`;
+        return {
+          person,
+          data: {
+            nombre: document.getElementById(`${prefix}Name`).value.trim(),
+            telefono: document.getElementById(`${prefix}Phone`).value.trim(),
+            email: document.getElementById(`${prefix}Email`).value.trim(),
+            fechaAlta: document.getElementById(`${prefix}Date`).value,
+            observaciones: document.getElementById(`${prefix}Notes`).value.trim()
+          }
+        };
       });
-      if (values.some(v => !v.data.nombre)) {
+
+      if (values.some(item => !item.data.nombre)) {
         alert(`El nombre de ${limit === 2 ? 'las dos' : 'las tres'} personas es obligatorio.`);
         return;
       }
-      values.forEach(({person,data}) => { Object.assign(person,data); ensurePersonArrays(person); });
-      client.personas = values.map(v => v.person);
-      const p1 = client.personas[0];
-      client.telefono = p1.telefono || '';
-      client.email = p1.email || '';
-      client.fechaAlta = p1.fechaAlta || '';
-      if (!client.personas.some(p => String(p.id) === String(client.seguimientoPersonaActivaId))) client.seguimientoPersonaActivaId = p1.id;
+
+      values.forEach(({ person, data }) => {
+        Object.assign(person, data);
+        ensurePersonArrays(person);
+      });
+      client.personas = values.map(item => item.person);
+      const person1 = client.personas[0];
+      client.telefono = person1.telefono || '';
+      client.email = person1.email || '';
+      client.fechaAlta = person1.fechaAlta || '';
+      if (!client.personas.some(person => String(person.id) === String(client.seguimientoPersonaActivaId))) {
+        client.seguimientoPersonaActivaId = person1.id;
+      }
       updateDisplayName(client);
       activatePerson(client, client.seguimientoPersonaActivaId);
-      if (typeof window.guardarDatos === 'function') window.guardarDatos();
+      save();
       closeEditor();
       if (typeof verFichaCliente === 'function') verFichaCliente(client.id);
     };
   }
 
-  window.editarPersonasGrupoRage = id => { const c = byId(id); if (c) openPeopleEditor(c); };
+  window.editarPersonasGrupoRage = id => {
+    const client = byId(id);
+    if (client) openPeopleEditor(client);
+  };
   window.editarPersonasParejaRage = window.editarPersonasGrupoRage;
+
   window.seleccionarPersonaGrupoRage = function (clientId, personId) {
-    const c = byId(clientId); if (!c) return;
-    activatePerson(c, personId);
-    if (typeof window.guardarDatos === 'function') window.guardarDatos();
-    if (typeof verFichaCliente === 'function') verFichaCliente(c.id);
+    const client = byId(clientId);
+    if (!client) return;
+    activatePerson(client, personId);
+    save();
+    if (typeof verFichaCliente === 'function') verFichaCliente(client.id);
   };
   window.seleccionarPersonaParejaRage = window.seleccionarPersonaGrupoRage;
 
   const editPrevious = window.editarClienteRage;
   if (typeof editPrevious === 'function') {
     window.editarClienteRage = function (id) {
-      const c = byId(id); if (!c) return;
-      normalizeClient(c);
-      if (isGroup(c.bonoModalidad)) return openPeopleEditor(c);
-      return editPrevious.apply(this, arguments);
-    };
-  }
-
-  const bonoPrevious = window.cambiarBonoRage;
-  if (typeof bonoPrevious === 'function') {
-    window.cambiarBonoRage = function (id) {
-      const c = byId(id);
-      const oldMode = c?.bonoModalidad || 'Individual';
-      const result = bonoPrevious.apply(this, arguments);
-      const select = document.getElementById('ebMode');
-      ensureModeOption(select);
-      if (select) select.value = oldMode;
+      const client = byId(id);
+      if (!client) return;
+      normalizeClient(client);
+      if (isGroup(client.bonoModalidad)) return openPeopleEditor(client);
+      const result = editPrevious.apply(this, arguments);
       const saveButton = document.querySelector('#rage-client-editor .rage-editor-save');
-      if (saveButton && c && !saveButton.dataset.rageGroupWrapped) {
-        saveButton.dataset.rageGroupWrapped = '1';
+      if (saveButton && !saveButton.dataset.ragePersonSync) {
+        saveButton.dataset.ragePersonSync = '1';
         const originalSave = saveButton.onclick;
         saveButton.onclick = function () {
-          const nextMode = select?.value || 'Individual';
-          const limit = memberLimit(nextMode);
-          const populated = (c.personas || []).filter(p => p?.nombre?.trim()).length;
-          if (populated > limit) {
-            alert(`Esta ficha tiene ${populated} personas. La modalidad ${nextMode} admite ${limit}. No se cambiará para evitar perder datos.`);
-            return;
-          }
-          const r = originalSave?.apply(this, arguments);
+          const response = originalSave?.apply(this, arguments);
           setTimeout(() => {
-            normalizeClient(c);
-            if (isGroup(c.bonoModalidad) && (c.personas || []).length < memberLimit(c.bonoModalidad)) openPeopleEditor(c);
+            normalizeClient(client);
+            save();
           }, 0);
-          return r;
+          return response;
         };
       }
       return result;
     };
   }
 
-  function decorateClient(c) {
+  const bonoPrevious = window.cambiarBonoRage;
+  if (typeof bonoPrevious === 'function') {
+    window.cambiarBonoRage = function (id) {
+      const client = byId(id);
+      const oldMode = client?.bonoModalidad || 'Individual';
+      const result = bonoPrevious.apply(this, arguments);
+      const select = document.getElementById('ebMode');
+      ensureModeOption(select);
+      if (select) select.value = oldMode;
+
+      const saveButton = document.querySelector('#rage-client-editor .rage-editor-save');
+      if (saveButton && client && !saveButton.dataset.rageGroupWrapped) {
+        saveButton.dataset.rageGroupWrapped = '1';
+        const originalSave = saveButton.onclick;
+        saveButton.onclick = function () {
+          const nextMode = select?.value || 'Individual';
+          const limit = memberLimit(nextMode);
+          const populated = (client.personas || []).filter(person => person?.nombre?.trim()).length;
+          if (populated > limit) {
+            alert(`Esta ficha tiene ${populated} personas. La modalidad ${nextMode} admite ${limit}. No se cambiará para evitar perder datos.`);
+            return;
+          }
+          const response = originalSave?.apply(this, arguments);
+          setTimeout(() => {
+            normalizeClient(client);
+            save();
+            if (isGroup(client.bonoModalidad) && (client.personas || []).length < memberLimit(client.bonoModalidad)) {
+              openPeopleEditor(client);
+            }
+          }, 0);
+          return response;
+        };
+      }
+      return result;
+    };
+  }
+
+  function decorateClient(client) {
     const ficha = document.getElementById('clienteFicha');
-    if (!ficha || !c) return;
-    normalizeClient(c);
+    if (!ficha || !client) return;
+    normalizeClient(client);
 
     ficha.querySelector('#ragePairPeople')?.remove();
-    ficha.querySelectorAll('[data-rage-pair-hidden="1"]').forEach(el => { el.style.display = ''; delete el.dataset.ragePairHidden; });
-    if (!isGroup(c.bonoModalidad)) return;
+    ficha.querySelectorAll('[data-rage-pair-hidden="1"]').forEach(element => {
+      element.style.display = '';
+      delete element.dataset.ragePairHidden;
+    });
+    if (!isGroup(client.bonoModalidad)) return;
 
-    const limit = memberLimit(c.bonoModalidad);
-    const active = c.personas.find(p => String(p.id) === String(c.seguimientoPersonaActivaId)) || c.personas[0];
+    const limit = memberLimit(client.bonoModalidad);
+    const active = client.personas.find(person => String(person.id) === String(client.seguimientoPersonaActivaId)) || client.personas[0];
+    const cards = [];
+
+    for (let index = 0; index < limit; index++) {
+      const person = client.personas[index];
+      if (person) {
+        cards.push(`<button type="button" class="rage-pair-person ${String(person.id) === String(active?.id) ? 'active' : ''}" onclick="seleccionarPersonaGrupoRage(${Number(client.id)},'${esc(person.id)}')"><span>PERSONA ${index + 1}</span><strong>${esc(person.nombre || 'Sin completar')}</strong><small>${esc(person.telefono || 'Sin teléfono')}${person.email ? ` · ${esc(person.email)}` : ''}</small><em>${person.mesociclos.length} mesociclo${person.mesociclos.length === 1 ? '' : 's'} · ${person.mediciones.length} medición${person.mediciones.length === 1 ? '' : 'es'}</em></button>`);
+      } else {
+        cards.push(`<button type="button" class="rage-pair-person missing" onclick="editarPersonasGrupoRage(${Number(client.id)})"><span>PERSONA ${index + 1}</span><strong>Completar persona</strong><small>Necesaria para la ficha de ${client.bonoModalidad.toLowerCase()}</small></button>`);
+      }
+    }
+
     const block = document.createElement('section');
     block.id = 'ragePairPeople';
     block.className = `rage-pair-people ${limit === 3 ? 'rage-trio-people' : ''}`;
-    const peopleCards = [];
-    for (let i = 0; i < limit; i++) {
-      const p = c.personas[i];
-      if (p) {
-        peopleCards.push(`<button type="button" class="rage-pair-person ${String(p.id)===String(active?.id)?'active':''}" onclick="seleccionarPersonaGrupoRage(${Number(c.id)},'${esc(p.id)}')"><span>PERSONA ${i+1}</span><strong>${esc(p.nombre || 'Sin completar')}</strong><small>${esc(p.telefono || 'Sin teléfono')}${p.email?` · ${esc(p.email)}`:''}</small><em>${p.mesociclos.length} mesociclo${p.mesociclos.length===1?'':'s'} · ${p.mediciones.length} medición${p.mediciones.length===1?'':'es'}</em></button>`);
-      } else {
-        peopleCards.push(`<button type="button" class="rage-pair-person missing" onclick="editarPersonasGrupoRage(${Number(c.id)})"><span>PERSONA ${i+1}</span><strong>Completar persona</strong><small>Necesaria para la ficha de ${c.bonoModalidad.toLowerCase()}</small></button>`);
-      }
-    }
     block.innerHTML = `
-      <div class="rage-pair-people-head"><div><span>BONO EN ${modeLabel(c.bonoModalidad)}</span><h2>${esc(c.nombre)}</h2><p>Comparten ${esc(c.bonoDisponible)}/${esc(c.bonoTotal)} sesiones, agenda y pagos. El seguimiento deportivo es individual para cada persona.</p></div><button type="button" onclick="editarPersonasGrupoRage(${Number(c.id)})">Editar personas</button></div>
-      <div class="rage-pair-person-grid ${limit === 3 ? 'rage-three-members' : ''}">${peopleCards.join('')}</div>`;
+      <div class="rage-pair-people-head"><div><span>BONO EN ${modeLabel(client.bonoModalidad)}</span><h2>${esc(client.nombre)}</h2><p>Comparten ${esc(client.bonoDisponible)}/${esc(client.bonoTotal)} sesiones, agenda y pagos. El seguimiento deportivo es individual para cada persona.</p></div><button type="button" onclick="editarPersonasGrupoRage(${Number(client.id)})">Editar personas</button></div>
+      <div class="rage-pair-person-grid ${limit === 3 ? 'rage-three-members' : ''}">${cards.join('')}</div>`;
     ficha.prepend(block);
 
     const legacyCards = [...ficha.querySelectorAll(':scope > .ficha-card')];
-    if (legacyCards[0]) { legacyCards[0].style.display = 'none'; legacyCards[0].dataset.ragePairHidden = '1'; }
+    if (legacyCards[0]) {
+      legacyCards[0].style.display = 'none';
+      legacyCards[0].dataset.ragePairHidden = '1';
+    }
     legacyCards.forEach(card => {
       const title = card.querySelector('h2')?.textContent.trim().toLowerCase();
-      if (title === 'observaciones') { card.style.display = 'none'; card.dataset.ragePairHidden = '1'; }
+      if (title === 'observaciones') {
+        card.style.display = 'none';
+        card.dataset.ragePairHidden = '1';
+      }
     });
 
     const tracking = document.getElementById('clienteTrackingRage');
     if (tracking && active) {
-      const h2 = tracking.querySelector('.tracking-head h2');
-      const p = tracking.querySelector('.tracking-head p');
-      if (h2) h2.textContent = `Seguimiento de ${active.nombre}`;
-      if (p) p.textContent = 'Mesociclos, mediciones, tablas opcionales y plan de ejercicios propios de esta persona.';
+      const heading = tracking.querySelector('.tracking-head h2');
+      const description = tracking.querySelector('.tracking-head p');
+      if (heading) heading.textContent = `Seguimiento de ${active.nombre}`;
+      if (description) description.textContent = 'Mesociclos, mediciones, tablas opcionales y plan de ejercicios propios de esta persona.';
     }
   }
 
   const viewPrevious = window.verFichaCliente;
   if (typeof viewPrevious === 'function') {
     window.verFichaCliente = function (id) {
-      const c = byId(id);
-      if (c) normalizeClient(c);
+      const client = byId(id);
+      if (client) normalizeClient(client);
       const result = viewPrevious.apply(this, arguments);
-      requestAnimationFrame(() => decorateClient(c));
-      setTimeout(() => decorateClient(c), 50);
-      setTimeout(() => decorateClient(c), 160);
+      requestAnimationFrame(() => decorateClient(client));
+      setTimeout(() => decorateClient(client), 60);
+      return result;
+    };
+  }
+
+  const screenPrevious = window.cambiarPantalla;
+  if (typeof screenPrevious === 'function') {
+    window.cambiarPantalla = function (screenId) {
+      const result = screenPrevious.apply(this, arguments);
+      if (screenId === 'alta-screen') {
+        requestAnimationFrame(ensureGroupFields);
+        setTimeout(ensureGroupFields, 40);
+      }
       return result;
     };
   }
 
   function normalizeAll() {
     let changed = false;
-    list().forEach(c => { if (normalizeClient(c)) changed = true; });
+    list().forEach(client => { if (normalizeClient(client)) changed = true; });
     ensureGroupFields();
-    if (changed && typeof window.guardarDatos === 'function') window.guardarDatos();
+    if (changed) save();
   }
 
-  const observer = new MutationObserver(() => ensureGroupFields());
-  observer.observe(document.documentElement, { childList:true, subtree:true });
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', normalizeAll, { once:true });
-  else normalizeAll();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', normalizeAll, { once: true });
+  } else {
+    normalizeAll();
+  }
 
   window.RageGrupos = { version: VERSION, normalize: normalizeAll, memberLimit };
 })();
