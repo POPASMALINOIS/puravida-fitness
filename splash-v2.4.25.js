@@ -1,12 +1,35 @@
 (() => {
+  const HOTFIX_VERSION = '2.4.56';
+  let appShown = false;
+  let tariffLoaded = false;
+
   function cargarModuloFacturas(){
     if(!document.querySelector('link[data-rage-facturas]')){
       const css=document.createElement('link');
-      css.rel='stylesheet';css.href='facturas-v2.4.29.css?v=2.4.29';css.dataset.rageFacturas='1';document.head.appendChild(css);
+      css.rel='stylesheet';css.href='facturas-v2.4.29.css?v=2.4.56';css.dataset.rageFacturas='1';document.head.appendChild(css);
     }
     if(!document.querySelector('script[data-rage-facturas]')){
       const js=document.createElement('script');
-      js.src='facturas-v2.4.29.js?v=2.4.29';js.dataset.rageFacturas='1';document.body.appendChild(js);
+      js.src='facturas-v2.4.29.js?v=2.4.56';js.dataset.rageFacturas='1';document.body.appendChild(js);
+    }
+  }
+
+  function cargarModuloTarifas(){
+    if(tariffLoaded) return;
+    tariffLoaded=true;
+    if(!document.querySelector('link[data-rage-tarifas-v255]')){
+      const css=document.createElement('link');
+      css.rel='stylesheet';
+      css.href='tarifas-v2.4.55.css?v=2.4.56';
+      css.dataset.rageTarifasV255='1';
+      document.head.appendChild(css);
+    }
+    if(!document.querySelector('script[data-rage-tarifas-v255]')){
+      const js=document.createElement('script');
+      js.src='tarifas-v2.4.55.js?v=2.4.56';
+      js.dataset.rageTarifasV255='1';
+      js.async=false;
+      document.body.appendChild(js);
     }
   }
 
@@ -42,31 +65,54 @@
       </svg>`;
   }
 
-  function mostrarApp(){
+  function quitarSplash(inmediato=false){
     const splash=document.getElementById('rage-splash');
+    if(!splash) return;
+    splash.classList.add('is-hidden');
+    setTimeout(()=>splash.remove(), inmediato ? 80 : 500);
+  }
+
+  function activarDashboard(){
     const dashboard=document.getElementById('dashboard-screen');
     const login=document.getElementById('login-screen');
-
-    cargarModuloFacturas();
-    montarPesa();
     if(login) login.classList.remove('active');
     if(dashboard) dashboard.classList.add('active');
-
     if(typeof mostrarSeccion==='function'){
-      try{ mostrarSeccion('resumen'); }catch(_){ }
-    }
-
-    if(splash){
-      setTimeout(()=>{
-        splash.classList.add('is-hidden');
-        setTimeout(()=>splash.remove(),500);
-      },5000);
+      try{mostrarSeccion('resumen')}catch(error){console.error('[Rage] Error al mostrar resumen:',error)}
     }
   }
 
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',mostrarApp,{once:true});
-  }else{
-    mostrarApp();
+  function mostrarApp(){
+    if(appShown) return;
+    appShown=true;
+    try{cargarModuloFacturas()}catch(error){console.error('[Rage] Facturas:',error)}
+    try{montarPesa()}catch(error){console.error('[Rage] Splash:',error)}
+    try{activarDashboard()}catch(error){console.error('[Rage] Dashboard:',error)}
+
+    setTimeout(()=>{
+      quitarSplash(false);
+      // Tarifas se carga cuando la interfaz ya está liberada. Un fallo del módulo nunca podrá dejar la PWA en la splash.
+      setTimeout(()=>{try{cargarModuloTarifas()}catch(error){console.error('[Rage] Tarifas:',error)}},650);
+    },5000);
+
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register(`service-worker.js?v=${HOTFIX_VERSION}`).catch(error=>console.warn('[Rage] Service worker:',error));
+    }
   }
+
+  // Watchdog independiente de DOMContentLoaded: incluso con un módulo posterior lento o una caché inconsistente,
+  // la pantalla de carga nunca permanecerá bloqueada indefinidamente.
+  setTimeout(()=>{
+    if(!appShown){
+      appShown=true;
+      try{activarDashboard()}catch(_){}
+      quitarSplash(true);
+      setTimeout(()=>{try{cargarModuloTarifas()}catch(_){}},300);
+    }else if(document.getElementById('rage-splash')){
+      quitarSplash(true);
+    }
+  },7500);
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mostrarApp,{once:true});
+  else mostrarApp();
 })();
