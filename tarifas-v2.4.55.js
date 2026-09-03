@@ -1,8 +1,9 @@
 (() => {
-  if (window.RageTarifasV255) return;
+  if (window.RageTarifasV257) return;
+  window.RageTarifasV257 = true;
   window.RageTarifasV255 = true;
 
-  const VERSION = '2.4.55';
+  const VERSION = '2.4.57';
   const KEY = 'rageTrainingTarifasV1';
   const DEFAULTS = Object.freeze({
     '60|Individual|5': 180,
@@ -19,15 +20,17 @@
     '30|Trío|10': null
   });
 
-  const list = () => { try { return Array.isArray(clientes) ? clientes : []; } catch (_) { return []; } };
-  const clientById = id => list().find(c => Number(c?.id) === Number(id));
+  const clients = () => { try { return Array.isArray(clientes) ? clientes : []; } catch (_) { return []; } };
+  const clientById = id => clients().find(client => Number(client?.id) === Number(id));
   const keyFor = (duration, modality, sessions) => `${Number(duration)}|${modality}|${Number(sessions)}`;
-  const num = value => {
+  const toNumber = value => {
     if (value === '' || value == null) return null;
-    const n = Number(String(value).replace(',', '.'));
-    return Number.isFinite(n) ? n : null;
+    const number = Number(String(value).replace(',', '.'));
+    return Number.isFinite(number) ? number : null;
   };
-  const euro = value => value == null ? 'Sin tarifa fijada' : `${Number(value).toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} €`;
+  const formatEuro = value => value == null
+    ? 'Sin tarifa fijada'
+    : `${Number(value).toLocaleString('es-ES', { maximumFractionDigits: 2 })} €`;
 
   function loadTariffs() {
     let saved = {};
@@ -35,8 +38,7 @@
     const data = { ...DEFAULTS };
     Object.keys(data).forEach(key => {
       if (!Object.prototype.hasOwnProperty.call(saved, key)) return;
-      const value = saved[key];
-      data[key] = value === '' || value == null ? null : num(value);
+      data[key] = saved[key] === '' || saved[key] == null ? null : toNumber(saved[key]);
     });
     return data;
   }
@@ -46,12 +48,12 @@
     window.dispatchEvent(new CustomEvent('rage:tarifas-changed', { detail: data }));
   }
 
-  function tariff(duration, modality, sessions) {
+  function getTariff(duration, modality, sessions) {
     const value = loadTariffs()[keyFor(duration, modality, sessions)];
     return value == null ? null : Number(value);
   }
 
-  function tariffInputId(duration, modality, sessions) {
+  function inputId(duration, modality, sessions) {
     const mode = modality === 'Individual' ? 'ind' : modality === 'Pareja' ? 'duo' : 'trio';
     return `tarifa-${duration}-${mode}-${sessions}`;
   }
@@ -59,50 +61,61 @@
   function tariffRow(duration, modality, label) {
     return `<div class="rage-tariff-row">
       <div class="rage-tariff-name"><strong>${label}</strong><span>${duration === 60 ? 'Full Session · 1 h' : 'Express Session · 30 min'}</span></div>
-      <label><span>5 sesiones</span><div class="rage-tariff-money"><input id="${tariffInputId(duration, modality, 5)}" type="number" min="0" step="0.01" inputmode="decimal"><small>€</small></div></label>
-      <label><span>10 sesiones</span><div class="rage-tariff-money"><input id="${tariffInputId(duration, modality, 10)}" type="number" min="0" step="0.01" inputmode="decimal"><small>€</small></div></label>
+      <label><span>5 sesiones</span><div class="rage-tariff-money"><input id="${inputId(duration, modality, 5)}" type="number" min="0" step="0.01" inputmode="decimal"><small>€</small></div></label>
+      <label><span>10 sesiones</span><div class="rage-tariff-money"><input id="${inputId(duration, modality, 10)}" type="number" min="0" step="0.01" inputmode="decimal"><small>€</small></div></label>
     </div>`;
   }
 
   function ensureSettingsCard() {
     const grid = document.querySelector('#ajustes-section .settings-grid');
-    if (!grid || document.getElementById('rageTariffSettingsCard')) return;
-    const card = document.createElement('section');
-    card.id = 'rageTariffSettingsCard';
-    card.className = 'settings-card rage-tariff-settings-card';
-    card.innerHTML = `
-      <div class="settings-card-head"><span class="settings-icon">€</span><div><h3>Tarifas y precios</h3><p>Precios por modalidad, duración y número de sesiones.</p></div></div>
-      <div class="rage-tariff-note"><strong>Precio por defecto, no precio obligatorio</strong><span>Se aplicará automáticamente a nuevas fichas y renovaciones. Podrás modificar el importe en cada cliente sin alterar esta tabla.</span></div>
-      <section class="rage-tariff-block"><div class="rage-tariff-block-title"><span>FULL SESSION</span><strong>1 hora</strong></div>
-        ${tariffRow(60,'Individual','Individual')}${tariffRow(60,'Pareja','Dúo / Pareja')}${tariffRow(60,'Trío','Grupo / Trío')}
-      </section>
-      <section class="rage-tariff-block"><div class="rage-tariff-block-title"><span>EXPRESS SESSION</span><strong>30 minutos</strong></div>
-        ${tariffRow(30,'Individual','Individual')}${tariffRow(30,'Pareja','Dúo / Pareja')}${tariffRow(30,'Trío','Grupo / Trío')}
-      </section>
-      <div class="rage-tariff-foot"><p><strong>Trío 30 min:</strong> la tablilla facilitada no fija precio. Esos dos campos se dejan vacíos y puedes completarlos si decidís ofrecer esa tarifa.</p><button type="button" onclick="restaurarTarifasRage()">Restaurar tablilla</button></div>`;
-    grid.appendChild(card);
+    if (!grid) return null;
+    let card = document.getElementById('rageTariffSettingsCard');
+    if (!card) {
+      card = document.createElement('section');
+      card.id = 'rageTariffSettingsCard';
+      card.className = 'settings-card rage-tariff-settings-card';
+      card.innerHTML = `
+        <div class="settings-card-head"><span class="settings-icon">€</span><div><h3>Tarifas y precios</h3><p>Precios por modalidad, duración y número de sesiones.</p></div></div>
+        <div class="rage-tariff-note"><strong>Precio por defecto, no obligatorio</strong><span>Se aplicará a nuevas fichas y renovaciones. El importe de cada cliente seguirá siendo modificable.</span></div>
+        <section class="rage-tariff-block"><div class="rage-tariff-block-title"><span>FULL SESSION</span><strong>1 hora</strong></div>
+          ${tariffRow(60, 'Individual', 'Individual')}${tariffRow(60, 'Pareja', 'Dúo / Pareja')}${tariffRow(60, 'Trío', 'Grupo / Trío')}
+        </section>
+        <section class="rage-tariff-block"><div class="rage-tariff-block-title"><span>EXPRESS SESSION</span><strong>30 minutos</strong></div>
+          ${tariffRow(30, 'Individual', 'Individual')}${tariffRow(30, 'Pareja', 'Dúo / Pareja')}${tariffRow(30, 'Trío', 'Grupo / Trío')}
+        </section>
+        <div class="rage-tariff-foot"><p><strong>Trío 30 min:</strong> la tablilla facilitada no fija precio. Los campos quedan vacíos hasta que decidáis esa tarifa.</p><button type="button" onclick="restaurarTarifasRage()">Restaurar tablilla</button></div>`;
+      grid.appendChild(card);
+    }
     fillSettingsForm();
+    return card;
   }
 
   function fillSettingsForm(data = loadTariffs()) {
-    Object.entries(DEFAULTS).forEach(([key]) => {
+    Object.keys(DEFAULTS).forEach(key => {
       const [duration, modality, sessions] = key.split('|');
-      const input = document.getElementById(tariffInputId(duration, modality, sessions));
+      const input = document.getElementById(inputId(duration, modality, sessions));
       if (!input) return;
       const value = data[key];
       input.value = value == null ? '' : String(value);
-      if (value == null) input.placeholder = 'Sin fijar';
+      input.placeholder = value == null ? 'Sin fijar' : '';
     });
   }
 
   function readSettingsForm() {
+    const current = loadTariffs();
     const data = {};
     for (const key of Object.keys(DEFAULTS)) {
       const [duration, modality, sessions] = key.split('|');
-      const input = document.getElementById(tariffInputId(duration, modality, sessions));
-      if (!input) { data[key] = loadTariffs()[key]; continue; }
-      if (input.value.trim() === '') { data[key] = null; continue; }
-      const value = num(input.value);
+      const input = document.getElementById(inputId(duration, modality, sessions));
+      if (!input) {
+        data[key] = current[key];
+        continue;
+      }
+      if (input.value.trim() === '') {
+        data[key] = null;
+        continue;
+      }
+      const value = toNumber(input.value);
       if (value == null || value < 0) {
         alert(`Revisa la tarifa ${modality} · ${duration} min · ${sessions} sesiones.`);
         input.focus();
@@ -113,23 +126,25 @@
     return data;
   }
 
-  const settingsSavePrevious = window.guardarAjustesRage;
-  if (typeof settingsSavePrevious === 'function') {
-    window.guardarAjustesRage = function () {
-      ensureSettingsCard();
-      const rates = readSettingsForm();
-      if (!rates) return;
-      saveTariffs(rates);
-      const result = settingsSavePrevious.apply(this, arguments);
-      installNewClientPricing();
-      return result;
-    };
-  }
-
   window.restaurarTarifasRage = function () {
-    if (!confirm('¿Restaurar en el formulario los precios de la tablilla facilitada? Los cambios no se guardarán hasta pulsar “Guardar cambios”.')) return;
+    if (!confirm('¿Restaurar en el formulario los precios de la tablilla? Los cambios se guardarán al pulsar “Guardar cambios”.')) return;
     fillSettingsForm({ ...DEFAULTS });
   };
+
+  function wrapSettingsSave() {
+    if (window.guardarAjustesRage?.rageTariffWrapped) return;
+    const previous = window.guardarAjustesRage;
+    if (typeof previous !== 'function') return;
+    function wrapped() {
+      ensureSettingsCard();
+      const tariffs = readSettingsForm();
+      if (!tariffs) return;
+      saveTariffs(tariffs);
+      return previous.apply(this, arguments);
+    }
+    wrapped.rageTariffWrapped = true;
+    window.guardarAjustesRage = wrapped;
+  }
 
   function ensureHelper(input, id) {
     if (!input) return null;
@@ -143,7 +158,7 @@
     return helper;
   }
 
-  function selectedNewClientTariff() {
+  function newClientSelection() {
     return {
       duration: Number(document.getElementById('clienteBonoDuracion')?.value || 60),
       modality: document.getElementById('clienteBonoModalidad')?.value || 'Individual',
@@ -151,20 +166,20 @@
     };
   }
 
-  let settingNewPrice = false;
+  let settingPrice = false;
   function applyNewClientTariff(force = false) {
     const price = document.getElementById('clienteCuota');
     if (!price) return;
     price.placeholder = 'Precio del bono (€)';
     const helper = ensureHelper(price, 'rageNewClientPriceHelper');
-    const s = selectedNewClientTariff();
-    const currentTariff = tariff(s.duration, s.modality, s.sessions);
+    const selection = newClientSelection();
+    const base = getTariff(selection.duration, selection.modality, selection.sessions);
 
-    if (currentTariff == null) {
+    if (base == null) {
       if (force) {
-        settingNewPrice = true;
+        settingPrice = true;
         price.value = '';
-        settingNewPrice = false;
+        settingPrice = false;
         price.dataset.ragePriceSource = 'manual';
       }
       if (helper) helper.textContent = 'No hay tarifa fijada para esta combinación. Introduce el precio manualmente o configúralo en Ajustes.';
@@ -172,72 +187,75 @@
     }
 
     if (force || !price.value.trim()) {
-      settingNewPrice = true;
-      price.value = String(currentTariff);
-      settingNewPrice = false;
+      settingPrice = true;
+      price.value = String(base);
+      settingPrice = false;
       price.dataset.ragePriceSource = 'tarifa';
     }
     if (helper) {
       helper.textContent = price.dataset.ragePriceSource === 'manual'
-        ? `Tarifa configurada: ${euro(currentTariff)} · Precio manual: ${price.value || '—'} €`
-        : `Tarifa aplicada automáticamente: ${euro(currentTariff)} · Puedes modificarla.`;
+        ? `Tarifa configurada: ${formatEuro(base)} · Precio manual: ${price.value || '—'} €`
+        : `Tarifa aplicada automáticamente: ${formatEuro(base)} · Puedes modificarla.`;
     }
   }
 
-  function installNewClientPricing() {
+  function bindNewClientPricing() {
     const total = document.getElementById('clienteBonoTotal');
     const duration = document.getElementById('clienteBonoDuracion');
-    const mode = document.getElementById('clienteBonoModalidad');
+    const modality = document.getElementById('clienteBonoModalidad');
     const price = document.getElementById('clienteCuota');
-    if (!total || !duration || !mode || !price) return;
+    if (!total || !duration || !modality || !price) return;
 
-    [total,duration,mode].forEach(el => {
-      if (el.dataset.rageTariffBound === '1') return;
-      el.dataset.rageTariffBound = '1';
-      el.addEventListener('change', () => applyNewClientTariff(true));
+    [total, duration, modality].forEach(element => {
+      if (element.dataset.rageTariffBound === '1') return;
+      element.dataset.rageTariffBound = '1';
+      element.addEventListener('change', () => applyNewClientTariff(true));
     });
     if (price.dataset.rageTariffBound !== '1') {
       price.dataset.rageTariffBound = '1';
       price.addEventListener('input', () => {
-        if (settingNewPrice) return;
+        if (settingPrice) return;
         price.dataset.ragePriceSource = 'manual';
         applyNewClientTariff(false);
       });
     }
-    if (!price.value.trim()) applyNewClientTariff(false);
-    else applyNewClientTariff(false);
+    applyNewClientTariff(false);
   }
 
-  function referenceFromValues(duration, modality, sessions, contractedPrice, source) {
-    const base = tariff(duration, modality, sessions);
+  function tariffReference(duration, modality, sessions, contractedPrice, source) {
+    const base = getTariff(duration, modality, sessions);
     return {
       duracion: Number(duration),
       modalidad: modality,
       sesiones: Number(sessions),
       tarifaBase: base,
-      precioContratado: num(contractedPrice),
-      origen: source || (base != null && Number(base) === Number(num(contractedPrice)) ? 'tarifa' : 'manual'),
+      precioContratado: toNumber(contractedPrice),
+      origen: source || (base != null && Number(base) === Number(toNumber(contractedPrice)) ? 'tarifa' : 'manual'),
       actualizadoEn: new Date().toISOString()
     };
   }
 
-  const addPrevious = window.agregarCliente;
-  if (typeof addPrevious === 'function') {
-    window.agregarCliente = function () {
-      installNewClientPricing();
-      const s = selectedNewClientTariff();
-      const priceInput = document.getElementById('clienteCuota');
-      const price = priceInput?.value || '';
-      const source = priceInput?.dataset.ragePriceSource || 'manual';
-      const before = new Set(list().map(c => String(c.id)));
-      const result = addPrevious.apply(this, arguments);
-      const created = list().find(c => !before.has(String(c.id)));
+  function wrapClientCreation() {
+    if (window.agregarCliente?.rageTariffWrapped) return;
+    const previous = window.agregarCliente;
+    if (typeof previous !== 'function') return;
+    function wrapped() {
+      bindNewClientPricing();
+      const selection = newClientSelection();
+      const input = document.getElementById('clienteCuota');
+      const price = input?.value || '';
+      const source = input?.dataset.ragePriceSource || 'manual';
+      const before = new Set(clients().map(client => String(client.id)));
+      const result = previous.apply(this, arguments);
+      const created = clients().find(client => !before.has(String(client.id)));
       if (created) {
-        created.tarifaReferencia = referenceFromValues(s.duration, s.modality, s.sessions, price, source);
-        if (typeof guardarDatos === 'function') guardarDatos();
+        created.tarifaReferencia = tariffReference(selection.duration, selection.modality, selection.sessions, price, source);
+        try { if (typeof guardarDatos === 'function') guardarDatos(); } catch (_) {}
       }
       return result;
-    };
+    }
+    wrapped.rageTariffWrapped = true;
+    window.agregarCliente = wrapped;
   }
 
   function installRenewPricing(clientId) {
@@ -245,46 +263,51 @@
     if (!modal) return;
     const total = document.getElementById('ebTotal');
     const duration = document.getElementById('ebDuration');
-    const mode = document.getElementById('ebMode');
+    const modality = document.getElementById('ebMode');
     const price = document.getElementById('ebFee');
     const full = document.getElementById('ebFull');
-    if (!total || !duration || !mode || !price) return;
+    if (!total || !duration || !modality || !price) return;
 
     const label = price.closest('label')?.querySelector(':scope > span');
     if (label) label.textContent = 'Precio del bono (€)';
     const helper = ensureHelper(price, 'rageRenewPriceHelper');
     price.dataset.ragePriceSource = 'actual';
+    let internal = false;
 
-    const selection = () => ({ duration:Number(duration.value), modality:mode.value, sessions:Number(total.value) });
-    let setting = false;
+    const selection = () => ({ duration: Number(duration.value), modality: modality.value, sessions: Number(total.value) });
     const show = () => {
-      const s = selection();
-      const base = tariff(s.duration, s.modality, s.sessions);
+      const current = selection();
+      const base = getTariff(current.duration, current.modality, current.sessions);
       if (!helper) return;
       if (base == null) helper.textContent = 'No hay tarifa configurada para esta combinación. El precio debe indicarse manualmente.';
-      else if (price.dataset.ragePriceSource === 'manual') helper.textContent = `Tarifa vigente: ${euro(base)} · Precio manual: ${price.value || '—'} €`;
-      else if (price.dataset.ragePriceSource === 'tarifa') helper.textContent = `Tarifa vigente aplicada: ${euro(base)} · Puedes modificarla.`;
-      else helper.textContent = `Precio actual del cliente: ${price.value || '0'} € · Tarifa vigente: ${euro(base)}.`;
+      else if (price.dataset.ragePriceSource === 'manual') helper.textContent = `Tarifa vigente: ${formatEuro(base)} · Precio manual: ${price.value || '—'} €`;
+      else if (price.dataset.ragePriceSource === 'tarifa') helper.textContent = `Tarifa vigente aplicada: ${formatEuro(base)} · Puedes modificarla.`;
+      else helper.textContent = `Precio actual: ${price.value || '0'} € · Tarifa vigente: ${formatEuro(base)}.`;
     };
     const apply = () => {
-      const s = selection();
-      const base = tariff(s.duration, s.modality, s.sessions);
-      setting = true;
+      const current = selection();
+      const base = getTariff(current.duration, current.modality, current.sessions);
+      internal = true;
       price.value = base == null ? '' : String(base);
-      setting = false;
+      internal = false;
       price.dataset.ragePriceSource = base == null ? 'manual' : 'tarifa';
       show();
     };
 
-    [total,duration,mode].forEach(el => {
-      if (el.dataset.rageTariffRenewBound === '1') return;
-      el.dataset.rageTariffRenewBound = '1';
-      el.addEventListener('change', apply);
-      if (el === total) el.addEventListener('input', apply);
+    [total, duration, modality].forEach(element => {
+      if (element.dataset.rageTariffRenewBound === '1') return;
+      element.dataset.rageTariffRenewBound = '1';
+      element.addEventListener('change', apply);
+      if (element === total) element.addEventListener('input', apply);
     });
     if (price.dataset.rageTariffRenewBound !== '1') {
       price.dataset.rageTariffRenewBound = '1';
-      price.addEventListener('input', () => { if (!setting) { price.dataset.ragePriceSource = 'manual'; show(); } });
+      price.addEventListener('input', () => {
+        if (!internal) {
+          price.dataset.ragePriceSource = 'manual';
+          show();
+        }
+      });
     }
     if (full && full.dataset.rageTariffRenewBound !== '1') {
       full.dataset.rageTariffRenewBound = '1';
@@ -292,54 +315,62 @@
     }
     show();
 
-    const save = modal.querySelector('.rage-editor-save');
-    if (save && save.dataset.rageTariffSaveWrapped !== '1') {
-      save.dataset.rageTariffSaveWrapped = '1';
-      const original = save.onclick;
-      save.onclick = function () {
-        const s = selection();
+    const saveButton = modal.querySelector('.rage-editor-save');
+    if (saveButton && saveButton.dataset.rageTariffSaveWrapped !== '1') {
+      saveButton.dataset.rageTariffSaveWrapped = '1';
+      const originalSave = saveButton.onclick;
+      saveButton.onclick = function () {
+        const current = selection();
         const contracted = price.value;
         const source = price.dataset.ragePriceSource || 'manual';
-        const result = original?.apply(this, arguments);
+        const result = originalSave?.apply(this, arguments);
         setTimeout(() => {
           if (document.getElementById('rage-client-editor')) return;
-          const c = clientById(clientId);
-          if (!c) return;
-          c.tarifaReferencia = referenceFromValues(s.duration, s.modality, s.sessions, contracted, source);
-          if (typeof guardarDatos === 'function') guardarDatos();
+          const client = clientById(clientId);
+          if (!client) return;
+          client.tarifaReferencia = tariffReference(current.duration, current.modality, current.sessions, contracted, source);
+          try { if (typeof guardarDatos === 'function') guardarDatos(); } catch (_) {}
         }, 0);
         return result;
       };
     }
   }
 
-  const renewPrevious = window.cambiarBonoRage;
-  if (typeof renewPrevious === 'function') {
-    window.cambiarBonoRage = function (id) {
-      const result = renewPrevious.apply(this, arguments);
+  function wrapRenewal() {
+    if (window.cambiarBonoRage?.rageTariffWrapped) return;
+    const previous = window.cambiarBonoRage;
+    if (typeof previous !== 'function') return;
+    function wrapped(id) {
+      const result = previous.apply(this, arguments);
       installRenewPricing(id);
       requestAnimationFrame(() => installRenewPricing(id));
       return result;
-    };
+    }
+    wrapped.rageTariffWrapped = true;
+    window.cambiarBonoRage = wrapped;
   }
 
-  // Copias locales: incluye la tabla de tarifas para que una tablet maestra conserve también los precios configurados.
   window.exportarCopiaRage = function () {
-    let ajustes = {};
-    try { ajustes = JSON.parse(localStorage.getItem('rageTrainingAjustes') || '{}'); } catch (_) {}
+    let settings = {};
+    try { settings = JSON.parse(localStorage.getItem('rageTrainingAjustes') || '{}'); } catch (_) {}
     const backup = {
-      app:'Rage Training', version:VERSION, fecha:new Date().toISOString(),
-      clientes:JSON.parse(localStorage.getItem('clientes') || '[]'),
-      entrenadores:JSON.parse(localStorage.getItem('entrenadores') || '[]'),
-      ajustes,
-      tarifas:loadTariffs()
+      app: 'Rage Training',
+      version: VERSION,
+      fecha: new Date().toISOString(),
+      clientes: JSON.parse(localStorage.getItem('clientes') || '[]'),
+      entrenadores: JSON.parse(localStorage.getItem('entrenadores') || '[]'),
+      ajustes: settings,
+      tarifas: loadTariffs()
     };
-    const blob = new Blob([JSON.stringify(backup,null,2)], { type:'application/json' });
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `rage-training-backup-${new Date().toISOString().slice(0,10)}.json`;
-    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `rage-training-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
   };
 
   document.addEventListener('change', async event => {
@@ -365,14 +396,52 @@
 
   function install() {
     ensureSettingsCard();
-    installNewClientPricing();
+    wrapSettingsSave();
+    bindNewClientPricing();
+    wrapClientCreation();
+    wrapRenewal();
   }
 
-  const observer = new MutationObserver(install);
-  observer.observe(document.documentElement, { childList:true, subtree:true });
-  window.addEventListener('rage:tarifas-changed', () => { installNewClientPricing(); });
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once:true });
-  else install();
+  const showSectionPrevious = window.mostrarSeccion;
+  if (typeof showSectionPrevious === 'function' && !showSectionPrevious.rageTariffWrapped) {
+    function showSectionWrapped(section) {
+      const result = showSectionPrevious.apply(this, arguments);
+      if (section === 'ajustes') {
+        ensureSettingsCard();
+        fillSettingsForm();
+      }
+      return result;
+    }
+    showSectionWrapped.rageTariffWrapped = true;
+    window.mostrarSeccion = showSectionWrapped;
+  }
 
-  window.RageTarifas = { version:VERSION, load:loadTariffs, get:tariff, save:saveTariffs, defaults:{...DEFAULTS}, refresh:install };
+  const screenPrevious = window.cambiarPantalla;
+  if (typeof screenPrevious === 'function' && !screenPrevious.rageTariffWrapped) {
+    function screenWrapped(screenId) {
+      const result = screenPrevious.apply(this, arguments);
+      if (screenId === 'alta-screen') {
+        requestAnimationFrame(bindNewClientPricing);
+        setTimeout(bindNewClientPricing, 50);
+      }
+      return result;
+    }
+    screenWrapped.rageTariffWrapped = true;
+    window.cambiarPantalla = screenWrapped;
+  }
+
+  window.addEventListener('rage:tarifas-changed', bindNewClientPricing);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once: true });
+  else install();
+  setTimeout(install, 100);
+  setTimeout(install, 800);
+
+  window.RageTarifas = {
+    version: VERSION,
+    load: loadTariffs,
+    get: getTariff,
+    save: saveTariffs,
+    defaults: { ...DEFAULTS },
+    refresh: install
+  };
 })();
