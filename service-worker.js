@@ -1,9 +1,9 @@
-const CACHE_NAME = "rage-training-v2.4.56";
+const CACHE_NAME = "rage-training-v2.4.57";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./manifest.json",
-  "./rage-logo.png",
+  "./manifest.json?v=2.4.57",
+  "./rage-logo.png?v=2.4.57",
   "./styles.css?v=2.3.0",
   "./modern-v2.4.css?v=2.4.1",
   "./responsive-v2.4.2.css?v=2.4.5",
@@ -18,17 +18,18 @@ const APP_SHELL = [
   "./agenda-mobile-v2.4.17.css?v=2.4.18",
   "./cliente-sesion-v2.4.19.css?v=2.4.19",
   "./alta-mobile-v2.4.20.css?v=2.4.20",
-  "./splash-v2.4.25.css?v=2.4.28",
+  "./splash-v2.4.25.css?v=2.4.57",
   "./facturas-v2.4.29.css?v=2.4.31",
   "./cliente-gestion-v2.4.39.css?v=2.4.39",
   "./mesociclo-ejercicios-v2.4.40.css?v=2.4.40",
   "./mesociclo-plan-editor-v2.4.43.css?v=2.4.43",
   "./calendar-zoom-v2.4.44.css?v=2.4.44",
   "./operativa-v2.4.46.css?v=2.4.46",
-  "./recurrencias-v2.4.47.css?v=2.4.56",
-  "./recurrencias-fix-v2.4.48.css?v=2.4.56",
-  "./parejas-v2.4.53.css?v=2.4.56",
-  "./tarifas-v2.4.55.css?v=2.4.56",
+  "./recurrencias-v2.4.47.css?v=2.4.57",
+  "./recurrencias-fix-v2.4.48.css?v=2.4.57",
+  "./parejas-v2.4.53.css?v=2.4.57",
+  "./tarifas-v2.4.55.css?v=2.4.57",
+  "./splash-v2.4.25.js?v=2.4.57",
   "./app.js?v=2.4.4",
   "./ajustes-v2.4.7.js?v=2.4.8",
   "./clientes-seguimiento-v2.4.9.js?v=2.4.9",
@@ -38,28 +39,34 @@ const APP_SHELL = [
   "./cliente-sesion-v2.4.19.js?v=2.4.22",
   "./alta-integrada-v2.4.23.js?v=2.4.24",
   "./navegacion-v2.4.24.js?v=2.4.24",
-  "./splash-v2.4.25.js?v=2.4.56",
   "./facturas-v2.4.29.js?v=2.4.31",
   "./facturas-print-v2.4.32.js?v=2.4.33",
   "./facturas-pdf-v2.4.33.js?v=2.4.35",
-  "./fixes-v2.4.36.js?v=2.4.56",
+  "./fixes-v2.4.36.js?v=2.4.57",
   "./cliente-gestion-v2.4.39.js?v=2.4.39",
   "./mesociclo-ejercicios-v2.4.40.js?v=2.4.40",
   "./tablet-android-v2.4.41.js?v=2.4.43",
   "./mesociclo-plan-editor-v2.4.43.js?v=2.4.43",
   "./calendar-zoom-v2.4.44.js?v=2.4.45",
   "./operativa-v2.4.46.js?v=2.4.46",
-  "./parejas-v2.4.53.js?v=2.4.56",
-  "./tarifas-v2.4.55.js?v=2.4.56",
-  "./recurrencias-loader-v2.4.47.js?v=2.4.56",
-  "./recurrencias-v2.4.47.js?v=2.4.56",
-  "./recurrencias-save-v2.4.51.js?v=2.4.56",
-  "./calendar-client-open-v2.4.52.js?v=2.4.56"
+  "./parejas-v2.4.53.js?v=2.4.57",
+  "./tarifas-v2.4.55.js?v=2.4.57",
+  "./recurrencias-loader-v2.4.47.js?v=2.4.57",
+  "./recurrencias-v2.4.47.js?v=2.4.57",
+  "./recurrencias-save-v2.4.51.js?v=2.4.57",
+  "./calendar-client-open-v2.4.52.js?v=2.4.57"
 ];
 
 self.addEventListener("install", event => {
   self.skipWaiting();
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(async cache => {
+      await Promise.all(APP_SHELL.map(async url => {
+        try { await cache.add(new Request(url, { cache: "reload" })); }
+        catch (error) { console.warn("[Rage SW] No se pudo precargar", url, error); }
+      }));
+    })
+  );
 });
 
 self.addEventListener("activate", event => {
@@ -76,9 +83,12 @@ self.addEventListener("fetch", event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
+  const isNavigation = request.mode === "navigate" || request.destination === "document";
   let networkRequest = request;
-  const forceV256 = [
+  const forceV257 = [
+    "/index.html",
     "/splash-v2.4.25.js",
+    "/splash-v2.4.25.css",
     "/fixes-v2.4.36.js",
     "/parejas-v2.4.53.js",
     "/parejas-v2.4.53.css",
@@ -92,9 +102,9 @@ self.addEventListener("fetch", event => {
     "/calendar-client-open-v2.4.52.js"
   ].some(path => url.pathname.endsWith(path));
 
-  if (url.pathname.endsWith("/calendar-zoom-v2.4.44.js") || forceV256) {
+  if (forceV257 || url.pathname.endsWith("/calendar-zoom-v2.4.44.js")) {
     const freshUrl = new URL(request.url);
-    freshUrl.searchParams.set("v", forceV256 ? "2.4.56" : "2.4.45");
+    freshUrl.searchParams.set("v", forceV257 ? "2.4.57" : "2.4.45");
     networkRequest = new Request(freshUrl.toString(), request);
   }
 
@@ -110,7 +120,7 @@ self.addEventListener("fetch", event => {
       .catch(async () => {
         const cached = await caches.match(request);
         if (cached) return cached;
-        if (request.mode === "navigate") return caches.match("./index.html");
+        if (isNavigation) return caches.match("./index.html");
         return Response.error();
       })
   );
