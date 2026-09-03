@@ -1,5 +1,6 @@
 (() => {
-  if (window.RageRecurrenciasLoaderV255) return;
+  if (window.RageRecurrenciasLoaderV257) return;
+  window.RageRecurrenciasLoaderV257 = true;
   window.RageRecurrenciasLoaderV255 = true;
   window.RageRecurrenciasLoaderV254 = true;
   window.RageRecurrenciasLoaderV252 = true;
@@ -38,42 +39,36 @@
     }
     const script = document.createElement('script');
     script.src = src;
-    script.async = false;
+    script.async = true;
     script.setAttribute(attribute, '1');
     script.addEventListener('load', () => {
       script.dataset.rageLoaded = '1';
       if (typeof onload === 'function') onload();
     }, { once: true });
-    document.head.appendChild(script);
+    script.addEventListener('error', error => console.error('[Rage] No se pudo cargar', src, error), { once: true });
+    document.body.appendChild(script);
     return script;
-  }
-
-  function loadTariffs() {
-    loadStyle('tarifas-v2.4.55.css?v=2.4.55', 'data-rage-tarifas-v255');
-    if (!window.RageTarifasV255) {
-      loadScript('tarifas-v2.4.55.js?v=2.4.55', 'data-rage-tarifas-v255');
-    }
   }
 
   function loadSaveHandler() {
     if (window.RageRecurrenciasSaveV251) return;
-    loadScript('recurrencias-save-v2.4.51.js?v=2.4.55', 'data-rage-recurrencias-save-v251');
+    loadScript('recurrencias-save-v2.4.51.js?v=2.4.57', 'data-rage-recurrencias-save-v251');
   }
 
   function loadCalendarClientNavigation() {
     if (window.RageCalendarClientOpenV252) return;
-    loadScript('calendar-client-open-v2.4.52.js?v=2.4.55', 'data-rage-calendar-client-open-v252');
+    loadScript('calendar-client-open-v2.4.52.js?v=2.4.57', 'data-rage-calendar-client-open-v252');
   }
 
   function loadCore() {
-    loadStyle('recurrencias-v2.4.47.css?v=2.4.55', 'data-rage-recurrencias-v247');
-    loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.55', 'data-rage-recurrencias-fix-v252');
+    loadStyle('recurrencias-v2.4.47.css?v=2.4.57', 'data-rage-recurrencias-v247');
+    loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.57', 'data-rage-recurrencias-fix-v252');
     loadCalendarClientNavigation();
     if (window.RageRecurrenciasVersion) {
       loadSaveHandler();
       return;
     }
-    loadScript('recurrencias-v2.4.47.js?v=2.4.55', 'data-rage-recurrencias-v247', loadSaveHandler);
+    loadScript('recurrencias-v2.4.47.js?v=2.4.57', 'data-rage-recurrencias-v247', loadSaveHandler);
   }
 
   function waitForOperativa(attempt = 0) {
@@ -85,15 +80,14 @@
   }
 
   function start() {
-    loadTariffs();
-    loadStyle('recurrencias-v2.4.47.css?v=2.4.55', 'data-rage-recurrencias-v247');
-    loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.55', 'data-rage-recurrencias-fix-v252');
+    loadStyle('recurrencias-v2.4.47.css?v=2.4.57', 'data-rage-recurrencias-v247');
+    loadStyle('recurrencias-fix-v2.4.48.css?v=2.4.57', 'data-rage-recurrencias-fix-v252');
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js?v=2.4.55').catch(error =>
+      navigator.serviceWorker.register('service-worker.js?v=2.4.57').catch(error =>
         console.warn('[Rage] No se pudo actualizar el service worker:', error)
       );
     }
-    waitForOperativa();
+    setTimeout(() => waitForOperativa(), 0);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
