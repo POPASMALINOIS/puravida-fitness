@@ -1,24 +1,26 @@
 (() => {
   function configurarEmail() {
-    const email = document.getElementById('clienteEmail');
-    if (!email) return;
-    email.type = 'text';
-    email.setAttribute('inputmode', 'email');
-    email.setAttribute('autocomplete', 'email');
-    email.setAttribute('autocapitalize', 'none');
-    email.setAttribute('spellcheck', 'false');
-    email.style.textTransform = 'none';
+    ['clienteEmail','pareja2Email'].forEach(id => {
+      const email = document.getElementById(id);
+      if (!email) return;
+      email.type = 'text';
+      email.setAttribute('inputmode', 'email');
+      email.setAttribute('autocomplete', 'email');
+      email.setAttribute('autocapitalize', 'none');
+      email.setAttribute('spellcheck', 'false');
+      email.style.textTransform = 'none';
+    });
   }
 
-  // Evita que el conversor global a mayúsculas altere el email.
+  // Evita que el conversor global a mayúsculas altere los emails.
   document.addEventListener('input', event => {
-    if (event.target && event.target.id === 'clienteEmail') {
+    if (event.target && (event.target.id === 'clienteEmail' || event.target.id === 'pareja2Email')) {
       event.stopImmediatePropagation();
     }
   }, true);
 
   window.convertirInputsMayusculas = function () {
-    document.querySelectorAll("#alta-screen input[type='text']:not(#clienteEmail), #alta-cliente-integrada-section input[type='text']:not(#clienteEmail), #alta-screen textarea, #alta-cliente-integrada-section textarea").forEach(input => {
+    document.querySelectorAll("#alta-screen input[type='text']:not(#clienteEmail):not(#pareja2Email), #alta-cliente-integrada-section input[type='text']:not(#clienteEmail):not(#pareja2Email), #alta-screen textarea, #alta-cliente-integrada-section textarea").forEach(input => {
       if (input.dataset.rageUppercaseBound === '1') return;
       input.dataset.rageUppercaseBound = '1';
       input.addEventListener('input', function () {
@@ -54,7 +56,6 @@
     ejecutarSeguro(() => renderCalendarioSemanal());
     ejecutarSeguro(() => renderClientes());
 
-    // Refuerzo porque algunas vistas integradas se repintan al final del ciclo del navegador.
     requestAnimationFrame(() => {
       ejecutarSeguro(() => renderAgendaDia());
       ejecutarSeguro(() => renderCalendarioSemanal());
@@ -79,10 +80,16 @@
     return { cliente, clase: cliente.clases[indice], indice };
   }
 
+  function horasHastaSesion(clase) {
+    if (!clase?.fecha || !clase?.hora) return NaN;
+    const fecha = new Date(`${clase.fecha}T${clase.hora}:00`);
+    if (Number.isNaN(fecha.getTime())) return NaN;
+    return (fecha.getTime() - Date.now()) / 3600000;
+  }
+
   function eliminarSesion(clienteId, claseId, modo) {
     const encontrada = localizarSesion(clienteId, claseId);
     if (!encontrada) {
-      // Aunque el dato ya no exista, limpiamos cualquier resto visual.
       refrescarTrasEliminar(clienteId);
       return;
     }
@@ -90,27 +97,36 @@
     const { cliente, clase, indice } = encontrada;
 
     if (modo === 'cancelar') {
-      if (!confirm('¿Cancelar esta sesión? La sesión contabilizará en el bono y se eliminará de la agenda.')) return;
+      const horas = horasHastaSesion(clase);
+      const penaliza = !Number.isFinite(horas) || horas <= 12;
+      const mensaje = penaliza
+        ? '¿Cancelar esta sesión? Quedan 12 horas o menos para el inicio, por lo que la sesión se descontará del bono y se eliminará de la agenda.'
+        : '¿Cancelar esta sesión? Quedan más de 12 horas para el inicio, por lo que NO se descontará ninguna sesión del bono.';
+      if (!confirm(mensaje)) return;
 
-      // Cancelación normal: cuenta una sesión. Si aún no se había descontado, se descuenta ahora.
-      if (!clase.consumida && Number(cliente.bonoDisponible) > 0) {
-        cliente.bonoDisponible = Number(cliente.bonoDisponible) - 1;
+      if (penaliza) {
+        // Dentro de las 12 horas la clase se pierde. Si todavía no se había consumido, se descuenta ahora.
+        if (!clase.consumida && Number(cliente.bonoDisponible) > 0) {
+          cliente.bonoDisponible = Number(cliente.bonoDisponible) - 1;
+        }
+      } else {
+        // Fuera de las 12 horas la cancelación no consume bono. Si por cualquier motivo ya estaba consumida, se devuelve.
+        if (clase.consumida && Number(cliente.bonoDisponible) < Number(cliente.bonoTotal)) {
+          cliente.bonoDisponible = Number(cliente.bonoDisponible) + 1;
+        }
       }
     } else {
       if (!confirm('¿Cancelar excepcionalmente esta sesión? Se devolverá al bono si estaba contabilizada y se eliminará de la agenda.')) return;
 
-      // Cancelación excepcional: si ya estaba contabilizada, devuelve una sesión.
       if (clase.consumida && Number(cliente.bonoDisponible) < Number(cliente.bonoTotal)) {
         cliente.bonoDisponible = Number(cliente.bonoDisponible) + 1;
       }
     }
 
-    // Mutación sobre el mismo array: evita que cualquier vista conserve una referencia antigua.
     cliente.clases.splice(indice, 1);
     refrescarTrasEliminar(clienteId);
   }
 
-  // Protección adicional: una sesión cancelada nunca se representa.
   const obtenerClasesOriginal = window.obtenerClasesPorFecha;
   if (typeof obtenerClasesOriginal === 'function') {
     window.obtenerClasesPorFecha = function (fechaISO) {
