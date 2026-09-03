@@ -1,4 +1,4 @@
-const CACHE_NAME = "rage-training-v2.4.55";
+const CACHE_NAME = "rage-training-v2.4.56";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -25,10 +25,10 @@ const APP_SHELL = [
   "./mesociclo-plan-editor-v2.4.43.css?v=2.4.43",
   "./calendar-zoom-v2.4.44.css?v=2.4.44",
   "./operativa-v2.4.46.css?v=2.4.46",
-  "./recurrencias-v2.4.47.css?v=2.4.55",
-  "./recurrencias-fix-v2.4.48.css?v=2.4.55",
-  "./parejas-v2.4.53.css?v=2.4.55",
-  "./tarifas-v2.4.55.css?v=2.4.55",
+  "./recurrencias-v2.4.47.css?v=2.4.56",
+  "./recurrencias-fix-v2.4.48.css?v=2.4.56",
+  "./parejas-v2.4.53.css?v=2.4.56",
+  "./tarifas-v2.4.55.css?v=2.4.56",
   "./app.js?v=2.4.4",
   "./ajustes-v2.4.7.js?v=2.4.8",
   "./clientes-seguimiento-v2.4.9.js?v=2.4.9",
@@ -38,23 +38,23 @@ const APP_SHELL = [
   "./cliente-sesion-v2.4.19.js?v=2.4.22",
   "./alta-integrada-v2.4.23.js?v=2.4.24",
   "./navegacion-v2.4.24.js?v=2.4.24",
-  "./splash-v2.4.25.js?v=2.4.28",
+  "./splash-v2.4.25.js?v=2.4.56",
   "./facturas-v2.4.29.js?v=2.4.31",
   "./facturas-print-v2.4.32.js?v=2.4.33",
   "./facturas-pdf-v2.4.33.js?v=2.4.35",
-  "./fixes-v2.4.36.js?v=2.4.55",
+  "./fixes-v2.4.36.js?v=2.4.56",
   "./cliente-gestion-v2.4.39.js?v=2.4.39",
   "./mesociclo-ejercicios-v2.4.40.js?v=2.4.40",
   "./tablet-android-v2.4.41.js?v=2.4.43",
   "./mesociclo-plan-editor-v2.4.43.js?v=2.4.43",
   "./calendar-zoom-v2.4.44.js?v=2.4.45",
   "./operativa-v2.4.46.js?v=2.4.46",
-  "./parejas-v2.4.53.js?v=2.4.55",
-  "./tarifas-v2.4.55.js?v=2.4.55",
-  "./recurrencias-loader-v2.4.47.js?v=2.4.55",
-  "./recurrencias-v2.4.47.js?v=2.4.55",
-  "./recurrencias-save-v2.4.51.js?v=2.4.55",
-  "./calendar-client-open-v2.4.52.js?v=2.4.55"
+  "./parejas-v2.4.53.js?v=2.4.56",
+  "./tarifas-v2.4.55.js?v=2.4.56",
+  "./recurrencias-loader-v2.4.47.js?v=2.4.56",
+  "./recurrencias-v2.4.47.js?v=2.4.56",
+  "./recurrencias-save-v2.4.51.js?v=2.4.56",
+  "./calendar-client-open-v2.4.52.js?v=2.4.56"
 ];
 
 self.addEventListener("install", event => {
@@ -77,7 +77,8 @@ self.addEventListener("fetch", event => {
   if (url.origin !== self.location.origin) return;
 
   let networkRequest = request;
-  const forceV255 = [
+  const forceV256 = [
+    "/splash-v2.4.25.js",
     "/fixes-v2.4.36.js",
     "/parejas-v2.4.53.js",
     "/parejas-v2.4.53.css",
@@ -91,9 +92,9 @@ self.addEventListener("fetch", event => {
     "/calendar-client-open-v2.4.52.js"
   ].some(path => url.pathname.endsWith(path));
 
-  if (url.pathname.endsWith("/calendar-zoom-v2.4.44.js") || forceV255) {
+  if (url.pathname.endsWith("/calendar-zoom-v2.4.44.js") || forceV256) {
     const freshUrl = new URL(request.url);
-    freshUrl.searchParams.set("v", forceV255 ? "2.4.55" : "2.4.45");
+    freshUrl.searchParams.set("v", forceV256 ? "2.4.56" : "2.4.45");
     networkRequest = new Request(freshUrl.toString(), request);
   }
 
